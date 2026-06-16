@@ -1,0 +1,65 @@
+{
+    "name": "formalms/formalms",
+    "authors": [
+        {
+            "name": "forma.lms project",
+            "email": "info@formalms.org"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "doctrine/dbal": "^3.3",
+        "eluceo/ical": "dev-feature/calendar-id-name-description",
+        "ezyang/htmlpurifier": "^v4.13",
+        "ircmaxell/password-compat": "^1.0",
+        "lusitanian/oauth": "^v0.8",
+        "monolog/monolog": "^2.6",
+        "nyholm/dsn": "^2.0",
+        "patchwork/utf8": "^1.3",
+        "pclzip/pclzip": "^2.8",
+        "phpmailer/phpmailer": "^v6.5",
+        "spatie/color": "^1.5",
+        "symfony/cache": "^5.4",
+        "symfony/event-dispatcher": "^v5.3",
+        "symfony/finder": "5.3.0",
+        "symfony/http-foundation": "^5.4",
+        "symfony/property-access": "^5.4",
+        "symfony/serializer": "^5.4",
+        "symfony/uid": "^5.3",
+        "tecnickcom/tcpdf": "^6.3",
+        "twig/extensions": "^1.5",
+        "twig/string-extra": "^3.3",
+        "twig/twig": "^v2.14",
+        "vanilla/htmlawed": "^2.2"
+    },
+    "require-dev": {
+        "phing/phing": "^2.13",
+        "phpunit/phpunit": "^6.5",
+        "roave/security-advisories": "dev-master",
+        "simpletest/simpletest": "^1.1",
+        "symfony/var-dumper": "^v5.3"
+    },
+    "config": {
+        "autoloader-suffix": "_formalms",
+        "bin-dir": "../bin",
+        "platform": {
+            "php": "7.4"
+        },
+        "vendor-dir": "vendor"
+    },
+    "autoload": {
+        "psr-4": {
+            "FormaLms\\": ""
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/giuseppenucifora/iCal"
+        }
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

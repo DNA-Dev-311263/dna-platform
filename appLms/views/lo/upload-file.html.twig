@@ -1,0 +1,35 @@
+
+<div id="forma-uploader"></div>
+<script>
+
+    window.frontend.helpers.Axios.defaults.headers.post['X-Signature'] = window.frontend.config.signature;
+    window.frontend.helpers.Axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
+    document.getElementById('forma-uploader').FormaFileUploader({
+        OnSubmitClick: function (obj) {
+            this.Errors = {};
+            obj.formData.append('back_url', '{{ back_url }}')
+            obj.formData.append('id_comm', '{{ id_comm }}')
+            this.Uploading = true;
+            window.frontend.helpers.Axios({
+                method: 'post',
+                url: `${window.frontend.config.url.appLms}/index.php?modname=item&op={{ op }}`,
+                data: obj.formData
+            }).then(res => {
+                this.Uploading = false;
+                if (res.data.errors) {
+                    this.Errors = res.data.errors;
+                } else {
+                    // todo traduci
+                    this.SuccessMessage = obj.info.length <= 1 ? `E' stato creato un nuovo materiale didattico. Redirect fra 2 secondi...` : `Sono stati creati ${obj.info.length} nuovi materiali didattici.  Redirect fra 2 secondi...`;
+                    {#//this.SuccessMessage = obj.info.length <= 1 ? {{ 'dropzone._SUCCESSFUL_ONE_ITEM' | translate }} : {{ 'dropzone._SUCCESSFUL_MULTIPLE_ITEMS' | translate({nObjects:2}) }};#}
+                    setTimeout(function () {
+                        window.location = res.data.back_url
+                    }, 2000);
+                }
+            });
+        }
+    });
+
+
+</script>
+

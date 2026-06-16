@@ -1,0 +1,236 @@
+<div class="std_block">
+    <div class="container">
+
+        {% set courseUrl = 'index.php?r=' ~ courseBaseLink ~ '/show' %}
+
+        {% set classUrl = 'index.php?r=' ~ classroomBaseLink ~ '/classroom&id_course=' ~ idCourse %}
+
+        {% if edit is empty or not edit %}
+            {% set title = Lang_translate('_ADD', 'course') %}
+        {% else %}
+            {% set title = Lang_translate('_MOD', 'course') ~ ': ' ~ postData.name %}
+
+            {% if postdata.dateBegin is not empty %}
+                {% set title = title ~ ' (' ~ postData.dateBegin ~ ')' %}
+            {% endif %}
+        {% endif %}
+
+        {{ Get_title(
+            {
+                (courseUrl) : Lang_translate('_COURSE', 'course'),
+                (classUrl) : Lang_translate('_CLASSROOM', 'course'),
+                '': title
+            },false) }}
+
+        {% if error %}
+            {% set errorTranslate = Lang_translate((error), 'course') %}
+            {{ UiFeedback_error(errorTranslate) }}
+        {% endif %}
+
+        {{ Form_openForm('date', action ) }}
+        {{ Form_openElementSpace() }}
+        {{ Form_getHidden('id_date','id_date',idDate) }}
+        {{ Form_getTextfield( Lang_translate('_CODE', 'course') , 'code', 'code', 255, postData.code ) }}
+        {{ Form_getTextfield(Lang_translate('_NAME', 'course') , 'name', 'name', 255, postData.name ) }}
+        {{ Form_getTextarea(Lang_translate('_DESCRIPTION', 'course'), 'description', 'description', postData.description|escape) }}
+		{{ Form_getDropdown(
+			Lang_translate('_FUND', 'standard'),
+			'id_fund',
+			'id_fund',
+			availableFund|raw,
+			postData.id_fund,
+			'<span id="btn-fund-info" class="btn btn-info ' 
+				~ (postData.fund_info_exists ? 'has-data' : '') 
+				~ '">'
+				~ Lang_translate('_FUND_DETAIL', 'classroom')
+				~ '</span>'
+		) }}{# ABR #}
+        {{ Form_getTextfield(Lang_translate('_INTERNAL_NOTE', 'classroom'), 'internal_note', 'internal_note', 255, postData.internal_note|escape ) }}{# ABR #}
+        {{ Form_getTextfield( Lang_translate('_MEDIUM_TIME', 'course'), 'mediumTime', 'mediumTime', 255, postData.mediumTime) }}
+        {{ Form_getTextfield( Lang_translate('_MAX_NUM_SUBSCRIBE', 'course') , 'maxNumSubscribes', 'max_par', 255, postData.maxNumSubscribes) }}
+        {{ Form_getTextfield( Lang_translate('_COURSE_PRIZE', 'course'), 'price', 'price', 255, postData.price) }}
+        {{ Form_getDropdown( Lang_translate('_STATUS', 'course'), 'status', 'status', availableStatuses|raw, postData.status) }}
+        {{ Form_getDropdown( Lang_translate('_FINAL_SCORE', 'course'), 'test', 'test', availableTestTypes|raw, postData.test) }}
+        <div class="form_line_l">
+            <p><label for="overbooking" class="floating">{{ Lang_translate('_ALLOW_OVERBOOKING', 'course') }} </label>
+            </p>
+            {{ Form_getInputCheckbox('overbooking', 'overbooking', 1, postData.overbooking, false) }}
+        </div>
+        {{ Form_getDatefield( Lang_translate('_SUBSCRIPTION_DATE_BEGIN', 'course'), 'sub_start_date', 'sub_start_date', postData.sub_start_date ) }}
+        {{ Form_getDatefield( Lang_translate('_SUBSCRIPTION_DATE_END', 'course'), 'sub_end_date', 'sub_end_date', postData.sub_end_date ) }}
+        {{ Form_getDatefield( Lang_translate('_UNSUBSCRIBE_DATE_LIMIT', 'course'), 'unsubscribe_date_limit', 'unsubscribe_date_limit', postData.unsubscribe_date_limit) }}
+
+		{# ABR #}
+		<div class="modal fade" id="fundInfoModal" tabindex="-1" role="dialog">
+		  <div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+
+			  <div class="modal-header">
+				<h5 class="modal-title"><b id="fundInfoTitle"></b></h5>
+				<button type="button" class="close" data-dismiss="modal">
+				  <span>&times;</span>
+				</button>
+			  </div>
+
+			  <div class="modal-body">
+				<input type="hidden" id="fundinfo_loaded_fund" value="">
+				<div id="fund-fields-container"></div>
+			  </div>
+
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+			  </div>
+
+			</div>
+		  </div>
+		</div>
+		{# / ABR #}
+		  
+        {% for field in customFields %}
+        {% set id = [field['type_field'],"_",field['id']]|join %}
+        {% set name = [field['type_field'],"[",field['id'],"]"]|join %}
+            {% if field['type_field'] == 'textfield' %}
+                {{ Form_getTextfield( field['name'], id, name, 255, field['entry']) }}
+            {% endif %}
+            {% if field['type_field'] == 'dropdown' %}
+               {{ Form_getDropdown( field['name'], id, name, field['elems']|raw, field['entry']) }}
+            {% endif %}
+        {% endfor %}
+        {{ Form_closeElementSpace() }}
+        {{ Form_openButtonSpace() }}
+        {{ Form_getButton('save', 'save', Lang_translate('_SAVE', 'course')) }}
+        {{ Form_getButton('undo', 'undo', Lang_translate('_UNDO', 'course')) }}
+        {{ Form_closeElementSpace() }}
+        {{ Form_closeForm() }}
+    </div>
+
+</div>
+
+<script src="{{ config.url.base ~ '/addons/jquery/dirtyforms/jquery.dirtyforms.min.js' }}"></script> {# Mod. ABR #}
+
+<script type="text/javascript">
+    window.onload = function() {
+        $("form#date").dirtyForms();
+        var submitted_undo = false;
+
+        $(window).on('beforeunload', function (event) {
+            if ($("form#date").dirtyForms("isDirty")) {
+                if (submitted_undo) {
+                    event.stopPropagation();
+                    event.preventDefault();
+
+                    event.returnValue = true;
+                    return true;
+                }
+            }
+        });
+
+        $("form#date").on("submit", function(event) {
+            var submitter_btn = $(event.originalEvent.submitter);
+            submitted_undo = false;
+
+            if (submitter_btn.attr("name") == "undo") {
+                submitted_undo = true;
+            }
+        });
+    };
+    
+    // ABR - JS Fund Info
+    $('#btn-fund-info').on('click', openFundInfoPopup);
+    
+	$('#fundinfo_cancel, .container-close').on('click', function() {
+		$('#fundinfo_dialog_c').css('visibility', 'hidden');
+	});
+
+	$('#id_fund').on('change', function() {
+		$('#fundinfo_loaded_fund').val(''); // forza nuova chiamata AJAX
+		$('#fund-fields-container').html('').removeData('loaded');
+		$('#btn-fund-info').removeClass('has-data');
+	});
+
+	function openFundInfoPopup() {
+
+		var idFund = $('#id_fund').val();
+		var idDate = $('#id_date').val() || '';
+		var container = $('#fund-fields-container');
+
+		// titolo del fondo (testo della combo)
+		var fundTitle = $('#id_fund option:selected').text();
+		$('#fundInfoTitle').text(fundTitle);
+
+		// hidden che contiene il fund già caricato nel popup
+		var loadedFund = $('#fundinfo_loaded_fund').val();
+
+		// 1. Nessun fund selezionato → non aprire
+		if (!idFund || idFund == 0) {
+			alert("Seleziona prima un fondo");
+			return;
+		}
+
+		// 2. Se il fund è lo stesso → apri subito senza AJAX
+		if (loadedFund === idFund) {
+			$('#fundInfoModal').modal('show');
+			return;
+		}
+
+		// 3. Fund cambiato → resetto il contenuto
+		container.html('');
+		container.removeData('loaded');
+
+		// 4. Costruzione URL AJAX
+		var url = 'ajax.adm_server.php?r={{classroomBaseLink}}/getFundEntryInput'
+				+ '&id_fund=' + idFund
+				+ '&id_date=' + idDate;
+
+		// 5. Chiamata AJAX
+		$.ajax({
+			type: 'GET',
+			url: url,
+			success: function(data) {
+
+				var res = JSON.parse(data);
+				container.html('');
+
+				// 6. Generazione dinamica dei campi
+				$.each(res, function(key, arr) {
+					var caption = arr[0];
+					var value   = arr[1];
+
+					container.append(`
+						<div class="form-group">
+							<label for="${key}">${caption}</label>
+							<input type="text" class="form-control"
+								   id="${key}"
+								   name="fund_info[${key}]"
+								   value="${value}">
+						</div>
+					`);
+				});
+
+				// 7. Eventi per il grassetto del bottone
+				container.find('input').on('input', updateFundButtonState);
+				updateFundButtonState();
+
+				// 8. Salvo il fund caricato nel popup
+				$('#fundinfo_loaded_fund').val(idFund);
+
+				// 9. Apro la modal
+				$('#fundInfoModal').modal('show');
+			}
+		});
+	}
+	
+	function updateFundButtonState() {
+		var hasData = false;
+
+		$('#fund-fields-container input').each(function() {
+			if ( $(this).val() != 0 ) {
+				hasData = true;
+				return false;
+			}
+		});
+
+		$('#btn-fund-info').toggleClass('has-data', hasData);
+	}
+
+</script>

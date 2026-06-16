@@ -1,0 +1,780 @@
+/* =============================================================
+   P&P UI — Design System
+   Include this file in any view that uses the pui-* components.
+   Usage: <link rel="stylesheet" href="../css/pandp-ui.css">
+         (adjust path depth as needed)
+   ============================================================= */
+
+/* ── Reset scope ─────────────────────────────────────────── */
+.pui-page *, .pui-page *::before, .pui-page *::after {
+    box-sizing: border-box;
+}
+.pui-page {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    color: #2d3748;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 24px 0 40px;
+}
+
+/* ── Stepper ─────────────────────────────────────────────── */
+.pui-stepper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 28px;
+    padding: 0 4px;
+}
+.pui-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #9aafca;
+    white-space: nowrap;
+}
+.pui-step--active { color: #1a6ef7; }
+.pui-step--done   { color: #28a745; }
+.pui-step__num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.pui-step--active .pui-step__num {
+    background: #1a6ef7;
+    border-color: #1a6ef7;
+    color: #fff;
+}
+.pui-step--done .pui-step__num {
+    background: #28a745;
+    border-color: #28a745;
+    color: #fff;
+}
+.pui-step__line {
+    flex: 1;
+    height: 2px;
+    background: #d0dae8;
+    margin: 0 10px;
+    min-width: 24px;
+}
+.pui-step__line--done { background: #28a745; }
+
+/* ── Card ────────────────────────────────────────────────── */
+.pui-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+    padding: 32px;
+}
+.pui-card + .pui-card { margin-top: 16px; }
+
+/* ── Two-column layout ───────────────────────────────────── */
+.pui-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+.pui-sidebar {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.pui-main {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+    padding: 28px;
+    overflow: hidden;
+}
+
+/* ── Section label ───────────────────────────────────────── */
+.pui-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #8a9fc4;
+    margin-bottom: 10px;
+}
+.pui-section-block {
+    margin-bottom: 24px;
+}
+.pui-sidebar-section {
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f2f8;
+}
+.pui-sidebar-section:first-child { padding-top: 0; }
+.pui-sidebar-section:last-child  { border-bottom: none; padding-bottom: 0; }
+
+/* ── Upload zone ─────────────────────────────────────────── */
+.pui-upload-zone {
+    border: 2px dashed #b0c4de;
+    border-radius: 10px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: #f8fbff;
+    margin-bottom: 28px;
+    position: relative;
+}
+.pui-upload-zone:hover {
+    border-color: #1a6ef7;
+    background: #eef3ff;
+}
+.pui-upload-zone--dragover {
+    border-color: #1a6ef7;
+    background: #eef3ff;
+    box-shadow: 0 0 0 3px rgba(26,110,247,.15);
+}
+.pui-upload-zone__icon {
+    font-size: 38px;
+    color: #6a8fc8;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+.pui-upload-zone__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c4a7a;
+    margin-bottom: 4px;
+}
+.pui-upload-zone__sub {
+    font-size: 12px;
+    color: #8a9fc4;
+}
+.pui-upload-zone input[type="file"] {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #4a5568;
+}
+
+/* ── Radio pills (horizontal) ────────────────────────────── */
+.pui-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0;
+}
+.pui-radio-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1.5px solid #d0dae8;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #4a5568;
+    transition: border-color .15s, color .15s;
+    background: #fff;
+    line-height: 1.4;
+    user-select: none;
+    margin: 0;
+}
+.pui-radio-pill:hover { border-color: #1a6ef7; color: #1a6ef7; }
+.pui-radio-pill input[type="radio"] { accent-color: #1a6ef7; flex-shrink: 0; }
+.pui-radio-pill--wide {
+    flex-basis: 100%;
+    border-radius: 8px;
+    background: #f8fbff;
+    border-style: dashed;
+}
+
+/* ── Radio stack (vertical, sidebar) ─────────────────────── */
+.pui-radio-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+.pui-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4a5568;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1.4;
+    margin: 0;
+}
+.pui-radio-item input[type="radio"] { accent-color: #1a6ef7; flex-shrink: 0; }
+
+/* ── Checkbox row ────────────────────────────────────────── */
+.pui-check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4a5568;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+.pui-check-row input[type="checkbox"] {
+    accent-color: #1a6ef7;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* ── Inline field (label + input on one line) ─────────────── */
+.pui-inline-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.pui-inline-field label {
+    font-size: 13px;
+    color: #555;
+    white-space: nowrap;
+    margin: 0;
+}
+.pui-text-input {
+    border: 1.5px solid #d0dae8;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    transition: border-color .2s;
+    background: #fff;
+    color: #2d3748;
+    width: 140px;
+}
+.pui-text-input:focus {
+    outline: none;
+    border-color: #1a6ef7;
+    box-shadow: 0 0 0 3px rgba(26,110,247,.1);
+}
+.pui-text-input--sm { width: 70px; }
+
+/* ── Select dropdown ─────────────────────────────────────── */
+.pui-select {
+    width: 100%;
+    border: 1.5px solid #d0dae8;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: #fff;
+    color: #2d3748;
+    cursor: pointer;
+    transition: border-color .2s;
+}
+.pui-select:focus {
+    outline: none;
+    border-color: #1a6ef7;
+    box-shadow: 0 0 0 3px rgba(26,110,247,.1);
+}
+
+/* ── Sub-control indented block ──────────────────────────── */
+.pui-sub-control {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: #f8fbff;
+    border: 1px solid #d8e8f8;
+    border-radius: 8px;
+}
+
+/* ── Info notice ─────────────────────────────────────────── */
+.pui-notice {
+    background: #fff8e6;
+    border: 1px solid #ffe08a;
+    color: #8a6000;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+.pui-notice--info {
+    background: #eef3ff;
+    border-color: #b0c8f8;
+    color: #2a4a9a;
+}
+
+/* ── Button row ──────────────────────────────────────────── */
+.pui-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #edf2f7;
+}
+.pui-btn-row--space-between { justify-content: space-between; }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.pui-btn {
+    padding: 10px 26px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background .15s, box-shadow .15s;
+    line-height: 1.4;
+    display: inline-block;
+    text-align: center;
+}
+.pui-btn--ghost {
+    background: #f0f2f6;
+    color: #4a5568;
+    border: 1.5px solid #d0dae8;
+}
+.pui-btn--ghost:hover { background: #e2e8f0; }
+.pui-btn--primary {
+    background: #1a6ef7;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(26,110,247,.3);
+}
+.pui-btn--primary:hover { background: #1457cc; }
+.pui-btn--primary:disabled,
+.pui-btn--primary[disabled] {
+    background: #9ab8f0;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* ── UIMap table overrides ───────────────────────────────── */
+.pui-uimap-wrap {
+    overflow-x: auto;
+    margin-top: 4px;
+}
+.pui-uimap-wrap .table-responsive {
+    overflow-x: visible;
+    border: none;
+}
+.pui-uimap-wrap .table.table-bordered {
+    font-size: 12px;
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 0;
+}
+.pui-uimap-wrap .table.table-bordered > thead > tr > th,
+.pui-uimap-wrap .table.table-bordered > thead > tr > td {
+    background: #f0f4fa;
+    color: #5a6a8a;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 10px 10px;
+    border: 1px solid #e0e8f4;
+    vertical-align: middle;
+}
+.pui-uimap-wrap .table.table-bordered > tbody > tr.odd > td,
+.pui-uimap-wrap .table.table-bordered > tbody > tr.even > td {
+    padding: 8px 10px;
+    border: 1px solid #edf0f8;
+    font-size: 13px;
+    color: #2d3748;
+    vertical-align: middle;
+}
+.pui-uimap-wrap .table.table-bordered > tbody > tr.odd  { background: #fff; }
+.pui-uimap-wrap .table.table-bordered > tbody > tr.even { background: #fafbff; }
+.pui-uimap-wrap .table.table-bordered > tbody > tr:hover td { background: #f0f4ff; }
+.pui-uimap-wrap select.dropdown_nowh {
+    border: 1.5px solid #d0dae8;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 12px;
+    background: #fff;
+    min-width: 140px;
+    transition: border-color .15s;
+}
+.pui-uimap-wrap select.dropdown_nowh:focus {
+    outline: none;
+    border-color: #1a6ef7;
+}
+.pui-uimap-wrap .row.table-actions { display: none !important; }
+.pui-uimap-wrap .panel-heading      { display: none !important; }
+
+/* ── Step 3 results ──────────────────────────────────────── */
+.pui-result-stat {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 16px;
+}
+.pui-result-stat b { color: #1a6ef7; }
+.pui-back-link { margin-bottom: 20px; }
+.pui-back-link a {
+    color: #1a6ef7;
+    font-size: 13px;
+    text-decoration: none;
+}
+.pui-back-link a:hover { text-decoration: underline; }
+
+/* ── Step 3 result stats ──────────────────────────────────── */
+.pui-stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.pui-stat-box {
+    flex: 1;
+    background: #f8fbff;
+    border: 1px solid #e0e8f4;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+.pui-stat-box__value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #2c4a7a;
+    line-height: 1.2;
+}
+.pui-stat-box__label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8a9fc4;
+    margin-top: 4px;
+}
+.pui-stat-box--success {
+    background: #f0fbf4;
+    border-color: #c6ecd4;
+}
+.pui-stat-box--success .pui-stat-box__value { color: #28a745; }
+.pui-stat-box--error {
+    background: #fff5f5;
+    border-color: #f6c6c6;
+}
+.pui-stat-box--error .pui-stat-box__value { color: #d9534f; }
+
+/* ── Step 3 close button (reuses the existing "back" link) ── */
+.pui-btn-row .container-back {
+    margin: 0;
+}
+.pui-btn-row .container-back a {
+    display: inline-block;
+    padding: 10px 26px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    background: #1a6ef7;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(26,110,247,.3);
+    transition: background .15s;
+}
+.pui-btn-row .container-back a:hover { background: #1457cc; }
+
+/* ── Status badges (Statistiche tab) ─────────────────────── */
+.pui-badge {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+}
+.pui-badge--success { background: #28a745; }
+.pui-badge--info    { background: #1a6ef7; }
+.pui-badge--danger  { background: #d9534f; }
+.pui-badge--neutral { background: #9aafca; }
+
+/* ── Scheda Corso: blocco "Descrizione" come card separata ── */
+.course-info__table--description {
+    background: #f8fbff;
+    border: 1px solid #e0e8f4;
+    border-radius: 10px;
+    padding: 20px 24px;
+}
+.course-info__table--description .course-info__label,
+.course-info__table--description .course-info__value {
+    display: block !important;
+    width: 100% !important;
+    float: none !important;
+}
+.course-info__table--description .course-info__label {
+    padding: 0 !important;
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: #8a9fc4;
+}
+.course-info__table--description .course-info__value {
+    line-height: 1.6;
+    color: #2d3748;
+}
+.course-info__table--description .course-info__value > *:first-child {
+    margin-top: 0;
+}
+.course-info__table--description .course-info__value > *:last-child {
+    margin-bottom: 0;
+}
+
+/* ── Scheda Corso: sezioni Docente/Tutor/Amministratore ── */
+.course-info__peoplecontainer .box-title--people {
+    display: block !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8a9fc4;
+    margin-bottom: 8px;
+}
+.course-info__peopletxt--noavatar {
+    float: none;
+    max-width: 100%;
+}
+.course-info__peopletxt--noavatar .course-info__peoplename {
+    margin-bottom: 0;
+}
+
+/* =============================================================
+   Profilo utente (r=lms/profile/show)
+   ============================================================= */
+.pui-profile-title {
+    margin-bottom: 20px;
+    color: #2d3748;
+}
+.pui-profile-avatar {
+    text-align: center;
+    margin-bottom: 14px;
+}
+.pui-profile-avatar img {
+    border-radius: 50%;
+}
+.pui-profile-name {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 2px;
+}
+.pui-profile-username {
+    text-align: center;
+    font-size: 13px;
+    color: #8a9fc4;
+    margin-bottom: 4px;
+}
+.pui-profile-level {
+    text-align: center;
+    margin-bottom: 18px;
+}
+.pui-field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f2f8;
+    gap: 16px;
+}
+.pui-field-row:last-child {
+    border-bottom: none;
+}
+.pui-field-label {
+    font-size: 13px;
+    color: #8a9fc4;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.pui-field-value {
+    font-size: 14px;
+    color: #2d3748;
+    text-align: right;
+    word-break: break-word;
+}
+.pui-signature-box {
+    background: #f8fbff;
+    border: 1px solid #d8e8f8;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    color: #4a5568;
+    font-style: italic;
+}
+.pui-sidebar .pui-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.pui-sidebar .pui-btn:last-child {
+    margin-bottom: 0;
+}
+.pui-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.pui-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #8a9fc4;
+    padding: 8px 10px;
+    border-bottom: 2px solid #f0f2f8;
+}
+.pui-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f2f8;
+    color: #2d3748;
+    vertical-align: middle;
+}
+.pui-table tr:last-child td {
+    border-bottom: none;
+}
+.pui-table .pui-course-type {
+    font-size: 12px;
+    color: #8a9fc4;
+}
+.pui-table .pui-course-date {
+    white-space: nowrap;
+    color: #4a5568;
+}
+.pui-table .pui-course-empty {
+    color: #c5cee0;
+}
+.pui-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f2f8;
+}
+.pui-section-block:first-child .pui-section-title {
+    padding-top: 0;
+    border-top: none;
+}
+
+/* ── Form password (Cambia password) ───────────────────────── */
+.pui-form-group {
+    margin-bottom: 18px;
+}
+.pui-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a9fc4;
+    margin-bottom: 6px;
+}
+.pui-input {
+    width: 100%;
+    max-width: 320px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #2d3748;
+    border: 1px solid #d8e8f8;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.pui-input:focus {
+    outline: none;
+    border-color: #1a6ef7;
+}
+.pui-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+.pui-form-actions .pui-btn {
+    width: auto;
+}
+
+/* ── Legacy form fields rendered inside a pui-card (mod_profile, mod_password) ──
+   Forma's Form::* helpers output .form_line_l / .floating / .textfield markup;
+   restyle it to match the pui-* look without rewriting every field renderer
+   (needed for dynamically-configured extra fields and preferences). */
+.pui-card .form_line_l,
+.pui-card .form-line {
+    display: block;
+    margin: 0 0 18px;
+    line-height: normal;
+}
+.pui-card .form_line_l p,
+.pui-card .form-line p {
+    display: block;
+    margin: 0 0 6px;
+    padding: 0;
+}
+.pui-card .form_line_l .label_effect,
+.pui-card .form_line_l label,
+.pui-card .form-line label {
+    display: block;
+    width: auto;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a9fc4;
+}
+.pui-card .form_line_l input[type="text"],
+.pui-card .form_line_l input[type="password"],
+.pui-card .form_line_l input.textfield,
+.pui-card .form_line_l select,
+.pui-card .form_line_l select.dropdown,
+.pui-card .form_line_l textarea,
+.pui-card .form-line input[type="text"],
+.pui-card .form-line select {
+    width: 100%;
+    max-width: 360px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #2d3748;
+    border: 1px solid #d8e8f8;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.pui-card .form_line_l textarea.textarea_full {
+    max-width: 100%;
+}
+.pui-card .form_line_l input:focus,
+.pui-card .form_line_l select:focus,
+.pui-card .form_line_l textarea:focus {
+    outline: none;
+    border-color: #1a6ef7;
+}
+/* checkbox lines: keep input + label on one row */
+.pui-card .form_line_l input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    accent-color: #1a6ef7;
+}
+.pui-card .form_line_l input[type="checkbox"] + label,
+.pui-card .form_line_l input[type="checkbox"] + p label {
+    display: inline;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+/* ---- impersonazione utente (banner "Accedi come") ---- */
+.pui-su-banner {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: #d97706;
+    color: #fff;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-family: inherit;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.pui-su-banner__text { flex: 1; }
+.pui-su-banner__exit {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+    white-space: nowrap;
+}
+.pui-su-banner__exit:hover { color: #fde68a; }

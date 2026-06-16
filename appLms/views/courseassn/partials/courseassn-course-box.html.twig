@@ -1,0 +1,87 @@
+{% extends 'partials/course-box.html.twig' %}
+
+{% block courseBoxTitle %}
+    <h3 class="course-box__title {{ course.course_virtual ? 'box-course-virtual' }}"</h3>
+        <a id="link_info_{{ course.idCourse }}"
+           href="javascript:;"
+           onclick="courseinfoPopUp('{{ course.idCourse }}', '{{ course.edition_valid ? course.id_edition : 0 }}')">
+            {{ course.name }}
+        </a>
+    </h3>
+{% endblock %}
+
+
+{# ----------------------------------------------------------- #}
+{# Output HTML del pulsante                                #}
+{# ----------------------------------------------------------- #}
+
+{% block entercourse %}
+
+    {% if course.state_access == 1 %}
+        {# ISCRIZIONE #}
+
+        <a class="forma-button course-box__cta__button button-subs" title="{{ course.name }}"
+           rel="{{ course.rel }}" data-target="course-box__modal_{{ course.idCourse }}"
+           onclick ="chooseEdition({{ course.idCourse }})">
+           <span class="forma-button__label">{{ Lang_translate('_CAN_SUBSCRIBE', 'course') }}</span>
+        </a>
+
+    {% elseif course.state_access == 2 %}
+        {# RE-ISCRIZIONE #}
+
+        <a class="forma-button course-box__cta__button button-subs-again" title="{{ course.name }}"
+           rel="{{ course.rel }}" data-target="course-box__modal_{{ course.idCourse }}"
+           onclick ="chooseEdition({{ course.idCourse }})">
+           <span class="forma-button__label">{{ Lang_translate('_CAN_SUBSCRIBE_AGAIN', 'course') }}</span>
+        </a>
+
+
+    {% elseif course.state_access == 3 %}
+        {# ENTRA NEL CORSO #}
+        <a class="forma-button course-box__cta__button button-enter"
+           title="{{ course.name }}"
+           href="index.php?modname=course&op=aula&idCourse={{ course.idCourse }}"
+           {% if course.direct_play == 1 and course.level <= 3 and course.first_lo_type == 'scormorg' %}
+               rel="lightbox"
+           {% endif %}>
+            <span class="forma-button__label">
+               {{ Lang_translate('_USER_STATUS_ENTER', 'catalogue') }}
+            </span>
+        </a>
+
+    {% elseif course.state_access == 8 %}
+        {# NESSUNA EDIZIONE DISPONIBILE #}
+        <a class="forma-button forma-button--disabled" href="javascript:void(0)">
+            <span class="forma-button__label">
+                {{ Lang_translate('_NO_EDITIONS', 'catalogue') }}
+            </span>
+        </a>
+
+    {% elseif course.state_access == 9 %}
+        {# DISABILITATO CON MOTIVO #}
+
+        {% set reasons = {
+            'waiting': Lang_translate('_WAITING_SUBSCRIPTION', 'dashboard'),
+            'subscription_not_started': Lang_translate('_SUBSCRIPTION_CLOSED', 'course'),
+            'subscription_expired': Lang_translate('_SUBSCRIPTION_CLOSED', 'course'),
+            'course_edition_date_begin': Lang_translate('_EDITION_NOT_STARTED', 'course'),
+            'course_edition_date_end': Lang_translate('_EDITION_ENDED', 'course')
+        } %}
+
+
+        {% set reasonLock = course.can_enter.reason %}
+        {% if reasons[reasonLock] is defined %}
+            {% set reasonLock = reasons[reasonLock] %}
+        {% endif %}
+
+        <span title="{{ reasonLock }}">
+            <a class="forma-button forma-button--disabled" href="javascript:void(0)">
+                <span class="forma-button__label">
+                     {{ Lang_translate('_DISABLED', 'course') }}
+                </span>
+            </a>
+        </span>
+
+    {% endif %}
+
+{% endblock %}

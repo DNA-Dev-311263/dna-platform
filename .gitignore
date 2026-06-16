@@ -1,0 +1,39 @@
+# Configurazione con credenziali DB
+config.php
+
+# Vendor e dipendenze
+vendor/
+node_modules/
+
+# Cache
+cache/
+files/cache/
+/var/
+
+# Upload e file utente
+files/appCore/
+files/appLms/
+files/common/
+files/tmp/
+files/logs/
+
+# Backup e dump SQL
+*.sql
+*.sql.zip
+*.sql.gz
+
+# File temporanei
+*.log
+*.tmp
+testphp.php
+test/
+
+# File di sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Auth sensibili
+auth.json
+host_file

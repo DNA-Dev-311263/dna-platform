@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Mockup - Profilo Utente</title>
+<link rel="stylesheet" type="text/css" href="https://test.pandp.it/css/pandp-ui.css" />
+<style>
+    /* Stili aggiuntivi solo per questo mockup, in stile pui-* */
+    .pui-avatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: #eef3ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        font-weight: 700;
+        color: #1a6ef7;
+        margin: 0 auto 14px;
+        border: 3px solid #d8e8f8;
+    }
+    .pui-profile-name {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 2px;
+    }
+    .pui-profile-username {
+        text-align: center;
+        font-size: 13px;
+        color: #8a9fc4;
+        margin-bottom: 4px;
+    }
+    .pui-profile-level {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+    .pui-field-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f2f8;
+        gap: 16px;
+    }
+    .pui-field-row:last-child { border-bottom: none; }
+    .pui-field-label {
+        font-size: 13px;
+        color: #8a9fc4;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .pui-field-value {
+        font-size: 14px;
+        color: #2d3748;
+        text-align: right;
+        word-break: break-word;
+    }
+    .pui-signature-box {
+        background: #f8fbff;
+        border: 1px solid #d8e8f8;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 13px;
+        color: #4a5568;
+        font-style: italic;
+    }
+    .pui-sidebar .pui-btn {
+        width: 100%;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    .pui-sidebar .pui-btn:last-child { margin-bottom: 0; }
+
+    /* ── Storia formativa ───────────────────────────────────── */
+    .pui-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .pui-table th {
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        color: #8a9fc4;
+        padding: 8px 10px;
+        border-bottom: 2px solid #f0f2f8;
+    }
+    .pui-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #f0f2f8;
+        color: #2d3748;
+        vertical-align: middle;
+    }
+    .pui-table tr:last-child td { border-bottom: none; }
+    .pui-table .pui-course-type {
+        font-size: 12px;
+        color: #8a9fc4;
+    }
+    .pui-table .pui-course-date {
+        white-space: nowrap;
+        color: #4a5568;
+    }
+    .pui-table .pui-course-empty {
+        color: #c5cee0;
+    }
+    .pui-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0 0 16px;
+        padding-top: 24px;
+        border-top: 1px solid #f0f2f8;
+    }
+    .pui-section-block:first-child .pui-section-title {
+        padding-top: 0;
+        border-top: none;
+    }
+</style>
+</head>
+<body style="background:#f4f6fb; margin:0;">
+<div class="pui-page">
+
+    <h2 style="margin-bottom:20px; color:#2d3748;">Il mio profilo</h2>
+
+    <div class="pui-layout">
+
+        <!-- SIDEBAR -->
+        <div class="pui-sidebar">
+            <div class="pui-sidebar-section" style="text-align:center;">
+                <div class="pui-avatar">MR</div>
+                <div class="pui-profile-name">Mario Rossi</div>
+                <div class="pui-profile-username">@mario.rossi</div>
+                <div class="pui-profile-level">
+                    <span class="pui-badge pui-badge--info">Amministratore</span>
+                </div>
+            </div>
+
+            <div class="pui-sidebar-section">
+                <div class="pui-section-label">Azioni</div>
+                <a href="#" class="pui-btn pui-btn--primary">Modifica profilo</a>
+                <a href="#" class="pui-btn pui-btn--ghost">Cambia password</a>
+                <a href="#" class="pui-btn pui-btn--ghost">Cambia policy</a>
+            </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="pui-main">
+
+            <div class="pui-section-block">
+                <div class="pui-section-label">Dati personali</div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Username</div>
+                    <div class="pui-field-value">mario.rossi</div>
+                </div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Cognome</div>
+                    <div class="pui-field-value">Rossi</div>
+                </div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Nome</div>
+                    <div class="pui-field-value">Mario</div>
+                </div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Azienda</div>
+                    <div class="pui-field-value">P&amp;P Consulting</div>
+                </div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Cod. Fisc.</div>
+                    <div class="pui-field-value">RSSMRA80A01H501Z</div>
+                </div>
+            </div>
+
+            <div class="pui-section-block">
+                <div class="pui-section-label">Contatti</div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Email</div>
+                    <div class="pui-field-value"><a href="#">mario.rossi@pandp.it</a></div>
+                </div>
+                <div class="pui-field-row">
+                    <div class="pui-field-label">Telefono</div>
+                    <div class="pui-field-value">+39 06 1234567</div>
+                </div>
+            </div>
+
+            <div class="pui-section-block">
+                <div class="pui-section-label">Firma</div>
+                <div class="pui-signature-box">
+                    Mario Rossi<br>
+                    P&amp;P Consulting &mdash; Ufficio Formazione
+                </div>
+            </div>
+
+            <div class="pui-section-block">
+                <div class="pui-section-title">Storia formativa</div>
+                <table class="pui-table">
+                    <thead>
+                        <tr>
+                            <th>Corso</th>
+                            <th>Stato</th>
+                            <th>Iscrizione</th>
+                            <th>Completamento</th>
+                            <th>Crediti</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                Cultura del rispetto
+                                <div class="pui-course-type">E-learning</div>
+                            </td>
+                            <td><span class="pui-badge pui-badge--success">Completato</span></td>
+                            <td class="pui-course-date">13/06/2026</td>
+                            <td class="pui-course-date">13/06/2026</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                SMYLE - Excel 365 Introduttivo
+                                <div class="pui-course-type">E-learning</div>
+                            </td>
+                            <td><span class="pui-badge pui-badge--info">In corso</span></td>
+                            <td class="pui-course-date">09/06/2026</td>
+                            <td class="pui-course-empty">&mdash;</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Validazione Impianti - Test
+                                <div class="pui-course-type">Aula</div>
+                            </td>
+                            <td><span class="pui-badge pui-badge--neutral">Iscritto</span></td>
+                            <td class="pui-course-date">14/06/2026</td>
+                            <td class="pui-course-empty">&mdash;</td>
+                            <td>1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

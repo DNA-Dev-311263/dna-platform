@@ -1,0 +1,52 @@
+{% extends 'partials/course-box.html.twig' %}
+{% block courseBoxMyCoursesNextLesson %}{% endblock %}
+{% block courseBoxHeader %}{% endblock %}
+{% block courseBoxCategory %}
+    <div class="course-box__category">
+        {{ course.course_type }}
+    </div>
+{% endblock %}
+
+{% block unsubscribe %}
+    <li>
+        <a href="javascript:confirmDialog( '{{ Lang_translate('_SELF_UNSUBSCRIBE', 'course') }}',
+                                            '{{ course.escaped_name }}',
+                                            'catalog/self_unsubscribe', 
+                                            {{ course.idCourse }})">
+            {{ Lang_translate('_SELF_UNSUBSCRIBE', 'course') }}
+        </a>
+
+    </li>
+
+{% endblock %}
+
+{% set courseBoxClasses = [] %}
+
+{% if not course.courseBoxEnabled %}
+    {% set courseBoxClasses = courseBoxClasses|merge(['course-box--disabled']) %}
+{% endif %}
+
+
+{% block courseBoxTitle %}
+    <h3 class="course-box__title">
+		<a id="link_info_{{ course.idCourse }}" href="javascript:;" onclick="courseinfoPopUp({{ course.idCourse }});">{{ course.name }}</a>
+	</h3>
+{% endblock %}
+
+{% block entercourse %}
+    {% if logged_in %}
+        {% if catalogueType == 'catalog' or catalogueType == 'homecatalogue' %}
+            {% if course.course_type == 'classroom' %}
+                {% include 'catalog/partials/classroom-button.html.twig' with { 'course': course, 'endpoint' : endpoint } %}
+            {% elseif course.course_type == 'elearning' %}
+                {% include 'catalog/partials/elearning-button.html.twig' with { 'course': course, 'endpoint' : endpoint } %}
+            {% endif %}
+        {% endif %}
+    {% else %}
+        {% if course.course_type == 'classroom' %}
+            {% include 'catalog/partials/classroom-login-button.html.twig' with { 'course': course, 'endpoint' : endpoint, 'catalogueType': catalogueType } %}
+        {% elseif course.course_type == 'elearning' %}
+            {% include 'catalog/partials/elearning-login-button.html.twig' with { 'course': course, 'endpoint' : endpoint, 'catalogueType': catalogueType } %}
+        {% endif %}
+    {% endif %}
+{% endblock %}

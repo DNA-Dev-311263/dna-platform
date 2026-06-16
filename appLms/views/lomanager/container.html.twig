@@ -1,0 +1,32 @@
+{% set data = tab.data %}
+
+<div class="tab-pane {{ tab.active ? 'active' : '' }}" data-container="{{ tab.type }}">
+    {{ Form_openForm('orgshow', 'index.php?modname=storage&op=display', false, 'POST') }}
+    <input type="hidden" id="treeview_selected_{{ tab.type }}" name="treeview_selected_{{ tab.type }}" value="0">
+    <input type="hidden" id="treeview_state_{{ tab.type }}" name="treeview_state_{{ tab.type }}" value="{{ tab.currentState }}">
+    <section class="folderTreeView js-folder-tree-view">
+        <aside class="folderTreeContent folderTreeContent--one-third">
+            <nav class="folderTree js-folder-tree">
+                <ul class="folderTree__ul js-folder-root">
+                    <li data-id="0" class="folderTree__li ft-is-parent">
+                        <button data-id="0"
+                                type="button"
+                                class="folderTree__link ft-is-root ft-is-selected ft-is-folder ft-is-folderOpen is-dropzone">
+                            <span>{{ Lang_translate('_LEVEL', 'standard' )}}</span>
+                        </button>
+                        <ul class="folderTree__ul js-sortable-tree"></ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="folderViewContent folderViewContent--two-third">
+            {% if tab.edit %}
+                <div class="folderTree__actions">
+                    {% include 'create_new_item.html.twig' with { tab: tab, lo_types: lo_types } %}
+                </div>
+            {% endif %}
+            <div class="folderView"></div>
+        </main>
+    </section>
+    {{ Form_closeForm() }}
+</div>

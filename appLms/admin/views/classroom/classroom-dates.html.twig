@@ -1,0 +1,661 @@
+<style>
+
+    .add-classroom-dates {
+        display: none;
+    }
+
+    .add-classroom-dates .col-box-end-button {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .add-classroom-dates .col-box-end-button .box-classroom {
+
+        align-items: center;
+        margin-right: 15px;
+    }
+
+    .add-classroom-dates .btn {
+        border-radius: 8px;
+    }
+
+    .add-classroom-dates .btn-save {
+        background: #2D8CFF;
+        color: white;
+    }
+
+    .add-classroom-dates .btn-delete {
+        background: transparent;
+        color: #2D8CFF;
+    }
+
+    .edit-classroom-dates .edit-classroom-dates--new-date {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+    }
+
+    .edit-classroom-dates .edit-classroom-dates--new-date span {
+        color: #2D8CFF;
+        cursor: pointer;
+    }
+
+    .edit-classroom-dates .edit-classroom-dates--update-dates {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+    }
+
+    .edit-classroom-dates .edit-classroom-dates--update-dates span {
+        color: #2D8CFF;
+        cursor: pointer;
+    }
+
+    .input-not-valid {
+        border-color: red;
+        /* insert your own styles for valid form input */
+    }
+    
+        
+    
+
+</style>
+
+
+<div class="std_block">
+    <div class="container">
+        {% set courseUrl = 'index.php?r=' ~ courseBaseLink ~ '/show' %}
+
+        {% set classUrl = 'index.php?r=' ~ classroomBaseLink ~ '/classroom&id_course=' ~ idCourse %}
+
+        {% set title = Lang_translate('_MOD_DATES', 'course') ~ ': ' ~ postData.name %}
+
+        {% if postdata.dateBegin is not empty %}
+            {% set title = title ~ ' (' ~ postData.dateBegin ~ ')' %}
+        {% endif %}
+
+        {{ Get_title(
+            {
+                (courseUrl) : Lang_translate('_COURSE', 'course'),
+                (classUrl) : Lang_translate('_CLASSROOM', 'course'),
+                '': title
+            },false) }}
+
+        {% if error %}
+            {% set errorTranslate = Lang_translate((error), 'course') %}
+            {{ UiFeedback_error(errorTranslate) }}
+        {% endif %}
+
+
+        <div class="edit-classroom-dates">
+
+            <div id="js-row-hidden" class="hidden">
+                <!--<tr data-id="#id#" data-date="#dataset_day_date#" data-date_begin="#dataset_day_date_begin#" data-date_end="#dataset_day_date_end#" data-pause_begin="#dataset_day_pause_begin#" data-pause_end="#dataset_day_pause_end#" data-classroom="#dataset_day_classroom#">
+                    <th scope="row">#day_date#</th>
+                    <td>#day_date_begin#</td>
+                    <td>#day_date_end#</td>
+                    <td>#day_pause_begin#</td>
+                    <td>#day_pause_end#</td>
+                    <td>#day_classroom#</td>
+                    <td><a class="js-edit" href="javascript:void(0)">{{ Lang_translate('_EDIT','course') }}</a></td>
+                    <td><a class="js-delete" href="javascript:void(0)">{{ Lang_translate('_DELETE','course') }}</a></td>
+                </tr>-->
+            </div>
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">{{ Lang_translate('_HOUR_BEGIN','course') }}</th>
+                    <th scope="col">{{ Lang_translate('_HOUR_END','course') }}</th>
+                    <th scope="col">{{ Lang_translate('_PAUSE_BEGIN','course') }}</th>
+                    <th scope="col">{{ Lang_translate('_PAUSE_END','course') }}</th>
+                    <th scope="col">{{ Lang_translate('_CLASSROOM','classroom') }}</th>
+                </tr>
+                </thead>
+                <tbody id="js-table-body">
+                {% for day in postData.days %}
+                    {% if day.classroom in availableClassrooms|keys %}
+                        {% set classroom = availableClassrooms[day.classroom] %}
+                    {% endif %}
+
+                    <tr data-id="{{ day.id }}" data-date="{{ day.date }}" data-date_begin="{{ day.date_begin }}"
+                        data-date_end="{{ day.date_end }}" data-pause_begin="{{ day.pause_begin }}"
+                        data-pause_end="{{ day.pause_end }}" data-classroom="{{ day.classroom }}">
+                        <th scope="row">{{ day.date }}</th>
+                        <td>{{ day.date_begin|date("H:i") }}</td>
+                        <td>{{ day.date_end|date("H:i") }}</td>
+                        <td>{{ day.pause_begin|date("H:i") }}</td>
+                        <td>{{ day.pause_end|date("H:i") }}</td>
+                        <td>{{ classroom|raw }}</td>
+                        <td><a class="js-edit" href="javascript:void(0)">{{ Lang_translate('_EDIT','course') }}</a></td>
+                        <td><a class="js-delete" href="javascript:void(0)">{{ Lang_translate('_DELETE','course') }}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+            <div class="edit-classroom-dates--new-date">
+                <div class="edit-classroom-dates--new-date-box">
+                    <span id="js-button-new-row">{{ Lang_translate('_ADD_DATE_ROW','classroom') }}</span>&nbsp;&nbsp;&nbsp;
+                    <span id="js-button-update-row">{{ Lang_translate('_TIMETABLE_MODIFY','classroom') }}</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="add-classroom-dates" id="js-add-classroom-dates" style="display: none">
+            <div class="row mb-4">
+                <input type="hidden" id="form-id">
+                <input type="hidden" id="form-day_value">
+                <div class="col form-data-default">
+                    <div class="form-outline">
+                        <label for="form-day_date">{{ Lang_translate('_DATE','course') }}</label>
+                        <input class="form-control" id="form-day_date" type="date" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-outline">
+                        <label class="form-label" for="form-day_date_begin">{{ Lang_translate('_HOUR_BEGIN','course') }}</label>
+                        <input value="00:00" type="time" id="form-day_date_begin" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-outline">
+                        <label class="form-label" for="form-day_date_end">{{ Lang_translate('_HOUR_END','course') }}</label>
+                        <input type="time" value="00:00" id="form-day_date_end" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-outline">
+                        <label class="form-label" for="form-day_pause_begin">{{ Lang_translate('_PAUSE_BEGIN','course') }}</label>
+                        <input type="time" value="00:00" id="form-day_pause_begin" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-outline">
+                        <label class="form-label" for="form-day_pause_end">{{ Lang_translate('_PAUSE_END','course') }}</label>
+                        <input type="time" value="00:00" id="form-day_pause_end" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col col-box-end-button">
+                    <div class="form-outline box-classroom">
+                        <label for="form-day_classroom">{{ Lang_translate('_CLASSROOM','classroom') }}</label>
+                        <select class="form-control select-box" id="form-day_classroom">
+
+                            {% for id,classroom in availableClassrooms %}
+                                <option value="{{ id }}">{{ classroom|striptags }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-outline" style="padding-left:10px;">
+                        <button class="btn btn-delete"
+                                id="js-classroom-dates-delete">{{ Lang_translate('_CLOSE','standard') }}</button>
+                        <button class="btn btn-save form-data-default"
+                                id="js-classroom-dates-save">{{ Lang_translate('_INSERT','standard') }}</button> {# ABR #}
+                        <button class="btn btn-save hidden form-data-hours"
+                                id="js-set-hours">{{ Lang_translate('_SET','course') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        {{ Form_openButtonSpace() }}
+
+        <label for="sendAlert">
+            {{ Lang_translate('_SEND_ALERT', 'subscribe') }}
+            {% if courseInfo.sendCalendar %}
+                <span class="notify-cal-enab">({{ (Lang_translate('_SEND_CALENDAR_ENABLED', 'calendar'))|lower }})</span>
+            {% endif %}
+        </label>: {# ABR #}
+        {{ Form_getInputCheckbox("sendAlert", "sendAlert", "1", eventCalendarChangeState , '') }} {# ABR #}
+        {{ Form_getButton('js-undo', 'undo', Lang_translate('_UNDO', 'standard')) }}
+        {{ Form_getButton('js-save', 'save', Lang_translate('_SAVE', 'course'),'','disabled') }}
+        {{ Form_closeElementSpace() }}
+
+    </div>
+</div>
+
+</div>
+
+<script type="text/javascript">
+    /* MODAL */
+
+    var confirm = function() { this.hide(); };
+
+	var dialogBox = new YAHOO.widget.Dialog("classroom-dates_modalDialog", {
+		width: "400px",
+		modal: true,
+		close: true,
+		visible: false,
+		fixedcenter: true,
+		constraintoviewport: true,
+		draggable: true,
+		hideaftersubmit: true,
+		buttons: [
+			{text: "{{ Lang_translate('_CLOSE','standard') }}", handler: confirm}
+		]
+	});
+	dialogBox.render(document.body);
+    
+    
+    /* end modal */
+
+
+
+    var availableClassrooms = {{ availableClassrooms|json_encode|raw }}
+    var lastInsertedRowId = -1;
+    var insertedDays = [];
+    var removedDays = [];
+
+    loadInsertedDays();
+
+    function loadInsertedDays() {
+        insertedDays = [];
+        rows = getTableBody().rows
+
+        for (let row of rows) {
+            insertedDays.push(row.dataset.date);
+        }
+    }
+
+    document.getElementById('js-button-new-row').addEventListener('click', function (e) {
+        var elementsToHide = document.getElementsByClassName('form-data-hours')
+        for (let element of elementsToHide) {
+            if (!element.classList.contains('hidden')) {
+                element.classList.add('hidden');
+            }
+        }
+        var elementsToHide = document.getElementsByClassName('form-data-default')
+        for (let element of elementsToHide) {
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+            }
+        }
+        showForm(e)
+        clearForm()
+    })
+
+    document.getElementById('js-button-update-row').addEventListener('click', function (e) {
+        var elementsToHide = document.getElementsByClassName('form-data-default')
+        for (let element of elementsToHide) {
+            if (!element.classList.contains('hidden')) {
+                element.classList.add('hidden');
+            }
+        }
+        var elementsToHide = document.getElementsByClassName('form-data-hours')
+        for (let element of elementsToHide) {
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+            }
+        }
+        showForm(e)
+        clearForm()
+    })
+
+    for (let item of document.getElementsByClassName('js-edit')) {
+        item.addEventListener('click', editRow);
+    }
+
+    for (let item of document.getElementsByClassName('js-delete')) {
+        item.addEventListener('click', deleteRow);
+    }
+
+    document.getElementById('js-save').addEventListener('click', saveData);
+
+    document.getElementById('js-undo').addEventListener('click', goBack)
+
+    document.getElementById('js-classroom-dates-save').addEventListener('click', saveForm);
+
+    document.getElementById('js-set-hours').addEventListener('click', updateHours);
+
+    document.getElementById('js-classroom-dates-delete').addEventListener('click', hideForm);
+
+    function saveForm(e) {
+        e.preventDefault();
+        
+        var id = document.getElementById('form-id').value;
+        var date = document.getElementById('form-day_date').value;
+        var editDate = document.getElementById('form-day_value').value;
+        var dateFormatted = dateToString(new Date(date));
+        var dateBegin = document.getElementById('form-day_date_begin').value;
+        var dateEnd = document.getElementById('form-day_date_end').value;
+        var pauseBegin = document.getElementById('form-day_pause_begin').value;
+        var pauseEnd = document.getElementById('form-day_pause_end').value;
+        var classroom = document.getElementById('form-day_classroom').value;
+
+        if (date === '') {
+            document.getElementById('form-day_date').classList.add('input-not-valid');
+            return;
+        } else {
+            document.getElementById('form-day_date').classList.remove('input-not-valid');
+        }
+
+        if (dateBegin === '') {
+            document.getElementById('form-day_date_begin').classList.add('input-not-valid');
+            return;
+        } else {
+            document.getElementById('form-day_date_begin').classList.remove('input-not-valid');
+        }
+
+        if (dateEnd === '') {
+            document.getElementById('form-day_date_end').classList.add('input-not-valid');
+            return;
+        } else {
+            document.getElementById('form-day_date_end').classList.remove('input-not-valid');
+        }
+
+        if (pauseBegin === '') {
+            document.getElementById('form-day_pause_begin').classList.add('input-not-valid');
+            return;
+        } else {
+            document.getElementById('form-day_pause_begin').classList.remove('input-not-valid');
+        }
+
+        if (pauseEnd === '') {
+            document.getElementById('form-day_pause_end').classList.add('input-not-valid');
+            return;
+        } else {
+            document.getElementById('form-day_pause_end').classList.remove('input-not-valid');
+        }
+
+        if (editDate === '' || editDate != '' && editDate != dateFormatted ) {
+            if (insertedDays.includes(dateFormatted)) {
+                    showError('{{ Lang_translate('_EXISTING_DATA','classroom') }}');
+                    return;
+            }
+        }
+
+        if (pauseBegin !== '00:00' || pauseEnd !== '00:00') {
+            if (
+                !moment(pauseBegin, 'hh:mm').isBetween(moment(dateBegin, 'hh:mm'), moment(dateEnd, 'hh:mm')) ||
+                !moment(pauseEnd, 'hh:mm').isBetween(moment(dateBegin, 'hh:mm'), moment(dateEnd, 'hh:mm'))
+            ) {
+                showError('{{ Lang_translate('_PAUSE_OUTRANGE', 'classroom') }}');
+                return;
+            }
+        }
+
+        document.getElementById('form-day_date').classList.remove('input-not-valid');
+
+        insertOrUpdateRow(id, date, dateFormatted, dateBegin, dateEnd, pauseBegin, pauseEnd, classroom);
+        clearForm();
+        loadInsertedDays();
+        enableSaveButton();
+       
+    }
+
+    function updateHours(e) {
+        e.preventDefault();
+        var dateBegin = document.getElementById('form-day_date_begin').value;
+        var dateEnd = document.getElementById('form-day_date_end').value;
+        var pauseBegin = document.getElementById('form-day_pause_begin').value;
+        var pauseEnd = document.getElementById('form-day_pause_end').value;
+        var classroom = document.getElementById('form-day_classroom').value;
+
+        var tableBody = getTableBody();
+        for (let row of tableBody.rows) {
+
+            var date = stringToDate(row.dataset.date, 'DD-MM-YYYY');
+            row.dataset.date = dateToString(date, 'YYYY-MM-DD')
+            var dateFormatted = dateToString(date, 'DD-MM-YYYY');
+        
+            insertOrUpdateRow(row.dataset.id, row.dataset.date, dateFormatted, dateBegin, dateEnd, pauseBegin, pauseEnd, classroom);
+        }
+
+        clearForm();
+        enableSaveButton();
+    }
+
+    function insertOrUpdateRow(id, date, dateFormatted, dateBegin, dateEnd, pauseBegin, pauseEnd, classroom) {
+        var tableBody = getTableBody();
+
+        var newTableRow = document.getElementById('js-row-hidden').innerHTML;
+        newTableRow = newTableRow.replace('<!--', '').replace('-->', '');
+        newTableRow = newTableRow.replace('#day_date#', dateFormatted).replace('#dataset_day_date#', dateFormatted);
+        newTableRow = newTableRow.replace('#day_date_begin#', dateBegin).replace('#dataset_day_date_begin#', date + ' ' + dateBegin);
+        newTableRow = newTableRow.replace('#day_date_end#', dateEnd).replace('#dataset_day_date_end#', date + ' ' + dateEnd);
+        newTableRow = newTableRow.replace('#day_pause_begin#', pauseBegin).replace('#dataset_day_pause_begin#', date + ' ' + pauseBegin);
+        newTableRow = newTableRow.replace('#day_pause_end#', pauseEnd).replace('#dataset_day_pause_end#', date + ' ' + pauseEnd);
+        newTableRow = newTableRow.replace('#day_classroom#', availableClassrooms[classroom]).replace('#dataset_day_classroom#', classroom);
+
+        if (typeof id !== 'undefined' && id !== '' || insertedDays.includes(dateFormatted)) {
+
+            for (let row of tableBody.rows) {
+                var dataset = row.dataset;
+
+                if (dataset.id === id) {
+                    newTableRow = newTableRow.replace('#id#', id);
+                    row.innerHTML = newTableRow;
+                    row.dataset.id = id;
+                    row.dataset.date = dateFormatted;
+                    row.dataset.date_begin = date + ' ' + dateBegin;
+                    row.dataset.date_end = date + ' ' + dateEnd;
+                    row.dataset.pause_begin = date + ' ' + pauseBegin;
+                    row.dataset.pause_end = date + ' ' + pauseEnd;
+                    row.dataset.classroom = classroom;
+
+                    jsEdit = row.getElementsByClassName('js-edit');
+                    jsDelete = row.getElementsByClassName('js-delete');
+
+                    for (let item of jsEdit) {
+                        item.addEventListener('click', editRow);
+                    }
+
+                    for (let item of jsDelete) {
+                        item.addEventListener('click', deleteRow);
+                    }
+                }
+            }
+        } else {
+
+            newTableRow = newTableRow.replace('#id#', lastInsertedRowId);
+            lastInsertedRowId--;
+            tableBody.insertAdjacentHTML('beforeend', newTableRow);
+
+            var lastRow = tableBody.rows.item(tableBody.rows.length - 1);
+
+            var jsEdit = lastRow.getElementsByClassName('js-edit');
+            var jsDelete = lastRow.getElementsByClassName('js-delete');
+
+            for (let item of jsEdit) {
+                item.addEventListener('click', editRow)
+            }
+
+            for (let item of jsDelete) {
+                item.addEventListener('click', deleteRow)
+            }
+        }
+    }
+
+    function hideForm(e) {
+        e.preventDefault();
+        var editClassroomDate = document.getElementById('js-add-classroom-dates');
+        editClassroomDate.style.display = 'none';
+    }
+
+    function showForm(e) {
+        e.preventDefault();
+        var editClassroomDate = document.getElementById('js-add-classroom-dates');
+        editClassroomDate.style.display = 'block';
+    }
+
+    function enableSaveButton(){
+        if (document.getElementById('js-save').hasAttribute('disabled')){
+            document.getElementById('js-save').removeAttribute('disabled');
+        }
+
+    }
+
+    function disableSaveButton(){
+        if (!document.getElementById('js-save').hasAttribute('disabled')){
+            document.getElementById('js-save').setAttribute('disabled','disabled');
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('form-id').value = '';
+        document.getElementById('form-day_date').value = '';
+        document.getElementById('form-day_value').value = '';
+        document.getElementById('form-day_date_begin').value = '00:00';
+        document.getElementById('form-day_date_end').value = '00:00';
+        document.getElementById('form-day_pause_begin').value = '00:00';
+        document.getElementById('form-day_pause_end').value = '00:00';
+        document.getElementById('form-day_classroom').value = Object.keys(availableClassrooms)[0];
+    }
+
+    function saveData(e) {
+        e.preventDefault();
+
+        var postData = [];
+        var rows = getTableBody().rows;
+
+        for (let row of rows) {
+
+            postData.push(JSON.parse(JSON.stringify(row.dataset)));
+        }
+
+ 
+        sendAlert = document.getElementById('sendAlert').checked ? '1' : '0'; //Mod. ABR
+
+        //Fix ABR - disabilito subito per evitare doppi post
+        //document.getElementById('sendAlert').checked = false;
+        disableSaveButton();
+
+        $.ajax({
+            type: "post",
+            url: "{{ actions.save|raw }}",
+            data: {
+                'sendAlert':sendAlert,
+                'data': postData,
+                'removedDays': removedDays
+            },
+            beforeSend: function () {
+
+            },
+            success: function (data) {
+                data = JSON.parse(data);
+
+                if (data.success) {
+                    for (let day in data.days) {
+                        date = data.days[day].date_begin.split(" ");
+                        if (date.length > 1) {
+                            data.days[day].date_begin = date[1].substring(0, 5);
+                        }
+                        date = data.days[day].date_end.split(" ");
+                        if (date.length > 1) {
+                            data.days[day].date_end = date[1].substring(0, 5);
+                        }
+                        date = data.days[day].pause_begin.split(" ");
+                        if (date.length > 1) {
+                            data.days[day].pause_begin = date[1].substring(0, 5);
+                        }
+                        date = data.days[day].pause_end.split(" ");
+                        if (date.length > 1) {
+                            data.days[day].pause_end = date[1].substring(0, 5);
+                        }
+
+
+                        insertOrUpdateRow(data.days[day].id, data.days[day].format_date, data.days[day].date, data.days[day].date_begin, data.days[day].date_end, data.days[day].pause_begin, data.days[day].pause_end, data.days[day].classroom)  
+                    }
+
+                    goBack();   // ABR: meglio chiudere la pagina e tornare alla principale
+                   
+                } else {
+                    if(data.message) alert(data.message); //ABR: Eventuale messaggio su insuccesso
+                }
+
+            },
+            complete: function () {
+            },
+            error: function (e) {
+                return false;
+            }
+        });
+    }
+
+    function goBack(e) {
+        window.location = '{{ actions.back|raw }}';
+    }
+
+    function getTableBody() {
+        return document.getElementById("js-table-body");
+    }
+
+    function editRow(e) {
+        showForm(e);
+
+        var rowData = getRowDatasetFromEvent(e);
+
+        document.getElementById('form-id').value = rowData.id;
+     
+
+        /** convert date string to date object (date string format 01-07-2021) */
+        var date = stringToDate(rowData.date, 'DD-MM-YYYY');
+        date.setHours(date.getHours() + 2);
+
+        document.getElementById('form-day_date').valueAsDate = date;
+
+        document.getElementById('form-day_value').value = dateToString(new Date(date));
+
+        /** split date_begin string to use only time */
+        date = rowData.date_begin.split(" ");
+        if (date.length > 1) {
+            document.getElementById('form-day_date_begin').value = date[1].substring(0, 5);
+        }
+        date = rowData.date_end.split(" ");
+        if (date.length > 1) {
+            document.getElementById('form-day_date_end').value = date[1].substring(0, 5);
+        }
+        date = rowData.pause_begin.split(" ");
+        if (date.length > 1) {
+            document.getElementById('form-day_pause_begin').value = date[1].substring(0, 5);
+        }
+        date = rowData.pause_end.split(" ");
+        if (date.length > 1) {
+            document.getElementById('form-day_pause_end').value = date[1].substring(0, 5);
+        }
+        document.getElementById('form-day_classroom').value = rowData.classroom;
+    }
+
+    function deleteRow(e) {
+        e.preventDefault()
+        var row = e.target.parentNode.parentNode
+        if (row.dataset.id > 0) {
+            removedDays.push(JSON.parse(JSON.stringify(row.dataset)));
+            insertedDays.pop(row.dataset.date);
+        }
+        row.remove();
+        enableSaveButton();
+    }
+
+    function getRowDatasetFromEvent(e) {
+        var row = e.target.parentNode.parentNode;
+        return row.dataset;
+    }
+
+    function dateToString(date = new Date, format = 'DD-MM-YYYY') {
+
+        return moment.utc(date).format(format);
+    }
+
+    function stringToDate(_date, _format) {
+
+        return moment.utc(_date, _format).toDate();
+    }
+
+    function showError(text) {
+        dialogBox.setHeader("{{ Lang_translate('_OPERATION_FAILURE','standard') }}");
+        dialogBox.setBody(text);
+        dialogBox.show();
+    }
+
+    function showSuccess(text) {
+        dialogBox.setHeader("{{ Lang_translate('_OPERATION_SUCCESSFUL','standard') }}");
+        dialogBox.setBody(text);
+        dialogBox.show();
+    }
+
+</script>

@@ -1,0 +1,142 @@
+<style>
+
+    .material-switch > input[type="checkbox"] {
+        display: none;
+    }
+
+    .material-switch > label {
+        cursor: pointer;
+        height: 0px;
+        position: relative;
+        width: 40px;
+    }
+
+    .material-switch > label::before {
+        background: rgb(0, 0, 0);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        content: '';
+        height: 16px;
+        margin-top: -8px;
+        position: absolute;
+        opacity: 0.3;
+        transition: all 0.4s ease-in-out;
+        width: 40px;
+    }
+
+    .material-switch > label::after {
+        background: rgb(255, 255, 255);
+        border-radius: 16px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: -8px;
+        position: absolute;
+        top: -4px;
+        transition: all 0.3s ease-in-out;
+        width: 24px;
+    }
+
+    .material-switch > input[type="checkbox"]:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+    }
+
+    .material-switch > input[type="checkbox"]:checked + label::after {
+        background: inherit;
+        left: 20px;
+    }
+
+    .show-on-hover:hover > ul.dropdown-menu {
+        display: block;
+    }
+
+    #toTop {
+        position: fixed;
+        bottom: 60px;
+        right: 30px;
+        cursor: pointer;
+        display: none;
+
+    }
+
+
+</style>
+
+<script type="text/javascript">
+
+    endpoint="{{ data.endpoint }}"
+    current_catalogue={{ data.id_catalogue }};
+    function getCurrentTypeCourse() {
+        c = getCookie('catalog[' + current_catalogue + '].type_course');
+        return (c == '' ? '' : c)
+    }
+
+
+    $(document).ready(function () {
+        $('body').append('<div id="toTop" class="btn btn-info"><span class="glyphicon glyphicon-chevron-up"></span>{{ Lang_translate('_BACKTOTOP', 'faq') }}</div>');
+        $(window).scroll(function () {
+            if ($(this).scrollTop() != 0) {
+                $('#toTop').fadeIn();
+            } else {
+                $('#toTop').fadeOut();
+            }
+        });
+        $('#toTop').click(function () {
+            $("html, body").animate({scrollTop: 0}, 1000);
+            return false;
+        });
+
+
+        $("select#typeCourse").val(getCurrentTypeCourse())
+
+        $('#typeCourse').change(function () {
+            setCookie('catalog[' + current_catalogue + '].type_course', this.value, 60);
+            callAjaxCatalog(getCookie('id_current_category'))
+        })
+
+
+    });
+
+</script>
+
+<div class="middlearea_container middlearea_container--margintop-small">
+<div class="tabs-wrapper">
+    <ul id="catalog_nav" class="nav nav-tabs hidden-xs">
+        
+        {% if data.show_general_catalogue_tab %}
+            <li class="active"><a href="index.php?r={{ data.endpoint }}/show&amp;id_catalogue=0"> {{ Lang_translate('_CATALOGUE') }}</a></li>
+       {% endif %}
+       
+       {% if data.show_empty_catalogue_tab %}
+            <li class="active"><a href="#">{{ Lang_translate('_CATALOGUE') }}</a></li>
+        {% endif %}
+        
+        {% if data.show_user_catalogue_tab %}
+
+            {% for catalogue, catalogueInfo in data.user_catalogue %}
+           
+                {% if ((data.id_catalogue == 0 or data.id_catalogue == catalogue) and not(tab_actived)) %} 
+                    {% set active = 'active' %}
+                    {% set tab_actived = true %}
+                {% else %}
+                    {% set active = '' %} 
+                {% endif %}              
+                <li class="{{ active }}"><a href="index.php?r={{ data.endpoint }}/show&amp;id_catalogue={{ catalogue }}"> {{ catalogueInfo.name }} </a></li>
+            {% endfor %}           
+        {% endif %}
+    </ul>
+
+</div>
+<div class="tab_subnav">
+    <ul class="filterBar nav nav-pills">
+        <li>
+            <select class='form-control' id="typeCourse">
+                <option value=''>{{ Lang_translate('_ALL') }}</option>
+                <option value='elearning'>{{ Lang_translate('_ELEARNING', 'catalogue') }}</option>
+                <option value='classroom'>{{ Lang_translate('_CLASSROOM_COURSE', 'cart') }}</option>
+            </select>
+        </li>
+    </ul>
+</div>

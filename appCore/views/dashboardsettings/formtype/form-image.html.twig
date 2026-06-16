@@ -1,0 +1,19 @@
+<div class="dashboard__infoBlock dashboard__infoBlock--image">
+    <div class="form-group">
+        <label class="dashboard__label"
+               for="{{ block.postData.block }}-{{ index }}-image">{{ Lang_translate('_IMAGE_'~ form.field|upper,'dashboardsetting') }}</label>
+
+        <div class="dashboard__infoContainer">
+            <input type="file" name="{{ form.name }}" class="form-control-image js-extra-setting js-upload-file"
+                   id="{{ form.field }}" data-block="{{ block.postData.block }}" data-url="{{ attribute(block.data, form.name) }}">
+            <input type="hidden" class="form-control-image" id="{{ block.postData.block }}-{{ index }}-image-string"
+                   data-block="{{ block.postData.block }}-{{ index }}">
+
+                <img src="{{ attribute(block.data, form.name) }}" style="width: 100px; {% if attribute(block.data,form.name) is not defined %}display:none;{% endif %}">
+        </div>
+
+        <div class="dashboard__helper">{{ Lang_translate('_DASHBOARD_SETTING_IMAGE_ALLOWED_TYPES', 'dashboardsetting') }} .jpg, .png, .gif</div>
+        <div class="dashboard__error">{{ Lang_translate('_DASHBOARD_SETTING_IMAGE_TYPE_ERROR', 'dashboardsetting') }}<br> .jpg, .png, .gif
+        </div>
+    </div>
+</div>

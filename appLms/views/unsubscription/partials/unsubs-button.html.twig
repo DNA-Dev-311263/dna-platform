@@ -1,0 +1,16 @@
+{% if allowed == 1 %}
+    <a href="index.php?r={{ base_link }}/selfUnsubscribe&id_course={{ id_course }}&id_edition={{ id_edition }}&id_date={{ id_date }}&call={{ caller }}"
+       title="{{ Lang_translate('_UNSUBS', 'subscribe', {'[course]': course_name}) }}">
+        <span class="ico-sprite subs_del"></span>
+    </a>
+
+{% elseif allowed == 3 %}
+    <a title="{{ Lang_translate('_WAITING', 'standard') }}">
+        <span class="ico-sprite subs_wait"></span>
+    </a>
+
+{% else %}
+    <a title="{{ Lang_translate('_UNSUBS_NOT_ALLOWED', 'subscribe') }}">
+        <span class="ico-sprite subs_del" style="filter:opacity(20%) grayscale(100%);"></span>
+    </a>
+{% endif %}

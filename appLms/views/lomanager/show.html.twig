@@ -1,0 +1,44 @@
+<div class="page-header">
+    <h1>{{ Lang_translate('menu_course', '_STORAGE') }}</h1>
+</div>
+
+<div class="std_block">
+    <div class="tabs-wrapper">
+        <ul class="nav nav-tabs">
+            {% for tab in tabs %}
+                <li role="presentation" class="tab-link {{ tab.active ? 'active' : '' }}" data-type="{{ tab.type }}" data-controller="{{ tab.controller }}" data-scorm_player_enabled="{{ tab.scormPlayerEnabled|raw }}">
+                    <a href="#{{ tab.type }}">{{ tab.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="tab-content fv-is-teacher-area">
+            {% for tab in tabs %}
+                {% include 'container.html.twig' with { tab: tab, lo_types: lo_types } %}
+            {% endfor %}
+        </div>
+
+        {% include 'rename.html.twig' %}
+        {% include 'select_target_tab.html.twig' with { tabs: tabs } %}
+    </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab-link');
+const activeTab = document.querySelector('.tab-link.active');
+window.type = document.querySelector('.tab-content > .active').getAttribute('data-container');
+
+if (tabs) {
+    let controllers = [];
+    tabs.forEach((tab) => {
+        controllers.push({
+            tab: tab,
+            controller: tab.getAttribute('data-controller'),
+            selector: tab.getAttribute('data-type'),
+            scormPlayerEnabled: tab.getAttribute('data-scorm_player_enabled'),
+        });
+    });
+
+    new window.frontend.modules.TeacherLearningObject(controllers);
+}
+</script>

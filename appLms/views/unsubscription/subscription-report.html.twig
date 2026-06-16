@@ -1,0 +1,141 @@
+<div class="page-header">
+  <h1 class="page-title">{{ title }}</h1>
+</div>
+
+<div class="page-subtitle">
+</div>
+
+<div class="std_block">
+    {{ back_link|raw }}
+
+    <div class="rsubs_message">{{ page_message }}</div>
+    <br />
+
+    <span class="rsubs_print" onclick="window.print();"></span>
+
+    <div class="rsubs_div">
+        <table class="table table-bordered table-view rsubs_table">
+            <tr>
+                <th>{{ Lang_translate('_CODE', 'standard') }}</th>
+                <th>{{ Lang_translate('_COURSE', 'standard') }}</th>
+                <th>{{ Lang_translate('_COURSE_TYPE', 'course') }}</th>
+                <th>{{ Lang_translate('_CATEGORY', 'standard') }}</th>
+                <th>{{ Lang_translate('_LEVEL_6', 'levels') }} / {{ Lang_translate('_LEVEL_4', 'levels') }}</th>
+                <th>{{ Lang_translate('_DATE', 'standard') }} / {{ Lang_translate('_LOCATION_INFO', 'classroom') }}</th>
+                <th width="110px">{{ Lang_translate('_UNSUBS_DATE_LIMIT', 'subscribe') }}</th>
+                <th class="image">
+                    <img src="{{ path_delete_icon }}" alt="{{ Lang_translate('_DEL', 'standard') }}" />
+                </th>
+            </tr>
+
+            {% if arr_data is empty %}
+                <tr>
+                    <td colspan="8">{{ Lang_translate('_USER_NO_SUBS', 'subscription') }}</td>
+                </tr>
+            {% else %}
+                {% for id_assn, info in arr_data %}
+                    {% set course = info.course %}
+                    {% set edition = info.edition %}
+                    {% set more = info.more_info %}
+
+                    {% set virtual_str = course.course_virtual ? ' (' ~ Lang_translate('_VIRTUAL', 'course')|lower ~ ')' : '' %}
+                    {% set category = course.category|replace({'/root/':''}) %}
+                    {% set course_code = edition.code ?? course.code %}
+
+                    <tr class="rsubs_tr_info">
+                        <td>{{ course_code }}</td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.course_type ~ virtual_str }}</td>
+                        <td>{{ category }}</td>
+                        <td>{{ more.teacher }}</td>
+
+                        {# --- CLASSROOM --- #}
+                        {% if course.course_type == 'classroom' %}
+                            <td class="rsubs_td_days">
+                                <ul class="rsubs_ul_list">
+                                    {% for day in more.days %}
+                                        <li>{{ day }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>{{ edition.unsubscribe_date_limit }}</td>
+                            <td class="image">
+                                {% include 'partials/unsubs-button.html.twig' with {
+                                    allowed: 1,
+                                    id_course: course.idCourse,
+                                    id_edition: 0,
+                                    id_date: edition.id_date,
+                                    course_name: course.name,
+                                    caller: caller
+                                } %}
+                            </td>
+
+                        {# --- ELEARNING con edizione --- #}
+                        {% elseif course.course_type == 'elearning' and course.course_edition == 1 %}
+                            <td class="rsubs_td_days">
+                                <span class="rsubs_sp">
+                                    {% if edition.date_begin %}
+                                        {{ edition.date_begin }} - {{ edition.date_end }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ course.unsubscribe_date_limit }}</td>
+                            <td class="image">
+                                {% include 'partials/unsubs-button.html.twig' with {
+                                    allowed: more.allow_unsubscribe,
+                                    id_course: course.idCourse,
+                                    id_edition: edition.id_edition,
+                                    id_date: 0,
+                                    course_name: course.name,
+                                    caller: caller
+                                } %}
+                            </td>
+
+                        {# --- ELEARNING senza edizione --- #}
+                        {% elseif course.course_type == 'elearning' and course.course_edition == 0 %}
+                            <td class="rsubs_td_days">
+                                <span class="rsubs_sp">
+                                    {% if course.date_begin %}
+                                        {{ course.date_begin }} - {{ course.date_end }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ course.unsubscribe_date_limit }}</td>
+                            <td class="image">
+                                {% include 'partials/unsubs-button.html.twig' with {
+                                    allowed: more.allow_unsubscribe,
+                                    id_course: course.idCourse,
+                                    id_edition: 0,
+                                    id_date: 0,
+                                    course_name: course.name,
+                                    caller: caller
+                                } %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </table>
+    </div>
+
+    {{ back_link|raw }}
+</div>
+
+<div id="container-feedback" class="container-feedback" style="display:none;"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var message = "{{ result_message|e('js') }}";
+    var div_feedback = document.getElementById('container-feedback');
+
+    if (div_feedback && message !== '') {
+        div_feedback.innerHTML = '<span class="ico-sprite fd_info"></span>&emsp;' + message;
+        div_feedback.style.display = "block";
+        $("#" + div_feedback.id).fadeOut(5000);
+    }
+});
+</script>

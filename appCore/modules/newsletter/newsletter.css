@@ -1,0 +1,79 @@
+.pui-field { margin-bottom: 16px; }
+
+.pui-field label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.pui-textarea {
+    width: 100%;
+    border: 1.5px solid #d0dae8;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: #fff;
+    color: #2d3748;
+    min-height: 90px;
+    font-family: inherit;
+    transition: border-color .2s;
+}
+
+.pui-textarea:focus {
+    outline: none;
+    border-color: #1a6ef7;
+    box-shadow: 0 0 0 3px rgba(26,110,247,.1);
+}
+
+.pui-history-link {
+    text-align: right;
+    margin-bottom: 12px;
+}
+
+.pui-history-link a {
+    color: #1a6ef7;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.pui-history-link a:hover { text-decoration: underline; }
+
+.pui-count-info {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #5a6a8a;
+    font-style: italic;
+}
+
+.nl_history_table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.nl_history_table th,
+.nl_history_table td {
+    border: 1px solid #e0e8f4;
+    padding: 8px 10px;
+    text-align: left;
+}
+
+.nl_history_table th {
+    background: #f0f4fa;
+    color: #5a6a8a;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: 12px;
+}
+
+.nl_history_pagination {
+    margin-top: 10px;
+}
+
+.nl_history_pagination .nl_page_current {
+    font-weight: bold;
+    text-decoration: none;
+}

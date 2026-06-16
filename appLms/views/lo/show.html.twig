@@ -1,0 +1,63 @@
+<style>
+.ft-status-dot{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;pointer-events:none;}
+.ft-status-dot--attempted{background-color:#e6870a;}
+.ft-status-dot--completed{background-color:#5cb85c;}
+</style>
+<div class="page-header">
+    <h1>{{ Lang_translate('_MENU_COURSE', 'storage') }}</h1>
+</div>
+
+<div class="std_block fv-is-student-area js-disable-context-menu js-disable-sortable js-disable-drag-and-drop">
+    {% include 'container.html.twig' with { tab: data, isStudent: true } %}
+</div>
+
+<script>
+    new window.frontend.modules.StudentLearningObject({
+        controller: 'lomanagerorganization',
+        selector: 'organization',
+    });
+
+    (function($) {
+        var _fss = {{ data.folderStatusJson | raw }};
+        var _refreshTimer = null;
+
+        function applyFolderDots() {
+            $('.js-folder-tree').find('button.folderTree__link').each(function() {
+                var $btn = $(this);
+                var id = '' + $btn.data('id');
+                var status = _fss[id];
+                if (status === undefined) return;
+                $btn.find('.ft-status-dot').remove();
+                if (status === 2) {
+                    $btn.append('<span class="ft-status-dot ft-status-dot--completed"></span>');
+                } else if (status === 1) {
+                    $btn.append('<span class="ft-status-dot ft-status-dot--attempted"></span>');
+                }
+            });
+        }
+
+        function refreshAndApply() {
+            $.getJSON('index.php', {r: 'lms/lo/folderstatuses'}, function(data) {
+                if (data && typeof data === 'object') {
+                    _fss = data;
+                }
+                applyFolderDots();
+            });
+        }
+
+        $(document).ajaxComplete(function(e, xhr, settings) {
+            if (settings.url && settings.url.indexOf('folderstatuses') !== -1) return;
+            clearTimeout(_refreshTimer);
+            _refreshTimer = setTimeout(refreshAndApply, 400);
+        });
+
+        window.addEventListener('focus', function() {
+            clearTimeout(_refreshTimer);
+            _refreshTimer = setTimeout(refreshAndApply, 300);
+        });
+
+        $(document).ready(function() {
+            setTimeout(refreshAndApply, 200);
+        });
+    }(jQuery));
+</script>

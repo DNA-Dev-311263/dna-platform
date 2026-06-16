@@ -1,0 +1,449 @@
+FORMA LMS
+RELEASE CHANGELOG
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.17
+---------------------------------------------------------------------------------------
+Release date: 2023 november
+
+- #      - update to readme
+- #      - fix orphan commontrack
+- #      - #20181 - Student upload a Zip file through the plugin upload
+- #      - #20180 - Student upload a Zip file through the SCORM importer feature
+- #      - #20179 - SQL injection vulnerability in appLms/ajax.adm_server.php?r=widget/userselector/getusertabledata - CVE-2022-42924
+- #      - #20070 - Vulnerability - SQL Injection in adm/mediagallery/delete - CVE-2022-42923
+- #      - #20069 - Vulnerability - XSS in appLms/index.php?modname=faq&op=play - CVE-2022-41679
+- #      - #20178 - Vulnerability stored-XSS in management of educational objects, through the FAQ title - CVE-2023-46693
+- #      - #20177 - Vulnerability stored-XSS in the title of discussions in the course forums - CVE-2023-46693
+- #      - #20176 - Vulnerability stored-XSS in the title parameter of the course advice - CVE-2023-46693
+- #      - fix test
+- #      - fix pattern for forma include
+- #      - fix on assigning template in creating new folder
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.15
+---------------------------------------------------------------------------------------
+Release date: 2023 october
+
+- #      - Fix user stats
+- #      - fix form replace
+- #      - fix upgrade communication and category menu
+- #      - fix require question type files with forma::inc
+- #      - fix dashboard middle area user
+- #      - add reset_field_if_not_set,use_default_password,default_password in iotask docebouser connector config
+- #      - add orgchart management in update user api
+- #      - add orgchart management in update user api
+- #      - fix custom field check when user insert 0 as value
+- #      - fix all require once for lib_profile.php
+- #      - fix custom field check when user insert 0 as value
+- #      - fix query for field show when textentry is numeric when fields filter is active
+- #      - fix 0 in session
+- #      - fix ssl encryption
+- #      - fix field show when textentry is numeric
+- #      - Fix dashboard next courses block
+- #      - fix 3.3.8 add index query to solve if index exists
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.13
+---------------------------------------------------------------------------------------
+Release date: 2023 september
+
+- #      - Fix dashboard next courses block
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.12
+---------------------------------------------------------------------------------------
+Release date: 2023 september
+
+- #      - Fix dashboard next courses block
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.11
+---------------------------------------------------------------------------------------
+Release date: 2023 july
+
+- #      - fix 3.3.8 add index query to solve if index exists
+- #      - add fallback to ',' '|' and space separator fo CC and CCN in mailer
+- #      - fix session in select node usermanagement
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.10
+---------------------------------------------------------------------------------------
+Release date: 2023 july
+
+- #      - Fix root required field in advanced registration when there isn't reg code
+- #      - add query in upgrader
+- #      - fix feedback calculation
+
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.9
+---------------------------------------------------------------------------------------
+Release date: 2023 june
+
+- #      - fix getUsersFieldEntryData in lib.field.php for Country custom field
+- #      - #20153: fixed http protocol setting
+- #      - #20152: managed "Cancel" button
+- #      - fix lang
+- #      - fix performance exception
+- #      - fix test update modality
+- #      - Fix require path with static /../ in string.
+- #      - create 3.3.8 to insert in install ad upgrade lost query index
+- #      - Fix send Alert in subscription
+- #      - functions refactor
+- #      - fix question bank
+- #      - fix forma table rows when text is HTML
+- #      - add translation in folder view learning object status and action
+- #      - add color management in dashboardblock attendancegraph
+- #      - fix api deleteDay
+- #      - fix api updateDay
+- #      - fix upgrade sql
+- #      - #20146: added missing SQL instructions
+- #      - fix purchase user logic
+- #      - first commit for versioning
+- #      - fix course report duplicates
+- #      - fix remove dates
+- #      - fix certificate image
+- #      - fix certificate image
+- #      - fix registration with code
+- #      - fix dashboard permission
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.5
+---------------------------------------------------------------------------------------
+Release date: 2023 april
+
+- #      - fix dashboard permission
+- #      - fix countable - remove old event
+- #      - try relative false in newsletter
+- #      - Fix frontend presence
+- #      - fix classroom presence - fix classroom date day save
+- #      - add setter and getter to docebo user
+- #      - feat: add alert on import csv on course
+- #      - fix api course updateDay
+- #      - fix(lo): tracking item correctly set
+- #      - fix id day to solve API addDay and updateDay
+- #      - fix installer
+- #      - #19842 - User Object grid - Pagination with many objects
+- #      - fix save user in session
+- #      - Fix typo in lib.catalogue.php
+- #      - fix constructs old style
+- #      - add test question score show in report management
+- #      - add remapping events from test360
+- #      - add event remapping
+- #      - Revert "exclude former closing date logic"
+- #      - Fix Get functions to read env variables if is defined
+- #      - fix dashboard permission
+- #      - exclude former closing date logic
+- #      - fix dashboard menu
+- #      - fix menu load
+- #      - fixes welcome block and add node
+- #      - fix dashboard settings and response
+- #      - fix plugin manager
+- #      - fix error dashboard layout
+- #      - upgrade version file
+- #      - fix dashboard
+- #      - fix save setting when param_type is button - code reindent
+- #      - fix report custom field translation when selected lang is different from default lang
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.3
+---------------------------------------------------------------------------------------
+Release date: 2023 january
+
+- #      - fix mysql 5.6 query issue in 3.3.0 upgrader query
+- #      - fix PluginManagerAdm warnings
+- #      - fix grid object count
+- #      - fix grid object count
+- #      - fix io task import user send email
+- #      - fix forum ticket 14334
+- #      - fix elearning icon size
+- #      - add function twigmanager - fix plugin session management
+- #      - FE build
+- #      - replace http to https in skebby gateway
+- #      - fix course stats ajax url
+- #      - various fix on dashboard blocks
+- #      - fix language and attachment link report
+- #      - fix dashboard block calendar enabling actions
+- #      - fix order posflat on building multilevel object stats tree using dynamic id based on table
+- #      - fix warnings - fix function static
+- #      - fix messages
+- #      - fix load template from plugins
+- #      - fix treeview teache area query string too long
+- #      - fix order posflat on building multilevel object stats tree
+- #      - fix custom field translation
+- #      - fix session lenght
+- #      - fix custom field visualization in report
+- #      - fix catalogue course access control
+- #      - fix cron report
+
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.2
+---------------------------------------------------------------------------------------
+Release date: 2022 october
+
+- #      - add index to learning_testquestanswer, learning_coursereport, core_field_userentry tables to speedup pages loading
+- #      - fix course report test recalculation
+- #20091 - fix update item
+- #20090 - fix poll course completion when is setted as end course marker.
+- #      - fix api course
+- #      - fix prerequisites typo
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.1
+---------------------------------------------------------------------------------------
+Release date: 2022 october
+
+- #20088 - fix Course copy does not copy learning object correctly
+- #20087 - fix send unsubscribe notification to student
+
+
+---------------------------------------------------------------------------------------
+forma.lms 3.3.0
+---------------------------------------------------------------------------------------
+Release date: 2022 september
+
+- #      - implement new session management with more session handlers
+- #      - refactoring of project autoloading with the activation of namespaces
+- #      - fix report user course selector
+- #      - fix count student and list certificate for admin users
+- #20085 - complete catalog refactor fix
+- #20085 - fix and refactor home catalogue
+- #      - fix show user catalogue
+- #      - fix export link in reservation page
+- #      - fix date show in courses block
+- #      - fix courses dashboard block dates
+- #      - fix twig extensions
+- #      - fix and refactor course copy
+- #      - fix and refactor check learning object prerequisites
+- #      - fix pagination in enrollRules
+- #      - homecatalogue fix categories show when there isn't visible to all courses
+- #      - hide courses with show_rules not equal to 0
+- #20085 - fix and refactor home catalogue
+- #      - add index in core_setting table
+- #      - fix user handling on duplicate course
+- #20084 - missing installation of dashboard_permission table.
+- #      - create folder missing object creation fix
+- #      - fix twig cache and deleted user list only for superadmin
+- #      - fix dashboard welcome block
+- #20083 - fixed using the right param
+- #20082 - added calendarID parameter on learning_course_date table
+- #20081 - Undo button: from submit to button and added a history.back command
+- #20079 - Fixed: "Directly play the first Learning Object in the player" in course setting does not work
+- #20077 - fix error err_http2_protocol_error download certificate
+- #20076 - UserManagementAdm: in  addFolder method added saving of template name; UsermanagementAdmController in createfolder method added managing of default template in case of admin without "org modify" permission.
+
+---------------------------------------------------------------------------------------
+forma.lms 3.2.1
+---------------------------------------------------------------------------------------
+Release date: 2022 june
+
+- #20071 - Vulnerability - privilege escalation
+- #20067 - Vulnerability - SQL Injection in alms/subscription/getlist
+- #20068 - Vulnerability - SQL Injection in mycertificate/getMyCertificates
+- #20070 - Vulnerability - SQL Injection in adm/mediagallery/delete
+
+---------------------------------------------------------------------------------------
+forma.lms 3.2.0
+---------------------------------------------------------------------------------------
+Release date: 2022 March
+
+- #      - Add Dropzone for upload files
+- #20052 - fix home page
+- #20051 - edit communication not working and not dropzone
+- #20047 - graphic fix news upload file
+- #20047 - graphic fix news and communication
+- #20046 - mail link report and transaltion for users
+- #      - update template version number
+- #20045 - remove seconds from next course widget
+- #      - fix scorm overlay
+- #20043 - Add decimal in course credits
+- #20041 fix widget communications and news
+- #20039 - Date not saved in coursepath
+- #      - Fix course widget
+- #      - add css and js versioning bind with template version
+- #20036 - fixed query related to user status
+- #      - fix scorm play
+- #      - new views modules news and communications
+- #      - update comunication html class scorm launcher
+- #      - fix folder view eventListeners for student area
+- #20031 - create custom fields for classroom
+- #20022 - fixed  addMenu method
+- #20007 - fixed not sanitized input param
+
+---------------------------------------------------------------------------------------
+forma.lms 3.1.0
+---------------------------------------------------------------------------------------
+Release date: 2022 March
+
+- Reformat all php code files , support PHP 7.4 syntax
+
+- addes new language lithuanian - icon SPRITE + css
+- Update from lang site 2022/03/28
+- fix menu course translation
+- #20005 - Vulnerability CVE-2022-26958 - remove vulnerability and check signature in RelayState
+- #20008 - Vulnerability CVE-2022-27301 CVE-2022-27302 - Unsafe require_once() can lead to arbitrary LFI
+- #20009 - Vulnerability CVE-2022-27303 - Unsafe saving of user-supplied values in SESSION
+- #20050 - fix button translate
+- #20049 - fix API user/mycourses does not show subscription date for classroom course
+- #20048 - load plugins in order by priority
+- #20042 - User profile show does not show custom fields
+- #20044 - dashboard certificate generation
+- #20040 - fix accented chars in print pdf certificate
+- #      - Fix privacy and password renewal check
+- #20038 - fix scorm close tracking
+- #20037 - change days of classroom courses
+- #20033 - Error date "active from / to" in course path
+- #20034 - show tabs button on dashboard menu
+- #      - fix field show in registration
+- #19690 - fixed call to parent constructor
+- #19690 - fixed class constructor
+- #20032 - publishing date makes courses invisiible for everyone
+- #      - fix api
+- #      - add idcourse filter in show courses
+- #20030 - initial resolution for reorder learningobjects folder
+- #20028 - added default managing
+- #20027 - fix Dynamic link missing in some email send
+- #      - change to dashboard calendar
+- #20026 - dashboard calendar dates duplicate elearning
+- #20025 - Add no value in select fields in setting
+- #20024 - added forma::inc check
+- #20023 - fix Docebo user connector remove users from all subscription roles
+- #20021 - block certificates dashboard query and html chars on block announcements fix
+- #      - add specs manifest for plugins
+- #20019 - Deep changes on plugin manager for dependencies
+- #20007 - fixed not sanitized input param
+- #20020 - API Authenticate does not working
+- #20018 - Land translation management does not translate all selected rows
+- #20017 - Fix event names 
+- #20016 - Fix Dynamic link does not work in user registration
+- #20015 - missing translations for context menu in LO
+- #20014 - impossible access to course tab detail for student
+- #20013 - empty selction in locations assignment not working
+- #20010 - reprise:fix for count students in class courses
+- #20012 - admin can delete superadmin
+- #20011 - fix Iotask not suspend/delete users
+- #20010 - filter admin id for list certificate and course students
+- #20006 - fix filter on aggregated certificates list and date on next courses widget
+- #20004 - fix duplicate events on calendar day
+- #19768 - fix break in foreach cycle that not permit to shows aggregate certificates 
+- #19768 - add logic to show generated certificates whatever course status has 
+- #20003 - fix API course updateUserSubscription does not set date_complete if status is END
+- #20001 - API updateDay give : Day does not exists although day exists
+- #19998 - fix check presence
+- #      - Add LO translation
+- #19996 - fix admin can delete super admin.
+- #      - fix add day api course
+
+
+---------------------------------------------------------------------------------------
+forma.lms 3.0.2
+---------------------------------------------------------------------------------------
+Release date: 2022 january
+
+-- internal release
+
+- #20016 - Fix Dynamic link does not work in user registration
+- #20015 - missing translations for context menu in LO
+- #20014 - impossible access to course tab detail for student
+- #20013 - empty selction in locations assignment not working
+- #20010 - fix for count students in class courses
+- #20011 - fix Iotask not suspend/delete users
+- #20012 - admin can delete superadmin
+- #20010 - filter admin id for list certificate and course students
+- #20006 - fix filter on aggregated certificates list and date on next courses widget
+- #20004 - fix duplicate events on calendar day
+- #19768 - fix break in foreach cycle that not permit to shows aggregate certificates
+- #19768 - add logic to show generated certificates whatever course status has
+- #20003 - fix API course updateUserSubscription does not set date_complete if status is END
+- #20001 - API updateDay give : Day does not exists although day exists
+- #19998 - fix check presence
+- #19996 - fix admin can delete super admin.
+
+---------------------------------------------------------------------------------------
+forma.lms 3.0.1
+---------------------------------------------------------------------------------------
+Release date: 2021 december
+
+- #19995 - CVE-2021-43136 Vulnerabity - resolve sso vulnerability
+- #19975 - fix Certificate special characters print error
+- #19994 - Sub Admin and user selector widget Commented out some code rows;deletion to be evaluated for future
+- #19985 - #Revert0 fix user selector orgchart error
+- #19993 - fix api course addClassroom
+- #      - Fix installer and upgrader mysql Check
+- #19992 - fixed class constructor
+- #19991 - changed orgchart parameter
+- #19989 - fix aggregate certificate API assign meta user
+- #19989 - fix aggregate certificate detail table
+- #19990 - add feature mail to teachers in upload course file
+- #19989 - Fix aggregate certificate category selector
+- #      - Fix Link categories - goto MyCourses page with the category ID and apply filter
+- #19988 - Fix error when try to delete classroom course with dates
+- #19987 - Fix error in teacher area when user does not have permission to one of organitazion|home|public repo
+- #19986 - fix resize image and increase min image width
+- #19978 - fix total hours in meta certificate layout
+- #19985 - fix user selector orgchart error
+- #19978 - fix meta certificate layout
+- #19979 - User/object Grid Cannot check Item object type:. missing default param on class constructor.
+- #      - Add paramter validation in course API
+- #19984 - fix error 500 in aggregate certificate view detail
+- #19981 - fix addDay API adding validation that idDate exist in course
+- #      - Fix certificate layout
+- #      - Api rename e delete
+- #19978 - fix meta certificate layout
+- #19978 - fix aggregated certificates
+- #19978 - Fix aggregate certificate list that shows incorrect course path
+- #19978 - fix API addMetaCertificates 
+- #19978 - fix 3000 upgrade query 
+- #19978 - fix aggregate certificate certificate Style#19977
+- #19978 - fix exception in getanswertest and refactor old while with foreach cycles
+- #19976 - fix You can't access in new learning object area for normal user.
+- #19964 - fix baseUrl generation
+- #      - Revert TwigManager addExtension function that was lost
+- #19974 - fix issue when block does not have enabledActions
+- #19974 - fix calendar
+- #19975 - fix Certificate special characters print error
+- #      - Revert correct namespace
+- #      - Add permissions in event dispatch to permit check in events listeners
+- #19964 - fix baseUrl generation
+- #19971 - fix addDay API
+- #19970 - Ripristinate event to interact with lo objects with new event system
+- #19969 - remove empty modules in land export
+- #19968 - Fix exception if createModule try to instantiate a class that does not exists
+- #19967 - Fix meta certificate date formats for tags [meta_complete] [meta_inscr] [meta_access]
+- #19963 - fix banner widget and video modal load.
+- #19964 - Fix baseurl calculate when request has implicit php file
+- #19962 - Fix lang code management in dashboardCalendar to get correct langCode
+- #      - Fix dashboard block load
+- #      - Add TWIG Template extensions functions
+- #19961 - replaced old event "lms.course.deleted" and added "lms.course.deleting"
+- #19960 - Typo in template folder extension - ripristinate "translate" twig function as "deprecated"
+- #19959 - Fix plugin manager that not show errors during installation/upgrade
+- #19958 - replace lost TwigManager functions
+- #19961 - removed old events and deprecated unused functions
+- #19957 - added course_box_description
+
+
+---------------------------------------------------------------------------------------
+forma.lms 3.0.0
+---------------------------------------------------------------------------------------
+Release date: 2021 november
+
+-  Complete PHP 7.4 compatibility
+-  Improved PHP event management system
+-  New Dashboard feature
+-  New refactored and redesigned LO Management feature
+-  Refactored language management
+-  Refactored and improved "Aggregated Certificate" feature
+-  Refactored and redesigned "Course Info" module
+-  Refactored and redesigned dates management for classroom courses
+-  Outlook calendar integration
+-  Improved multi template management
+-  API improvement and postman integration
+-  Layout restyling
+-  Refactored MyCourses and Catalog modules 
+-  Improveded overbooking and waiting list management
+
+Plus tons and tons of bugfixes, minor improvements, core libraries updates and optimizations
+

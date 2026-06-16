@@ -1,0 +1,24 @@
+{% block classRoomButton %}
+    {% if catalogueType == 'homecatalogue' %}
+        <button class="forma-button course-box__cta__button contact-request-btn"
+                data-course-id="{{ course.idCourse }}"
+                data-course-name="{{ course.name|e('html_attr') }}"
+                onclick="openContactRequestModal(this)">
+            <span class="forma-button__label">Richiedi informazioni</span>
+        </button>
+    {% elseif course.courseBoxEnabled %}
+        {% if course.edition_exists %}
+            <a class="forma-button course-box__cta__button" title="{{ course.name }}"
+               href="{{ config.url.base }}"
+               rel="{{ course.rel }}">
+                <span class="forma-button__label">{{ Lang_translate('_LOGIN', 'login') }}</span>
+            </a>
+        {% endif %}
+    {% else %}
+        <a class="forma-button forma-button--disabled" href="javascript:void(0);" title="{{ course.name }}">
+                        <span class="forma-button__label">
+                            {{ Lang_translate('_NO_AVAILABLE_EDITIONS', 'catalogue') }}
+                        </span>
+        </a>
+    {% endif %}
+{% endblock %}

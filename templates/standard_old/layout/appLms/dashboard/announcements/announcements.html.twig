@@ -1,0 +1,39 @@
+{% extends "base/base.html.twig" %}
+
+{% block content %}
+    {% if (block.type == '4-col') %}
+        {% set class =  ' d-col--12--desktop' %}
+    {% elseif (block.type == '3-col') %}
+        {% set class =  ' d-col--9--desktop' %}
+    {% elseif (block.type == '2-col') %}
+        {% set class =  ' d-col--6--desktop' %}
+    {% elseif (block.type == '1-col') %}
+        {% set class =  ' d-col--3--desktop' %}
+    {% endif %}
+
+    <div class="d-col d-col--12 {{ class }}">
+      <div class="d-advise d-widget">
+        <h3 class="d-title">
+            {% if block.data.title is empty %}
+                {{ Lang_translate('_DASHBOARDBLOCKANNOUNCEMENTSLMS','dashboard') }}
+            {% else %}
+                {{ block.data.title }}
+            {% endif %}
+        </h3>
+        {% for advise in block.courseAdvices %}
+          <div class="d-advise__item has-forma-tooltip" style="position: relative">
+            <div class="forma-tooltip">{{ advise.courseName }}</div>
+            <div class="d-advise__date">
+              {{ advise.date }}
+            </div>
+            <div class="d-advise__title">
+              <a href="index.php?modname=course&amp;op=aula&amp;idCourse={{ advise.idCourse }}">{{ advise.title }}</a>
+            </div>
+            <div class="d-advise__desc">
+              {{ advise.description }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+{% endblock %}

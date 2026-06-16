@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design A – Wizard Card</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f2f5;font-family:"Segoe UI",Arial,sans-serif;font-size:14px;color:#333;padding:30px}
+.wrap{max-width:780px;margin:0 auto}
+h2{font-size:22px;font-weight:600;color:#1a2b4a;margin-bottom:24px}
+/* Stepper */
+.stepper{display:flex;align-items:center;margin-bottom:28px}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#9aafca}
+.step.active{color:#1a6ef7}
+.step.done{color:#28a745}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step.active .step-num{background:#1a6ef7;border-color:#1a6ef7;color:#fff}
+.step.done .step-num{background:#28a745;border-color:#28a745;color:#fff}
+.step-line{flex:1;height:2px;background:#d0dae8;margin:0 8px}
+.step-line.done{background:#28a745}
+/* Card */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px}
+/* Upload zone */
+.upload-zone{border:2px dashed #b0c4de;border-radius:10px;padding:40px 20px;text-align:center;cursor:pointer;transition:.2s;background:#f8fbff;margin-bottom:24px}
+.upload-zone:hover{border-color:#1a6ef7;background:#eef3ff}
+.upload-zone .icon{font-size:40px;margin-bottom:12px;color:#6a8fc8}
+.upload-zone p{color:#6a8fc8;font-size:13px}
+.upload-zone strong{font-size:15px;color:#2c4a7a;display:block;margin-bottom:4px}
+/* Sections */
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8a9fc4;margin-bottom:10px}
+.radio-group{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.radio-pill{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px solid #d0dae8;border-radius:20px;cursor:pointer;font-size:13px;transition:.15s;background:#fff}
+.radio-pill:hover{border-color:#1a6ef7;color:#1a6ef7}
+.radio-pill input{accent-color:#1a6ef7}
+.radio-pill.manual{align-items:center;gap:8px;flex-basis:100%;border-radius:8px;padding:8px 14px;background:#f8fbff}
+.manual-input{border:1px solid #d0dae8;border-radius:6px;padding:4px 10px;font-size:13px;width:70px;margin-left:4px}
+.check-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:14px;cursor:pointer}
+.check-row input{accent-color:#1a6ef7;width:16px;height:16px}
+.inline-field{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.inline-field label{font-size:13px;color:#555;white-space:nowrap}
+.txt-input{border:1.5px solid #d0dae8;border-radius:8px;padding:7px 12px;font-size:13px;width:120px;transition:.2s}
+.txt-input:focus{outline:none;border-color:#1a6ef7}
+/* Buttons */
+.btn-row{display:flex;justify-content:flex-end;gap:12px;margin-top:8px;padding-top:24px;border-top:1px solid #edf2f7}
+.btn{padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.btn-ghost{background:#f0f2f5;color:#556;border:1.5px solid #d0dae8}
+.btn-ghost:hover{background:#e0e5ee}
+.btn-primary{background:#1a6ef7;color:#fff}
+.btn-primary:hover{background:#1457cc}
+</style></head><body>
+<div class="wrap">
+<h2>Importa utenti</h2>
+<div class="stepper">
+  <div class="step active"><div class="step-num">1</div><span>Carica file</span></div>
+  <div class="step-line"></div>
+  <div class="step"><div class="step-num">2</div><span>Configura</span></div>
+  <div class="step-line"></div>
+  <div class="step"><div class="step-num">3</div><span>Risultati</span></div>
+</div>
+<div class="card">
+  <div class="upload-zone">
+    <div class="icon">⬆</div>
+    <strong>Trascina il file CSV qui</strong>
+    <p>oppure clicca per selezionare &nbsp;•&nbsp; .csv, .txt</p>
+    <div style="margin-top:14px"><input type="file" style="font-size:13px;color:#555"></div>
+  </div>
+
+  <div class="section-label">Separatore colonne</div>
+  <div class="radio-group">
+    <label class="radio-pill"><input type="radio" name="sep" checked> Rilevamento automatico</label>
+    <label class="radio-pill"><input type="radio" name="sep"> <b>,</b>&nbsp;Virgola</label>
+    <label class="radio-pill"><input type="radio" name="sep"> <b>;</b>&nbsp;Punto e virgola</label>
+    <label class="radio-pill manual"><input type="radio" name="sep"> Manuale:<input class="manual-input" type="text" placeholder="|"></label>
+  </div>
+
+  <label class="check-row"><input type="checkbox" checked> Prima riga come intestazione colonne</label>
+
+  <div class="inline-field">
+    <label>Charset</label>
+    <input class="txt-input" type="text" value="UTF-8">
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost">Annulla</button>
+    <button class="btn btn-primary">Avanti &rarr;</button>
+  </div>
+</div>
+</div>
+</body></html>

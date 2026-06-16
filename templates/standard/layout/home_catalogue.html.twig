@@ -1,0 +1,15 @@
+{% extends 'home.html.twig' %}
+
+{% block homeContent %}
+    <!-- content -->
+    <main class="homecatalogue__content content-margin">
+        <div class="homecatalogue__row homecatalogue__row--header">
+            <a href="index.php">
+                <img class="homecatalogue_logo" src="{{ Layout_getPath() }}images/company_logo.png" alt="Center logo"/>
+            </a>
+        </div>
+        <div class="homecatalogue__row homecatalogue__row--content">
+            {{ Layout_getZone('content') }}
+        </div>
+    </main>
+{% endblock %}

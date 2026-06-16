@@ -1,0 +1,33 @@
+<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>questionmark</title>
+ <defs>
+  <path d="m10.308,0.231l-5.41,5.417l-2.424,-2.432c-0.154,-0.154 -0.341,-0.231 -0.561,-0.231c-0.22,0 -0.406,0.077 -0.56,0.231l-1.122,1.121c-0.154,0.154 -0.231,0.341 -0.231,0.561c0,0.22 0.077,0.407 0.231,0.56l2.985,2.986l1.121,1.120998c0.154,0.154 0.341,0.231 0.561,0.231c0.22,0 0.407,-0.077 0.56,-0.231l1.122,-1.120998l5.971,-5.97c0.153002,-0.154 0.23,-0.341 0.23,-0.561c0,-0.22 -0.077,-0.407 -0.23,-0.56l-1.122,-1.122c-0.154,-0.154 -0.341,-0.231 -0.561,-0.231c-0.22,0 -0.406,0.077 -0.56,0.231z" id="path-1"/>
+ </defs>
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <g id="ELEMENTS" fill="none" fill-rule="evenodd">
+   <g id="03-_-STYLEGUIDE---Icon-System">
+    <g id="STATUS-ICONS">
+     <g id="STATUS-TYPE-/-concluso">
+      <g id="CONCLUSO-ICON">
+       <circle id="Oval" fill="#F6A623" cx="15" cy="15" r="15"/>
+       <g id="Page-1">
+        <mask id="mask-2">
+         <use xlink:href="#path-1" id="svg_1"/>
+        </mask>
+        <g id="Clip-2"/>
+        <polygon id="Fill-1" fill="#FFFFFF" mask="url(#mask-2)" points="4,24.796005249023438 26.781005859375,24.796005249023438 26.781005859375,5 4,5 "/>
+       </g>
+      </g>
+     </g>
+    </g>
+   </g>
+  </g>
+  <text fill="#f9f7f7" stroke="#000000" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" x="15" y="24.5" id="svg_22" font-size="24" font-family="serif" text-anchor="middle" xml:space="preserve">?</text>
+  <rect fill="#FF0000" stroke="#fcf4f4" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" opacity="0" x="-113.5" y="6.75" width="0.5" height="1" id="svg_24"/>
+ </g>
+</svg>

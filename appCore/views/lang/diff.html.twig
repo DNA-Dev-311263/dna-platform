@@ -1,0 +1,149 @@
+{% if import_type == 'core' %}
+    {% set translatedDiffTitle = Lang_translate('_CORE_TRANSLATION', 'standard') %}
+{% else %}
+    {% set translatedDiffTitle = Lang_translate('_FILE_TRANSLATION', 'standard') %}
+{% endif %}
+<form id="import_diff">
+    <table class="table table-bordered display" style="width:100%" id="langdiff"></table>
+    <div style="display: flex; justify-content: flex-end">
+        <a href="index.php?r=adm/lang/show" id="undo-btn" class="button btn btn-secondary" role="button">
+            {{ Lang_translate('_UNDO', 'standard') }}
+        </a>
+        <button id="translate-btn" class="button btn btn-danger dahsboard__button--save js-save-block"
+                type="submit">
+            <i class="fa fa-spinner fa-spin"></i>
+            {{ Lang_translate('_TRANSLATELANG', 'admin_lang') }}
+        </button>
+        <a href="index.php?r=adm/lang/show" id="complete-btn" class="button btn btn-primary" role="button">
+            {{ Lang_translate('_CLOSE', 'standard') }}
+        </a>
+    </div>
+</form>
+
+</div>
+
+<script>
+    $(function () {
+        var body = {{ body | json_encode(constant('JSON_HEX_APOS')) | raw }};
+
+        var columns = [
+            {data: 'id', title: '{{ Lang_translate('_ID', 'standard') }}', sortable: true},
+            {data: 'text_module', title: '{{ Lang_translate('_MODULE', 'standard') }}', sortable: true},
+            {data: 'text_key', title: '{{ Lang_translate('_KEY', 'standard') }}', sortable: true},
+            {data: 'plugin_name', title: '{{ Lang_translate('_PLUGIN', 'standard') }}', sortable: true},
+            {
+                data: 'translation_text',
+                title: '{{ Lang_translate('_CURRENT_TRANSLATION', 'standard') }}',
+                sortable: true
+            },
+            {
+                data: 'translation_text_diff',
+                title: '{{ translatedDiffTitle }}',
+                sortable: true
+            }
+        ];
+        var rows = [];
+
+        body.forEach(function (item, k) {
+            rows.push(Object.assign({}, item));
+        });
+
+        var diffTable = $('#langdiff').FormaTable({
+            rowId: function (row) {
+                return row[0];
+            },  // cambia
+            scrollX: true,
+            processing: true,
+            serverSide: false,
+            paging: true,
+            searching: true,
+            columns,
+            data: rows,
+            dom: 'Bfrtip',
+            stateSave: true,
+            deferRender: true,
+            'columnDefs': [
+                {
+                    'targets': 0,
+                    'checkboxes': {
+                        'selectRow': true
+                    }
+                }
+            ],
+            'select': {
+                'style': 'multi',
+                'all': true
+            },
+        });
+        $("#translate-btn .fa-spin").hide();
+        $("#translate-btn").attr("disabled", true);
+
+        var params = [];
+
+        $("#langdiff .select-checkbox, .buttons-select-all, .buttons-select-none").click(function (e) {
+            setTimeout(function () {
+                if ($("#langdiff tr.selected").length > 0) {
+                    $("#translate-btn").attr("disabled", false);
+                } else {
+                    $("#translate-btn").attr("disabled", true);
+                }
+            }, 100);
+        });
+
+        $('#import_diff').on('submit', function (e) {
+            e.preventDefault();
+
+            if (!$("#langdiff tr.selected").length) {
+                return;
+            }
+            params = [];
+
+            selectedRows = diffTable._datatable.rows({selected: true}).data();
+
+            selectedRows.each(function (item) {
+
+                var idText = item.id
+                var key = item.text_key
+                var plugin = item.plugin_name;
+                var translation = item.translation_text_diff
+
+                params.push({
+                    idText,
+                    langCode: '{{ langCode }}',
+                    key,
+                    plugin,
+                    translation
+                });
+            });
+
+            $("#translate-btn .fa-spin").show();
+            $("#translate-btn").attr("disabled", true);
+
+            $.ajax({
+                type: 'POST',
+                url: 'ajax.adm_server.php?r=adm/lang/saveDiff',
+                data: {langKeys: params},
+                success: function (data) {
+                    var list = JSON.parse(data);
+
+                    list.forEach(function (item) {
+                        diffTable._datatable.rows({selected: true}).every(function (rowIndex) {
+                            var row = diffTable._datatable.row(rowIndex);
+                            var data = row.data();
+
+                            if (data.id === item.langKey.idText && item.success) {
+                                row.deselect();
+                                let checkbox = $(this.node()).find('td.select-checkbox');
+                                checkbox.removeClass('select-checkbox').html('\
+                                    <i class="fa fa-check" style="color: green;font-size: 2rem; display: block; text-align: center;"></i>\
+                                ');
+                            }
+                        });
+                    });
+                    $("#translate-btn .fa-spin").hide();
+                    $("#translate-btn").attr("disabled", false);
+                }
+            });
+        });
+    });
+</script>

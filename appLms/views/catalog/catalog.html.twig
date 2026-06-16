@@ -1,0 +1,381 @@
+{% include 'partials/catalog_header.html.twig' with { 'data': data } %}
+
+<div class="row">
+    <div class="col-sm-3 {% if data.total_category == 0 %}hidden{% endif %}">
+        <div id="treeview1" class="aside"></div>
+    </div>
+    <div class="{% if data.total_category > 0 %}col-sm-9{% else %}col-sm-12 {% endif %}" id="div_course"><br>
+        <p align="center"><img src='{{ Layout_getPath() }}images/standard/loadbar.gif'></p>
+    </div>
+    <div>
+        {% if not data.show_empty_catalogue_tab %}
+
+            <script type="text/javascript">
+                window.catalog = {};
+                var $treeview = $("#treeview1");
+                window.catalog.selectedCategory = null;
+
+                function callAjaxCatalog(id_category) {
+
+                    window.catalog.selectedCategory = id_category;
+                    str_loading = "{{ Layout_getPath() }}images/standard/loadbar.gif";
+                    $("#div_course").html("<br><p align='center'><img src='{{ Layout_getPath() }}images/standard/loadbar.gif'></p>");
+                    var type_course = getCurrentTypeCourse();
+                    var posting = $.get(
+                        window.frontend.config.url.appLms + '/ajax.server.php',
+                        {
+                            r: '{{ data.endpoint }}/allCourseForma',
+                            id_category: id_category,
+                            type_course: type_course,
+                            id_catalogue: {{ data.starting_catalogue }}
+                        }
+                    );
+                    posting.done(function (responseText) {
+                        $("#div_course").html(responseText);
+                    });
+                    posting.fail(function () {
+                        $("#div_course").html('course catalogue load failed')
+                    })
+                }
+
+                function checkSticky() {
+                    var windowHeight = $(window).height();
+                    var treeviewHeight = $treeview.innerHeight();
+                    $treeview.css({maxHeight: windowHeight - 200, overflowY: 'auto'});
+                    $(".container-fluid").css("height", "auto");
+
+                    if (window.innerWidth >= 768 && $('#div_course').offset().top - $(window).scrollTop() <= 70) {
+                        $treeview.css({maxHeight: windowHeight - 190, overflowY: 'auto'});
+                        $treeview.css({width: $treeview.parent().width(), position: 'fixed', top: '70px'});
+                    } else {
+                        $treeview.css({position: 'static'});
+                    }
+                }
+
+                document.onreadystatechange = function () {
+                    if (document.readyState === 'complete') {
+
+                        callAjaxCatalog(0);
+                        a_node =  {{ data.catalogue|json_encode|raw }}
+
+                            // Alphabetical sort
+                            $.each(a_node, function (k, cat) {
+                                if (cat.nodes) {
+                                    var result = Object.keys(cat.nodes).map(function (key) {
+                                        return cat.nodes[key];
+                                    });
+                                    result = result.sort(function (a, b) {
+                                        return (a['text'] < b['text']) ? -1 : (a['text'] > b['text']) ? 1 : 0;
+                                    })
+                                    cat.nodes = result;
+                                }
+                            })
+                        var category_tree = [
+                            {
+                                text: "&nbsp;&nbsp;{{ Lang_translate('_ALL_COURSES') }}",
+                                href: "#Category",
+                                id_cat: 0,
+                                state: {
+                                    checked: true,
+                                    selected: true
+                                },
+                                showIcon: true,
+                                nodes: a_node
+                            }
+                        ];
+                        $treeview.treeview({
+                            data: category_tree,
+                            enableLinks: false,
+                            backColor: "#ffffff",
+                            color: "#000000",
+                            levels: 2,
+                            onhoverColor: '#F5F5F5',
+                            showTags: true,
+                            multiSelect: false,
+                            selectedBackColor: "#C84000",
+
+                            onNodeSelected: function (event, node) {
+                                var id_cat = node.id_cat ? node.id_cat : node.nodeId;
+
+                                callAjaxCatalog(id_cat);
+                            },
+                            onNodeUnselected: function (event, node) {
+                            }
+                        });
+
+                        // sticky feature
+                        checkSticky();
+                        window.addEventListener('scroll', checkSticky, true);
+                        window.addEventListener('resize', checkSticky, true);
+                    }
+                };
+
+
+                function enrollClassroom(id_date, overbooking) {
+                    event.preventDefault();
+                    var posting = $.get(
+                        window.frontend.config.url.appLms + '/ajax.server.php',
+                        {
+                            r: '{{ data.endpoint }}/subscribeToCourse',
+                            id_course: '<?=$id_course?>',
+                            id_date: id_date,
+                            overbooking: overbooking,
+                            type_course: '<?=$type_course?>',
+                            id_catalogue: '<?=$id_catalogue ?>',
+                            id_category: window.selectedCategory
+                        }
+                    );
+                    posting.done(function (responseText) {
+                        /*if (op == 'catalog/addToCart') {
+                            $('#menu_over').load(document.URL +  '  #menu_over');
+                        }; */
+                        $("#div_course").html(responseText);
+                    });
+                    posting.fail(function () {
+                        alert('unsubscribe failed')
+                    })
+                    $('#formaModal').modal('hide')
+
+                }
+
+                function addToCart(id_date) {
+                    event.preventDefault();
+                    var posting = $.get(
+                        window.frontend.config.url.appLms + '/ajax.server.php',
+                        {
+                            r: '{{ data.endpoint }}/addToCart',
+                            id_course: '<?=$id_course?>',
+                            id_date: id_date,
+                            type_course: '<?=$type_course?>',
+                            id_catalogue: '<?=$id_catalogue ?>',
+                            id_category: '<?=$id_category?>'
+                        }
+                    );
+                    posting.done(function (responseText) {
+                        $('#menu_over').load(document.URL + '  #menu_over');
+                        $("#div_course").html(responseText);
+                        if($('#cart_element').parent('li').hasClass('hidden')) {
+                            $('#cart_element').parent('li').removeClass('hidden');
+                        }
+                        
+                      
+                    });
+                    posting.fail(function () {
+                        alert('unsubscribe failed')
+                    })
+                    $('#formaModal').modal('hide')
+                }
+
+
+                function courseinfoPopUp(id_course) {
+                    //ABR
+
+                    var posting = $.get(
+                            window.frontend.config.url.appLms + '/ajax.server.php',
+                            {
+                                r: 'lms/catalog/courseInfo',
+                                id_course: id_course
+                            }
+                        );
+                        posting.done(function (o) {
+							var res = JSON.parse(o);
+                        	if (res.success) {
+									$('<div></div>').appendTo('body')
+									.html("<div>"+res.body+"</div>")
+									.dialog({
+											modal: true,
+											title: res.title,
+											autoOpen: true,
+                                            height: $(window).height()*0.7,
+											width: $(window).width()*0.4,
+											minHeight: 400,
+											minWidth: 400,
+                                            closeOnEscape: true,
+                                            draggable: true,
+											resizable: false,
+											buttons: {
+												{{ Lang_translate('_CLOSE', 'standard') }}:
+													function() {
+														$(this).dialog("close");
+													}
+											},
+											open: function(event, ui) {
+												$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+											},
+											close: function(event, ui) {
+												$(this).remove();
+											}
+									});
+							}
+                        });
+                        posting.fail(function () {
+                            alert('Loading error')
+                        })
+
+                }
+
+                function printElement(elId, pgTitle, classHidden) {
+                    //ABR: Stampa un elemento (es. div) in una nuova finestra
+
+                    var links = document.getElementsByTagName("link");
+                    var content = document.getElementById(elId).innerHTML;
+                    var htmlstr = '';
+                    var mywindow = window.open('', '', '');
+                    
+                    htmlstr += "<html><head>";
+                    
+                    //Fogli di stile
+                    for (var i = 0; i < links.length; i++) {
+                        if(links[i].rel == 'stylesheet') {
+                            htmlstr += '<link rel="stylesheet" type="text/css" href="' + links[i].href + '" media = "' + links[i].media + '"/>';
+                        }
+                    }
+
+                    //Stile della pagina (nascondimento elementi)
+                    htmlstr += "<style>";
+
+                    if(classHidden != ''){
+                        var classname = classHidden.split(',');
+                        for (var i = 0; i < classname.length; i++) {
+                            htmlstr += '.' + classname[i].trim() + '{visibility: hidden;}';
+                        }
+                    }
+
+                    htmlstr += "</style>";
+                    
+                    htmlstr += "</head><title>" + pgTitle + "</title>";
+                    htmlstr += '<body>' + content + '</body></html>';
+
+                    //Scrivo
+                    mywindow.document.write(htmlstr);
+                    
+                    //Chiudo l'output stream
+                    mywindow.document.close();
+                    
+                    //Stampo
+                    mywindow.print();
+
+                    return true;
+                }
+            </script>
+        {% else %}
+            <script type="text/javascript">
+                $("#div_course").html("<br><p align='center'>{{ Lang_translate('_NO_CATEGORY_TODISPLAY','catalogue') }}</p>");
+            </script>
+        {% endif %}
+    </div>
+
+    {% if data.catalogueType == 'homecatalogue' %}
+    <div id="contactRequestModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Richiedi informazioni</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="contactRequestFeedback"></div>
+                    <form id="contactRequestForm">
+                        <input type="hidden" name="id_course" id="cr_id_course" value="">
+                        <input type="hidden" name="course_name" id="cr_course_name" value="">
+                        <div class="form-group">
+                            <label>Nome *</label>
+                            <input type="text" class="form-control" name="name" id="cr_name">
+                        </div>
+                        <div class="form-group">
+                            <label>Azienda *</label>
+                            <input type="text" class="form-control" name="company" id="cr_company">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" class="form-control" name="email" id="cr_email">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefono</label>
+                            <input type="text" class="form-control" name="phone" id="cr_phone">
+                        </div>
+                        <div class="form-group">
+                            <label>Messaggio</label>
+                            <textarea class="form-control" name="message" id="cr_message" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="contactRequestClose" data-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-primary" id="contactRequestSubmit" onclick="submitContactRequest()">Invia richiesta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    function openContactRequestModal(btn) {
+        var $btn = $(btn);
+        $('#contactRequestForm')[0].reset();
+        $('#cr_id_course').val($btn.data('course-id'));
+        $('#cr_course_name').val($btn.data('course-name'));
+        $('#contactRequestFeedback').html('');
+        $('#contactRequestForm').show();
+        $('#contactRequestSubmit').show().prop('disabled', false);
+        $('#contactRequestClose').text('Annulla');
+        $('#contactRequestModal').modal('show');
+    }
+
+    function submitContactRequest() {
+        var name    = $.trim($('#cr_name').val());
+        var company = $.trim($('#cr_company').val());
+        var email   = $.trim($('#cr_email').val());
+
+        if (!name || !company || !email) {
+            $('#contactRequestFeedback').html(
+                '<div class="alert alert-danger">Compila i campi obbligatori: Nome, Azienda, Email.</div>'
+            );
+            return;
+        }
+
+        $('#contactRequestSubmit').prop('disabled', true);
+
+        var data = {
+            r:           'lms/homecatalogue/contactrequest',
+            name:        name,
+            company:     company,
+            email:       email,
+            phone:       $.trim($('#cr_phone').val()),
+            message:     $.trim($('#cr_message').val()),
+            id_course:   $('#cr_id_course').val(),
+            course_name: $('#cr_course_name').val()
+        };
+
+        $.post(window.frontend.config.url.appLms + '/ajax.server.php', data)
+            .done(function(res) {
+                try { res = JSON.parse(res); } catch(e) { res = {}; }
+                if (res && res.success) {
+                    $('#contactRequestFeedback').html(
+                        '<div class="alert alert-success">Richiesta inviata. Ti risponderemo al più presto.</div>'
+                    );
+                    $('#contactRequestForm').hide();
+                    $('#contactRequestSubmit').hide();
+                    $('#contactRequestClose').text('Chiudi');
+                } else {
+                    $('#contactRequestFeedback').html(
+                        '<div class="alert alert-danger">' +
+                        (res && res.error ? $('<span>').text(res.error).html() : 'Errore. Riprova.') +
+                        '</div>'
+                    );
+                    $('#contactRequestSubmit').prop('disabled', false);
+                }
+            })
+            .fail(function() {
+                $('#contactRequestFeedback').html(
+                    '<div class="alert alert-danger">Errore di rete. Riprova.</div>'
+                );
+                $('#contactRequestSubmit').prop('disabled', false);
+            });
+    }
+
+    $(document).ready(function() {
+        $('body').append($('#contactRequestModal'));
+    });
+    </script>
+    {% endif %}
+</div>

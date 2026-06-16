@@ -1,0 +1,94 @@
+{% extends "base.html.twig" %}
+
+{% block stylesheet %}
+    <link rel="stylesheet" type="text/css" href="{{ Layout_getPath() }}style/lms.css?v={{ Template_getVersion() }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ Layout_getPath() }}style/lms-to-review.css?v={{ Template_getVersion() }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ Layout_getPath() }}style/lms-menu.css?v={{ Template_getVersion() }}"/>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="{{ Get_relPath('base') }}/lib/js_utils.js?v={{ Template_getVersion() }}"></script>
+        <script>
+            $(function() {
+                // feedback
+                $('#container-feedback').click(function(){
+                   event.preventDefault();
+                    $( this ).fadeOut( 500 );
+                });
+            });
+        </script>
+{% endblock %}
+
+{% block content %}
+    <!-- blind nav -->
+    {{ Layout_getZone('blind_navigation') }}
+    <!-- container -->
+    <div id="container">
+
+
+
+
+
+        <!-- menu_over -->
+        <div id="menu_over" class="layout_menu_over">
+        <!-- feedback -->
+            {{ Layout_getZone('feedback') }}
+            {{ Layout_getCart() }} <!-- ????? -->
+
+            <!-- header -->
+            <header class="header white-bg">
+                <nav>
+                    <div class="row-fluid" id="lms_menu_container" >
+                        <div class="navbar-header">
+                            {{ Layout_getZone('logo') }}
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                                <span class="glyphicon glyphicon-align-justify"></span>
+                            </button>
+                        </div>
+                        <div id="navbar" class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav">
+                                {{ Layout_getZone('main-menu') }}
+                                {{ Layout_getZone('cart') }} <!-- ????? -->
+                                {{ Layout_getZone('profile') }}
+                            </ul>
+                        </div>
+                        <div id="c-mask" class="c-mask"></div>
+                    </div>
+                </nav>
+            </header>
+
+            {# Temporary solution before helpdesk refactoring. #}
+            {{ Layout_getZone('helpdesk') }}
+            {# ############################################### #}
+
+        </div>
+
+
+
+
+        <!-- content  -->
+        {#{{ <div class="layout_colum_container"> }}#}
+        <div class="row lms-user-content-wrapper">
+            <div class="container-fluid">
+                {{ Layout_getZone('content') }}
+
+                <div class="nofloat"></div>
+            </div>
+        </div>
+    </div>
+    <!-- footer  -->
+    <div id="footer" class="layout_footer">
+        {{ Layout_getZone('footer') }}
+            {{ Layout_getCopyright() }}
+    </div>
+
+
+
+
+    <!-- scripts -->
+    {{ Layout_getZone('scripts') }}
+    <!-- debug -->
+    {{ Layout_getZone('debug') }}
+    <!-- def_lang -->
+    {{ Layout_getZone('def_lang') }}
+{% endblock %}

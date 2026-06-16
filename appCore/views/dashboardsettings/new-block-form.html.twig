@@ -1,0 +1,41 @@
+{% set block = block|merge({'type': type}) %}
+
+<div id="{{ block.postData.block }}-{{ index }}"
+     class="dashboard__block dashboard__block--{{ block.type }}"
+     data-block="{{ block.postData.block }}"
+     data-type="{{ block.type }}"
+     data-action="{{ block.registeredActions | join(',') }}" data-first-insert="true">
+    <div class="dashboard__content">
+        <button class="dashboard__remove js-remove-block" data-block="{{ block.postData.block }}-{{ index }}"></button>
+        <div class="dashboard__title">{{ Lang_translate('_'~block.postData.block|upper,'dashboardsetting') }}</div>
+        {#
+            <div class="dashboard__image">
+            <img src="{{ block.templatePath }}static/images/dashboard-placeholder/{{ block.postData.block }}-placeholder.jpg"
+                 class="dashboard__image">
+            </div>
+        #}
+
+        <div class="dashboard__description">{{ Lang_translate('_'~block.postData.block|upper,'dashboardsetting') }}</div>
+
+        <div class="dashboard__info">
+            {% if block.registeredActions | length > 0 %}
+                <div class="dashboard__infoBlock">
+                    <div class="dashboard__label">{{ Lang_translate('_ENABLED_ACTIONS', 'dashboardsetting') }}</div>
+                    <div class="dashboard__infoContainer dashboard__enabledActions">
+                        <div class="dashboard__elx">
+                            {% for action in block.registeredActions %}
+                                <label class="d-block" style="display:block;">
+                                    <input name="enabledActions[{{ loop.index0 }}]"
+                                        type="checkbox" value="{{ action }}"
+                                        {% if action in block.enabledActions %}checked{% endif %} />{{ Lang_translate('_'~block.postData.block|upper~'_'~action|upper,'dashboardsetting') }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% include 'block-form.html.twig' %}
+        </div>
+    </div>
+</div>

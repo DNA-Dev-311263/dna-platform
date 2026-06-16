@@ -1,0 +1,131 @@
+<div class="page-header">
+  <h1>{{ Lang_translate('_INFO','course') }}</h1>
+</div>
+
+<div class="page-subtitle">
+  {{course.name}}
+</div>
+
+<link rel="stylesheet" href="{{ Get_relPath('base') }}/css/pandp-ui.css">
+
+<div class="section-course course-info js-infocourse pui-page">
+
+  <div class="pui-stats-row">
+    <div class="pui-stat-box">
+      <div class="pui-stat-box__value">{{ course.mediumTime }}</div>
+      <div class="pui-stat-box__label">{{ Lang_translate('_MEDIUM_TIME','course') }}</div>
+    </div>
+    <div class="pui-stat-box">
+      <div class="pui-stat-box__value">{{ course.credits }}</div>
+      <div class="pui-stat-box__label">{{ Lang_translate('_CREDITS','standard') }}</div>
+    </div>
+    <div class="pui-stat-box">
+      <div class="pui-stat-box__value">{{ course.valid_time }}</div>
+      <div class="pui-stat-box__label">{{ Lang_translate('_DAY_OF_VALIDITY','course') }}</div>
+    </div>
+    <div class="pui-stat-box">
+      <div class="pui-stat-box__value">{{ course.lang_description }}</div>
+      <div class="pui-stat-box__label">{{ Lang_translate('_LANGUAGE','course') }}</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="course-info__general">
+        <div class="box-title">{{ Lang_translate('_INFO','course') }}</div>
+
+        <div class="course-info__table course-info__table--code">
+          <div class="course-info__label">{{ Lang_translate('_CODE','course') }}</div>
+          <div class="course-info__value text--gray">{{course.code}}</div>
+        </div>
+
+        {% if  course.course_type == 'classroom' %}
+
+	        <div class="course-info__table course-info__table--subscribe-method">
+	          <div class="course-info__label">{{ Lang_translate('_EDITION','course') }}</div>
+	          <div class="course-info__value text--gray">[{{info_date.code}}]<br> {{info_date.name}} </div>
+	        </div>
+
+        {% endif %}
+
+        <div class="course-info__table course-info__table--difficulty">
+          <div class="course-info__label">{{ Lang_translate('_DIFFICULTY','course') }}</div>
+          <div class="course-info__value text--gray">{{course.difficulty_translate}}</div>
+        </div>
+
+        <div class="course-info__table course-info__table--unsubscribe">
+          <div class="course-info__label">{{ Lang_translate('_UNSUBSCRIBE_DATE_LIMIT','course') }}</div>
+          <div class="course-info__value text--gray">
+            {% if course.unsubscribe_date_limit and course.unsubscribe_date_limit != '0000-00-00 00:00:00' %}{{ course.unsubscribe_date_limit|date('d/m/Y') }}{% else %}-{% endif %}
+          </div>
+        </div>
+
+        <div class="clear"></div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      {% if  course.Instructor.users is not empty %}
+        <div class="col-sm-12 course-info__peoplecontainer">
+          <div class="box-title box-title--people">{{  Lang_translate('_LEVEL_6', 'levels') }}</div>
+          {% for user in course.Instructor.users %}
+            {% include 'infocourse/peoplebox.html.twig' with {'route': route, 'user': user, 'role': course.Instructor.name} %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if  course.Tutor.users is not empty %}
+        <div class="col-sm-12 course-info__peoplecontainer">
+          <div class="box-title box-title--people">{{  Lang_translate('_LEVEL_4', 'levels') }}</div>
+          {% for user in course.Tutor.users %}
+            {% include 'infocourse/peoplebox.html.twig' with {'route': route, 'user': user, 'role': course.Tutor.name} %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if  course.Administrator.users is not empty %}
+        <div class="col-sm-12 course-info__peoplecontainer">
+          <div class="box-title box-title--people">{{  Lang_translate('_LEVEL_7', 'levels') }}</div>
+          {% for user in course.Administrator.users %}
+            {% include 'infocourse/peoplebox.html.twig' with {'route': route, 'user': user, 'role': course.Administrator.name} %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <div class="course-info__table course-info__table--full course-info__table--description">
+    <div class="course-info__label">{{ Lang_translate('_DESCRIPTION','course') }}</div>
+    <div class="course-info__value text--gray">
+      {{ course.description|raw }}
+    </div>
+  </div>
+</div>
+
+<div class="modal fade js-infocourse-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog--notitle modal-dialog--bio" role="document">
+    <div class="modal-content modal-content--bio">
+      <div class="modal-header modal-header--bio">
+        <div class="course-info__peopleimage js-infocourse-dynamic-img">
+        </div>
+        <div class="course-info__peoplename course-info__peoplename--modal js-infocourse-dynamic-title"></div>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body modal-body--nopadding">
+        <div class="modal__textcontainer">
+          <div class="box-title box-title--modal js-infocourse-dynamic-role"></div>
+          <div class="modal__text js-infocourse-dynamic-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% if  route.edit and route.edit is not empty %}
+<div class="table-container-below">
+  <a class="infomod" href="{{route.edit.url}}">
+    <img src="{{ Get_pathImage() }}standard/edit.png " alt="{{  Lang_translate('_MOD') }}" />
+    {{  Lang_translate('_MOD') }}
+  </a>
+</div>
+{% endif %}

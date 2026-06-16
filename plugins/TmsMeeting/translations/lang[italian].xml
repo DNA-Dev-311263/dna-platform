@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<LANGUAGES>
+    <DATE>20211130</DATE>
+    <LANG id="italian">
+        <lang_code>italian</lang_code>
+        <lang_description>Italiano</lang_description>
+        <lang_charset>utf-8</lang_charset>
+        <lang_browsercode>it</lang_browsercode>
+        <lang_direction>ltr</lang_direction>
+        <platform id="all">
+            <!-- This will create new keys with a new module -->
+            <module id="configuration">
+                <key id="_TMSMEETING" attributes="" save_date="2021-09-30 15:32:39">
+                    <![CDATA[Plugin Corsi Teams]]>
+                </key>
+            </module>
+            <module id="configuration">
+                <key id="_TMSMEETING.SITE_URL" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Sito Microsoft Login]]>
+                </key>
+            </module>
+             <module id="configuration">
+                <key id="_TMSMEETING.SCOPE_URL" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Sito Microsoft Graph]]>
+                </key>
+            </module>
+              <module id="configuration">
+                <key id="_TMSMEETING.AUTH_URL" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Sito Microsoft Entra]]>
+                </key>
+            </module>
+             <module id="configuration">
+                <key id="_TMSMEETING.TENANT_ID" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Tenant ID]]>
+                </key>
+            </module>
+             <module id="configuration">
+                <key id="_TMSMEETING.CLIENT_ID" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Client ID]]>
+                </key>
+            </module>
+             <module id="configuration">
+                <key id="_TMSMEETING.CLIENT_SECRET" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Client Secret]]>
+                </key>
+            </module>
+              <module id="configuration">
+                <key id="_TMSMEETING.ORGANIZER_EMAIL" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Organizzatore Email]]>
+                </key>
+            </module>
+             <module id="classroom">
+                <key id="_TMSMEETING.SYNC_ERROR" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Errori nella procedura di allineamento con Teams]]>
+                </key>
+            </module>
+             <module id="classroom">
+                <key id="_TMSMEETING.SCHEDULE_ERROR" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Le date pianificate sono incongruenti. Controlla la pianificazione.]]>
+                </key>
+            </module>
+             <module id="extraction">
+                <key id="_TMSMEETING.EXCT_MEETING" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Lista lezioni in Teams]]>
+                </key>
+            </module>
+             <module id="extraction">
+                <key id="_TMSMEETING.EXCT_EDITION" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Lista edizioni in Teams]]>
+                </key>
+            </module>
+            <module id="extraction">
+                <key id="_TMSMEETING.EXCT_PARTICIPANTS" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Registro presenze]]>
+                </key>
+            </module>
+            <module id="message">
+                <key id="_TMSMEETING.SECRET_INVALID_TITLE" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Plugin Teams: chiave segreta invalida]]>
+                </key>
+            </module>
+            <module id="message">
+                <key id="_TMSMEETING.SECRET_INVALID_MESSAGE" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[Per interagire con Teams occorre impostare una chiave segreta. Per proseguire con la pianificazione accedi al sito Microsoft Entra,genera una chiave valida, inseriscila nelle configurazioni del Plugin.]]>
+                </key>
+            </module>
+            <module id="message">
+                <key id="_TMSMEETING.MEETING_NOTIFY" attributes="" save_date="2021-11-30 15:32:39">
+                    <![CDATA[
+                    Questa notifica riguarda la tua iscrizione al corso [edition_name].<br>
+                    Per informazioni sul corso visita <a href="[url]">[url]</a>.
+					]]>
+                </key>
+            </module>
+        </platform>
+    </LANG>
+</LANGUAGES>
