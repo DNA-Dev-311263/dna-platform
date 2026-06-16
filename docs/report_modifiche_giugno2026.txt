@@ -1,0 +1,133 @@
+PIATTAFORMA DNA — REPORT MODIFICHE
+Periodo: Giugno 2026
+Data documento: 16 giugno 2026
+========================================
+
+
+INTRODUZIONE
+------------
+Il presente documento riepiloga gli interventi di sviluppo effettuati sulla
+piattaforma DNA (basata su FormaLMS) nel corso del mese di giugno 2026.
+Gli interventi hanno riguardato diverse aree funzionali della piattaforma,
+con l'obiettivo di migliorare la gestione dei corsi, del catalogo, delle
+iscrizioni e degli strumenti di amministrazione.
+
+
+1. GESTIONE CORSI E ISCRIZIONI (8-9 giugno)
+--------------------------------------------
+Sono stati rivisti e aggiornati i componenti legati alla gestione dei corsi
+nel backoffice amministrativo. In particolare, la vista di dettaglio del corso
+è stata migliorata per offrire informazioni più complete agli amministratori.
+
+Sul fronte delle iscrizioni, il controller e il modello amministrativo sono
+stati aggiornati per gestire in modo più preciso le operazioni di iscrizione
+e disiscrizione degli utenti ai corsi. La vista di riepilogo delle iscrizioni
+nel backoffice è stata adeguata di conseguenza.
+
+
+2. CATALOGO E LEARNING OBJECT (9 giugno)
+-----------------------------------------
+L'area del catalogo corsi nel front-end ha ricevuto aggiornamenti significativi.
+I componenti grafici (box corso, pulsanti di accesso per i corsi in aula e
+eLearning) sono stati revisionati per migliorare l'esperienza utente.
+
+È stata inoltre intervenuta la gestione dei Learning Object (LO): il controller,
+il modello e le viste relative alla visualizzazione dei contenuti formativi sono
+stati aggiornati per garantire un funzionamento più fluido e coerente con il
+resto della piattaforma.
+
+
+3. HOME CATALOGO E STATISTICHE UTENTE (10 giugno)
+--------------------------------------------------
+Sono stati aggiornati i componenti della home del catalogo, che rappresenta
+la pagina principale di accesso ai contenuti formativi per gli utenti.
+Il controller, il modello e la logica di visualizzazione sono stati rivisti
+per migliorare le prestazioni e la coerenza dei dati presentati.
+
+In parallelo, è stata migliorata la sezione delle statistiche personali del
+corso, che permette all'utente di consultare il proprio avanzamento e i
+risultati ottenuti nei percorsi formativi.
+
+
+4. DETTAGLIO CORSO E REPORTISTICA (11 giugno)
+----------------------------------------------
+Il controller del corso nel front-end è stato aggiornato, così come il template
+di visualizzazione delle informazioni sul corso (infocourse) e il componente
+grafico che mostra i partecipanti iscritti (peoplebox).
+
+Sul versante della reportistica, la libreria principale dei report e il modulo
+di reportistica nel backoffice sono stati revisionati per garantire dati più
+accurati e aggiornati. Questi interventi preparano il terreno per una gestione
+più avanzata dei report di avanzamento e completamento.
+
+
+5. REPORT AUTOMATICO VIA CRON (12 giugno)
+------------------------------------------
+È stato aggiornato lo script cron dedicato alla generazione automatica dei
+report. Questo componente viene eseguito periodicamente dal sistema e produce
+report di avanzamento degli utenti in modo automatico, senza necessità di
+intervento manuale da parte degli amministratori.
+
+
+6. GESTIONE DATE (14 giugno)
+-----------------------------
+La libreria di gestione delle date è stata aggiornata per risolvere alcune
+problematiche legate alla formattazione e al calcolo delle date in contesti
+internazionali e con fusi orari diversi.
+
+
+7. NEWSLETTER, PROFILO UTENTE E IMPORT (15 giugno)
+---------------------------------------------------
+Il modulo newsletter nel backoffice ha ricevuto aggiornamenti sia lato logica
+(PHP) che lato grafico (CSS e JavaScript), migliorando la gestione delle
+comunicazioni verso gli utenti della piattaforma.
+
+La libreria del profilo utente LMS è stata aggiornata per una gestione più
+completa delle informazioni anagrafiche e formative dell'utente.
+
+La funzionalità di importazione massiva degli utenti tramite file è stata
+revisionata, così come la maschera di creazione e modifica dei corsi nel
+backoffice, che ora presenta campi e opzioni aggiornati.
+
+Infine, il modello delle statistiche personali del corso ha ricevuto ulteriori
+perfezionamenti in linea con gli aggiornamenti del controller effettuati nei
+giorni precedenti.
+
+
+8. FUNZIONALITÀ "ACCEDI COME" (16 giugno)
+------------------------------------------
+È stata implementata ex novo la funzionalità di impersonazione utente,
+riservata esclusivamente agli amministratori con ruolo GodAdmin.
+
+Questa funzione consente all'amministratore di accedere alla piattaforma
+front-end nei panni di un qualsiasi utente, senza conoscerne la password,
+al fine di verificare la corretta visualizzazione dei contenuti e risolvere
+eventuali problematiche segnalate.
+
+L'implementazione comprende:
+
+- Un pulsante con icona arancione nella lista utenti del backoffice, visibile
+  solo ai GodAdmin, che avvia la sessione di impersonazione.
+
+- Un banner arancione persistente in cima a tutte le pagine del front-end
+  durante la sessione di impersonazione, che indica chiaramente il nome
+  dell'utente che si sta simulando.
+
+- Un link "Esci e torna al backoffice" nel banner che, con un clic, termina
+  la sessione di impersonazione e ripristina l'identità originale
+  dell'amministratore, riportandolo alla lista utenti.
+
+La funzionalità è stata implementata con particolare attenzione alla sicurezza:
+non è possibile impersonare altri GodAdmin, e il meccanismo di uscita dalla
+sessione è protetto contro accessi non autorizzati.
+
+
+RIEPILOGO TECNICO
+-----------------
+Totale file modificati nel periodo: circa 35 file
+Aree coinvolte: front-end LMS, backoffice amministrativo, librerie core,
+                template Twig, JavaScript, CSS, cron job
+
+========================================
+Documento generato il 16 giugno 2026
+Piattaforma DNA — Sviluppo e manutenzione
