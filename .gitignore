@@ -22,9 +22,10 @@ files/logs/
 *.sql.zip
 *.sql.gz
 
-# File temporanei
+# File temporanei e log
 *.log
 *.tmp
+cron/log/
 testphp.php
 test/
 
