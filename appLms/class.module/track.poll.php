@@ -173,4 +173,29 @@ class Track_Poll extends Track_Object
             return $output;
         }
     }
+
+    /**
+     * Cancella il tentativo di un utente su un questionario. Il poll non scrive
+     * mai una riga in learning_commontrack (a differenza di test/scorm), quindi
+     * la riga da cancellare va cercata direttamente in learning_polltrack,
+     * con la stessa chiave usata da getTrack() per rilevare il completamento.
+     **/
+    public function deleteTrackInfo($id_lo, $id_user)
+    {
+        $query = 'SELECT id_track FROM %lms_polltrack' .
+            ' WHERE id_user=' . (int) $id_user . ' AND id_reference=' . (int) $id_lo;
+        $res = sql_query($query);
+        if ($res && sql_num_rows($res) > 0) {
+            list($id_track) = sql_fetch_row($res);
+
+            if (!sql_query("DELETE FROM %lms_polltrack_answer WHERE id_track = '" . (int) $id_track . "'")) {
+                return false;
+            }
+            if (!sql_query("DELETE FROM %lms_polltrack WHERE id_track = '" . (int) $id_track . "'")) {
+                return false;
+            }
+        }
+
+        return parent::deleteTrackInfo($id_lo, $id_user);
+    }
 }

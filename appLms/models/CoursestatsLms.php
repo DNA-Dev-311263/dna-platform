@@ -881,11 +881,41 @@ class CoursestatsLms extends Model
         $id_track = $this->getTrackId($id_lo, $id_user);
         $object_lo = $this->getLOTrackObject($id_track, false, $id_lo);
         if (!$object_lo) {
-            return true;
-        } //no track for this user and LO, the track is already "reset"
+            // Alcuni tipi di LO (es. poll) non scrivono mai in commontrack: se non
+            // troviamo nulla lì, risolviamo il tipo direttamente dal LO stesso
+            // invece di assumere che non ci sia nulla da resettare.
+            $object_lo = $this->getLOTrackObjectByLo($id_lo);
+            if (!$object_lo) {
+                return true; //no track for this user and LO, the track is already "reset"
+            }
+        }
         $res = $object_lo->deleteTrackInfo($id_lo, $id_user);
 
         return $res;
     }
-    
+
+    /*
+     * get an instance of LO track object resolving the type directly from the LO
+     * (idOrg), invece che da una riga di commontrack che potrebbe non esistere
+     */
+    private function getLOTrackObjectByLo($id_lo)
+    {
+        $query = 'SELECT objectType FROM ' . $this->tables['organization'] . ' WHERE idOrg=' . (int) $id_lo;
+        $res = $this->db->query($query);
+        if (!$res || $this->db->num_rows($res) <= 0) {
+            return false;
+        }
+        list($type) = $this->db->fetch_row($res);
+
+        $types = $this->getLOTypes();
+        if (!is_array($types) || !isset($types[$type])) {
+            return false;
+        }
+
+        require_once Forma::inc(_lms_ . '/class.module/' . $types[$type]->fileNameTrack);
+        $classname = $types[$type]->classNameTrack;
+
+        return new $classname(0);
+    }
+
 }
