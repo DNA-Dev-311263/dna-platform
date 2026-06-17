@@ -238,6 +238,10 @@ class LomanagerLms extends Model
 
     public function getLoTypes()
     {
+        // Tipi nascosti dal menu "Crea nuovo" su richiesta P&P (non eliminati: gli LO
+        // esistenti di questi tipi restano accessibili, si nasconde solo la creazione di nuovi).
+        $hidden_create_types = ['faq', 'glossary', 'link'];
+
         $query = 'SELECT objectType AS type FROM %lms_lo_types';
         $rs = sql_query($query);
 
@@ -248,6 +252,9 @@ class LomanagerLms extends Model
             ],
         ];
         while ($lo_type = sql_fetch_assoc($rs)) {
+            if (in_array($lo_type['type'], $hidden_create_types, true)) {
+                continue;
+            }
             $lo_type['title'] = Lang::t("_LONAME_{$lo_type['type']}", 'storage');
             $lo_types[] = $lo_type;
         }
