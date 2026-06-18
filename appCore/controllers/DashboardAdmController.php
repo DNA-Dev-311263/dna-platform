@@ -65,6 +65,7 @@ class DashboardAdmController extends AdmController
         Util::get_js(FormaLms\lib\Get::rel_path('base') . '/addons/jquery/chartist/chartist.min.js', true, true);
         Util::get_js(FormaLms\lib\Get::rel_path('base') . '/addons/jquery/chartist-plugin-pointlabels/chartist-plugin-pointlabels.min.js', true, true);
         Util::get_css(FormaLms\lib\Get::rel_path('base') . '/addons/jquery/chartist/chartist.min.css', true, true);
+        Util::get_css(FormaLms\lib\Get::rel_path('base') . '/css/pandp-ui.css', true, true);
         $charts_num_days = 7;
 
         //check if there are any problems with technical configuration of the server
