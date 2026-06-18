@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Spec — Dashboard Backoffice Redesign</title>
+<link rel="stylesheet" href="pandp-ui.css">
+<style>
+  body { background:#f4f7fb; margin:0; font-family:"Segoe UI", Arial, sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 24px 60px; }
+  .doc { background:#fff; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,.07); padding:36px 44px; }
+  .doc h1 { font-size:26px; color:#1a2b4a; margin:0 0 6px; }
+  .doc .meta { font-size:12px; color:#8a9fc4; margin-bottom:28px; }
+  .doc h2 { font-size:17px; color:#1a6ef7; margin:32px 0 12px; border-bottom:2px solid #eef3ff; padding-bottom:6px; }
+  .doc p { line-height:1.65; color:#2d3748; font-size:14.5px; }
+  .doc ul, .doc ol { line-height:1.65; color:#2d3748; font-size:14.5px; padding-left:22px; }
+  .doc li { margin-bottom:6px; }
+  .doc code { background:#eef3ff; color:#1457cc; padding:1px 6px; border-radius:5px; font-size:13px; }
+  .doc table { width:100%; border-collapse:collapse; margin:14px 0 20px; font-size:13.5px; }
+  .doc th { background:#f0f4fa; color:#5a6a8a; text-transform:uppercase; font-size:11px; padding:10px 12px; text-align:left; border:1px solid #e0e8f4; }
+  .doc td { padding:10px 12px; border:1px solid #edf0f8; color:#2d3748; }
+  .doc tr:nth-child(even) td { background:#fafbff; }
+  .doc strong { color:#1a2b4a; }
+  .doc hr { border:none; border-top:1px solid #edf2f7; margin:28px 0; }
+  .badge-bar { display:flex; gap:8px; margin-bottom:24px; }
+  .pui-badge { font-size:11px; padding:3px 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="doc">
+    <h1>Dashboard Backoffice — Redesign Design Spec</h1>
+    <div class="meta">17 giugno 2026 · docs/superpowers/specs/2026-06-17-dashboard-redesign-design.md</div>
+    <div class="badge-bar">
+      <span class="pui-badge pui-badge--info">In revisione</span>
+      <span class="pui-badge pui-badge--neutral">Sviluppo a fasi</span>
+    </div>
+
+    <h2>Contesto</h2>
+    <p>La pagina di benvenuto del backoffice (<code>appCore/index.php?r=adm/dashboard/show</code>, file <code>appCore/views/dashboard/show.php</code>) viene rinominata e ridisegnata in <strong>Dashboard</strong>: una panoramica sintetica e navigabile su Utenti, Aziende e Corsi, sostituendo l'attuale blocco "Link veloci" e la disposizione a sezioni impilate.</p>
+    <p>Il sistema esistente (<code>appCore/models/DashboardAdm.php</code>) ha già un meccanismo di scoping funzionante tra <strong>Superadmin</strong> (dati globali) e <strong>Admin</strong> (dati filtrati su <code>users_filter</code>/<code>courses_filter</code>, popolati in base all'organigramma gestito). Questo meccanismo viene riusato ed esteso, non ricostruito.</p>
+    <p>Esiste inoltre un secondo elemento di menu, <strong>"Impostazioni Dashboard"</strong> (<code>adm/dashboardsettings/show</code>, voce di menu <code>idMenu=601</code> sotto Configurazione), che appartiene a un vecchio sistema di dashboard a blocchi configurabili (<code>DashboardBlockWelcomeLms</code> e classi collegate), non funzionante e non più mantenuto. Va disattivato senza eliminare il codice.</p>
+    <p>Il nuovo look si basa sul design system <strong>P&amp;P UI</strong> (<code>css/pandp-ui.css</code>), già usato nelle pagine di newsletter e di importazione utenti: card bianche con ombra leggera, accent blu <code>#1a6ef7</code>, badge colorati, tabelle compatte. Il mockup approvato è in <code>css/_mockup_dashboard_v3.html</code>.</p>
+
+    <h2>Cosa cambia rispetto ad oggi</h2>
+    <table>
+      <tr><th>Elemento attuale</th><th>Nuovo comportamento</th></tr>
+      <tr><td>Blocco "Link veloci" (quick links utenti/corsi/contenuti/supporto)</td><td><strong>Rimosso</strong> dalla pagina</td></tr>
+      <tr><td>Voce di menu "Impostazioni Dashboard" (Configurazione)</td><td><strong>Disattivata</strong> (<code>is_active = false</code> su <code>core_menu.idMenu = 601</code>), codice non toccato</td></tr>
+      <tr><td>Sezioni Utenti/Corsi impilate verticalmente, con grafici larghi</td><td><strong>Layout a 3 colonne affiancate</strong> (Utenti | Aziende | Corsi), pensato per restare in una sola schermata senza scroll su risoluzioni desktop standard</td></tr>
+      <tr><td>Nessuna sezione Aziende</td><td><strong>Nuova sezione Aziende</strong></td></tr>
+      <tr><td>Numeri statici, nessun drill-down</td><td>Ogni KPI è cliccabile e apre un <strong>dialog modale</strong> (pattern YUI già in uso nel backoffice) con il dettaglio</td></tr>
+    </table>
+
+    <h2>Architettura</h2>
+    <ul>
+      <li><strong>Stessa route e stesso controller</strong>: <code>DashboardAdmController</code> + <code>DashboardAdm.php</code> (model), nessuna nuova area applicativa.</li>
+      <li><strong>View</strong>: <code>appCore/views/dashboard/show.php</code> viene riscritta per il nuovo layout; il CSS specifico del nuovo layout (classi <code>dash-*</code>) viene aggiunto come blocco dedicato in coda a <code>css/pandp-ui.css</code>, riusando le classi esistenti (<code>pui-badge</code>, <code>pui-card</code> dove utile) per coerenza visiva.</li>
+      <li><strong>Model</strong>: <code>DashboardAdm.php</code> viene estesa con i nuovi metodi di calcolo. I metodi esistenti (<code>getUsersStats</code>, <code>getCoursesStats</code>, <code>getUsersChartAccessData</code>, ecc.) vengono riusati dove già coprono la metrica richiesta; il filtro <code>users_filter</code>/<code>courses_filter</code> esistente resta l'unico meccanismo di scoping admin/superadmin.</li>
+      <li><strong>Drill-down</strong>: ogni dialog è caricato via AJAX (<code>ajax.adm_server.php?r=adm/dashboard/...</code>), stesso pattern dei dialog "Stato utente" / "Certificati" già presenti nella pagina attuale.</li>
+    </ul>
+
+    <h2>Sezione UTENTI</h2>
+    <p><strong>KPI principali</strong> (griglia 2×2):</p>
+    <ul>
+      <li><strong>Totale utenti caricati</strong> — riusa <code>getUsersStats()['all']</code></li>
+      <li><strong>Utenti connessi ora</strong> — riusa <code>getUsersStats()['now_online']</code> (solo se la voce era già visibile lato Admin; va verificato il permesso, altrimenti nascosto per Admin come oggi)</li>
+      <li><strong>Totale amministratori</strong> — riusa <code>getUsersStats()['admin']</code> (spostato qui dalla sezione Aziende)</li>
+      <li><strong>Totale superadmin</strong> — riusa <code>getUsersStats()['superadmin']</code> (visibile solo a Superadmin, come già gestito oggi)</li>
+    </ul>
+    <p><strong>Blocco Accessi</strong> (utenti che entrano in piattaforma ma non visionano nessun contenuto formativo):</p>
+    <ul>
+      <li>Tre numeri affiancati: mese in corso (etichettato col nome del mese), ultimi 3 mesi, ultimi 6 mesi</li>
+      <li>Sorgente dati: <code>learning_tracksession</code> (tabella già usata da <code>getUsersChartAccessData</code>) per gli accessi, <strong>escludendo</strong> gli utenti che nello stesso periodo hanno anche almeno una riga in <code>learning_commontrack</code> (questi sono "attivi", non semplici "accessi")</li>
+      <li>Mini-grafico a barre (sparkline) sotto i tre numeri, con l'andamento mensile</li>
+    </ul>
+    <p><strong>Blocco Utenti attivi (anno in corso)</strong> (hanno visionato almeno un contenuto formativo):</p>
+    <ul>
+      <li>Stessa struttura a tre numeri (mese/3 mesi/6 mesi) + sparkline</li>
+      <li>Sorgente dati: utenti distinti con almeno una riga in <code>learning_commontrack</code> nel periodo, filtrati sull'anno corrente</li>
+      <li>Lo scoping admin/superadmin riusa lo stesso filtro <code>users_filter</code>/<code>courses_filter</code> già applicato dai metodi esistenti</li>
+    </ul>
+
+    <h2>Sezione AZIENDE</h2>
+    <p>Definizione di "azienda": <strong>nodo di primo livello dell'organigramma</strong> (figlio diretto della radice, es. "P&amp;P Technology", "Test"). I nodi interni a un'azienda (sotto-cartelle) non vengono contati come aziende separate, ma sono navigabili in drill-down.</p>
+    <p><strong>KPI principale</strong>: Totale aziende caricate — conteggio dei nodi di primo livello sotto la radice dell'organigramma.</p>
+    <p><strong>Vista per ruolo</strong>:</p>
+    <ul>
+      <li><strong>Superadmin</strong>: vede il totale globale; il drill-down elenca tutte le aziende, e da ciascuna si naviga ricorsivamente nei nodi figli e nei loro sotto-nodi (struttura ad albero)</li>
+      <li><strong>Admin</strong>: la sezione mostra solo l'azienda/nodo di organigramma che l'admin gestisce (un solo elemento, non un totale globale), con lo stesso drill-down ricorsivo sui suoi nodi interni</li>
+    </ul>
+    <p><strong>Grafico</strong>: andamento nuove aziende create negli ultimi 6 mesi (sparkline a barre), basato sulla data di creazione del nodo nell'organigramma.</p>
+    <p><strong>Elenco rapido</strong> (mini-tabella sotto al grafico): nome azienda + numero utenti totali, con icona di accesso al drill-down. Per Admin la tabella mostra la singola azienda gestita.</p>
+
+    <h2>Sezione CORSI</h2>
+    <p><strong>KPI principali</strong> (griglia 3 colonne):</p>
+    <ul>
+      <li><strong>Corsi attivi</strong> — riusa <code>getCoursesStats()</code> (campo <code>active</code>)</li>
+      <li><strong>Corsi completati</strong> — conteggio delle iscrizioni (<code>learning_courseuser</code>) con stato completato (<code>_CUS_END</code>). A livello di corso non esiste uno stato "completato" (il campo <code>status</code> di <code>learning_course</code> è solo preparazione/effettivo), quindi la metrica è sempre a livello di iscrizione utente↔corso, coerente con <code>_CUS_END</code> già usato altrove nel codice (es. <code>SubscriptionAlms</code>)</li>
+      <li><strong>Certificati rilasciati</strong> — nuovo conteggio da <code>learning_certificate_assign</code> (campo <code>on_date</code> per il filtro periodo), scoped su <code>users_filter</code>/<code>courses_filter</code></li>
+      <li><strong>In attivazione entro 7 giorni</strong> — riusa <code>getCoursesStats()</code> (campo <code>active_seven</code>)</li>
+      <li><strong>Totale iscrizioni</strong> — riusa <code>getCoursesStats()</code> (campo <code>user_subscription</code>)</li>
+    </ul>
+    <p><strong>Grafico</strong>: Iscrizioni vs Completamenti — ultimi 6 mesi, doppia serie mensile affiancata (riusa/estende <code>getCoursesMonthsStats()</code> già presente, esteso da 3 a 6 mesi e aggiungendo la serie dei completamenti).</p>
+    <p><strong>Tabella "Corsi più visti"</strong>: top corsi ordinati per numero di iscritti (<code>learning_courseuser</code>), colonne Corso / Iscritti / Completati / Stato (badge), con drill-down per riga verso la scheda corso esistente.</p>
+
+    <h2>Drill-down</h2>
+    <p>Tutti i numeri KPI e le righe delle mini-tabelle sono cliccabili e aprono un <strong>dialog modale</strong> (stesso widget <code>dialog</code> YUI già usato per "Stato utente", "Cambia password", "Certificati" nella pagina attuale). Ogni dialog carica via AJAX una tabella di dettaglio filtrata in base al KPI cliccato.</p>
+
+    <h2>Layout visivo</h2>
+    <p>Tre colonne affiancate su desktop (Utenti | Aziende | Corsi), che vanno a singola colonna sotto i ~1100px di larghezza (responsive di base, non priorità per mobile). Ogni colonna è una card bianca con KPI compatti in griglia, blocchi a sparkline per le metriche storiche, e una mini-tabella finale. Riferimento visivo: <code>css/_mockup_dashboard_v3.html</code> (approvato).</p>
+
+    <h2>Fuori scope (non in questa spec)</h2>
+    <ul>
+      <li>Ottimizzazione mobile/tablet della Dashboard</li>
+      <li>Esportazione dati Dashboard (PDF/Excel)</li>
+      <li>Personalizzazione/drag&amp;drop dei blocchi (il vecchio sistema "Impostazioni Dashboard" viene disattivato, non sostituito da un equivalente moderno)</li>
+      <li>Modifica del significato di "Corsi completati" oltre a quanto chiarito in questa spec</li>
+    </ul>
+
+    <h2>Fasi di implementazione previste</h2>
+    <ol>
+      <li><strong>Pulizia</strong>: rimozione blocco "Link veloci" dalla view attuale, disattivazione voce menu "Impostazioni Dashboard" (DB), rinomina pagina in "Dashboard"</li>
+      <li><strong>Layout base + Sezione Utenti</strong>: nuovo layout a 3 colonne, sezione Utenti completa con KPI, blocchi Accessi/Utenti attivi, sparkline, drill-down</li>
+      <li><strong>Sezione Aziende</strong>: KPI, sparkline nuove aziende, elenco rapido, drill-down ricorsivo sull'organigramma, scoping Admin/Superadmin</li>
+      <li><strong>Sezione Corsi</strong>: KPI (incluso nuovo conteggio certificati e corsi completati), grafico doppia serie, tabella "Corsi più visti", drill-down</li>
+    </ol>
+    <p>Ogni fase è testabile autonomamente sulla pagina reale prima di passare alla successiva.</p>
+  </div>
+</div>
+</body>
+</html>

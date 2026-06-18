@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Mockup — Dashboard DNA Platform</title>
+<link rel="stylesheet" href="pandp-ui.css">
+<style>
+  body { background:#f4f7fb; margin:0; }
+  .pui-page { max-width: 1280px; }
+  .dash-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; }
+  .dash-header h1 { font-size:26px; font-weight:700; color:#1a2b4a; margin:0; }
+  .dash-header .dash-scope { font-size:13px; color:#8a9fc4; margin-top:4px; }
+  .dash-mockup-banner { background:#fff3cd; border:1px solid #ffe69c; color:#7a5b00; padding:10px 16px; border-radius:8px; font-size:13px; margin-bottom:20px; }
+
+  .dash-section { margin-bottom: 28px; }
+  .dash-section__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .dash-section__title { font-size:15px; font-weight:700; color:#1a2b4a; text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:8px; }
+  .dash-section__title .dot { width:8px; height:8px; border-radius:50%; }
+  .dot--users { background:#1a6ef7; }
+  .dot--companies { background:#28a745; }
+  .dot--courses { background:#f0a93e; }
+
+  .dash-kpi-row { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .dash-kpi {
+    flex: 1; min-width: 150px;
+    background:#fff; border:1px solid #e0e8f4; border-radius:12px;
+    padding:18px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,.04);
+    cursor:pointer; transition: box-shadow .15s, transform .15s;
+    position:relative;
+  }
+  .dash-kpi:hover { box-shadow:0 6px 18px rgba(26,110,247,.18); transform: translateY(-2px); }
+  .dash-kpi__value { font-size:30px; font-weight:700; color:#1a2b4a; line-height:1.1; }
+  .dash-kpi__label { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.03em; color:#8a9fc4; margin-top:6px; }
+  .dash-kpi__hint { position:absolute; top:10px; right:12px; font-size:11px; color:#c3cfe6; }
+
+  .dash-subblock {
+    background:#fff; border-radius:12px; box-shadow:0 2px 14px rgba(0,0,0,.06);
+    padding:20px 24px; margin-bottom:16px;
+  }
+  .dash-subblock__title { font-size:13px; font-weight:700; color:#2c4a7a; margin-bottom:12px; }
+  .dash-periods { display:flex; gap:8px; margin-bottom:14px; }
+  .dash-period-pill {
+    padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;
+    border:1.5px solid #d0dae8; color:#4a5568; cursor:pointer; background:#fff;
+  }
+  .dash-period-pill--active { background:#1a6ef7; border-color:#1a6ef7; color:#fff; }
+  .dash-period-value { font-size:22px; font-weight:700; color:#1a2b4a; }
+  .dash-period-value small { font-size:12px; color:#8a9fc4; font-weight:500; display:block; margin-top:2px;}
+
+  .dash-chart-placeholder {
+    height:140px; border-radius:8px; background:
+      linear-gradient(to top, #eef3ff 0%, #eef3ff 30%, transparent 30%),
+      repeating-linear-gradient(90deg, transparent, transparent 38px, #dde6f5 38px, #dde6f5 40px);
+    display:flex; align-items:flex-end; gap:10px; padding:10px 16px;
+  }
+  .dash-bar { width:24px; background:#1a6ef7; border-radius:4px 4px 0 0; opacity:.85; }
+  .dash-bar--company { background:#28a745; }
+
+  .dash-table-preview { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  .dash-table-preview th { text-align:left; color:#8a9fc4; font-size:11px; text-transform:uppercase; padding:8px 10px; border-bottom:2px solid #edf2f7; }
+  .dash-table-preview td { padding:9px 10px; border-bottom:1px solid #f0f2f8; color:#2d3748; }
+
+  .dash-drill-note { font-size:11px; color:#8a9fc4; margin-top:10px; display:flex; align-items:center; gap:6px; }
+  .dash-drill-note svg { width:13px; height:13px; }
+
+  /* fake modal preview, just to show concept */
+  .dash-modal-demo { display:none; position:fixed; inset:0; background:rgba(20,30,50,.45); align-items:center; justify-content:center; z-index:50; }
+  .dash-modal-demo.open { display:flex; }
+  .dash-modal-demo__box { background:#fff; border-radius:14px; width:600px; max-width:90vw; padding:26px; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+  .dash-modal-demo__head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .dash-modal-demo__head h3 { margin:0; font-size:16px; color:#1a2b4a; }
+  .dash-modal-demo__close { cursor:pointer; color:#8a9fc4; font-size:20px; border:none; background:none; }
+</style>
+</head>
+<body>
+
+<div class="pui-page">
+  <div class="dash-mockup-banner">
+    🖼️ MOCKUP statico — solo aspetto grafico, i numeri sono di esempio e i click aprono una demo semplificata del drill-down.
+  </div>
+
+  <div class="dash-header">
+    <div>
+      <h1>Dashboard</h1>
+      <div class="dash-scope" id="scopeLabel">Vista Superadmin — dati su tutta la piattaforma</div>
+    </div>
+    <div class="dash-periods">
+      <span class="dash-period-pill" onclick="setScope('admin')">Anteprima vista Admin</span>
+      <span class="dash-period-pill dash-period-pill--active" onclick="setScope('superadmin')">Anteprima vista Superadmin</span>
+    </div>
+  </div>
+
+  <!-- SEZIONE UTENTI -->
+  <div class="dash-section">
+    <div class="dash-section__head">
+      <div class="dash-section__title"><span class="dot dot--users"></span> Utenti</div>
+    </div>
+
+    <div class="dash-kpi-row">
+      <div class="dash-kpi" onclick="openModal('Totale utenti caricati')">
+        <div class="dash-kpi__value">1.248</div>
+        <div class="dash-kpi__label">Totale utenti caricati</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Utenti connessi ora')">
+        <div class="dash-kpi__value">37</div>
+        <div class="dash-kpi__label">Utenti connessi ora</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+    </div>
+
+    <div class="dash-subblock">
+      <div class="dash-subblock__title">Totale Accessi <span style="color:#8a9fc4; font-weight:400;">— utenti che entrano ma non visionano contenuti</span></div>
+      <div class="dash-periods">
+        <span class="dash-period-pill dash-period-pill--active">Giugno 2026</span>
+        <span class="dash-period-pill">Ultimi 3 mesi</span>
+        <span class="dash-period-pill">Ultimi 6 mesi</span>
+      </div>
+      <div class="dash-period-value">312 <small>accessi nel mese corrente</small></div>
+      <div class="dash-chart-placeholder" style="margin-top:14px;">
+        <div class="dash-bar" style="height:40%"></div>
+        <div class="dash-bar" style="height:55%"></div>
+        <div class="dash-bar" style="height:35%"></div>
+        <div class="dash-bar" style="height:70%"></div>
+        <div class="dash-bar" style="height:60%"></div>
+        <div class="dash-bar" style="height:80%"></div>
+      </div>
+    </div>
+
+    <div class="dash-subblock">
+      <div class="dash-subblock__title">Totale Utenti Attivi (2026) <span style="color:#8a9fc4; font-weight:400;">— hanno visionato almeno un contenuto formativo</span></div>
+      <div class="dash-periods">
+        <span class="dash-period-pill dash-period-pill--active">Giugno 2026</span>
+        <span class="dash-period-pill">Ultimi 3 mesi</span>
+        <span class="dash-period-pill">Ultimi 6 mesi</span>
+      </div>
+      <div class="dash-period-value">589 <small>utenti attivi nel mese corrente</small></div>
+      <div class="dash-chart-placeholder" style="margin-top:14px;">
+        <div class="dash-bar" style="height:50%"></div>
+        <div class="dash-bar" style="height:62%"></div>
+        <div class="dash-bar" style="height:58%"></div>
+        <div class="dash-bar" style="height:75%"></div>
+        <div class="dash-bar" style="height:68%"></div>
+        <div class="dash-bar" style="height:90%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEZIONE AZIENDE -->
+  <div class="dash-section">
+    <div class="dash-section__head">
+      <div class="dash-section__title"><span class="dot dot--companies"></span> Aziende</div>
+    </div>
+
+    <div class="dash-kpi-row">
+      <div class="dash-kpi" onclick="openModal('Totale aziende caricate')">
+        <div class="dash-kpi__value">14</div>
+        <div class="dash-kpi__label">Totale aziende caricate</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Totale amministratori')">
+        <div class="dash-kpi__value">22</div>
+        <div class="dash-kpi__label">Totale amministratori</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Totale superadmin')">
+        <div class="dash-kpi__value">3</div>
+        <div class="dash-kpi__label">Totale superadmin</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+    </div>
+
+    <div class="dash-subblock">
+      <div class="dash-subblock__title">Andamento nuove aziende — ultimi 6 mesi</div>
+      <div class="dash-chart-placeholder">
+        <div class="dash-bar dash-bar--company" style="height:20%"></div>
+        <div class="dash-bar dash-bar--company" style="height:30%"></div>
+        <div class="dash-bar dash-bar--company" style="height:25%"></div>
+        <div class="dash-bar dash-bar--company" style="height:45%"></div>
+        <div class="dash-bar dash-bar--company" style="height:35%"></div>
+        <div class="dash-bar dash-bar--company" style="height:55%"></div>
+      </div>
+      <div class="dash-drill-note">↳ click su un'azienda nel drill-down per esplorare i nodi figli e i loro sotto-nodi</div>
+    </div>
+  </div>
+
+  <!-- SEZIONE CORSI -->
+  <div class="dash-section">
+    <div class="dash-section__head">
+      <div class="dash-section__title"><span class="dot dot--courses"></span> Corsi</div>
+    </div>
+
+    <div class="dash-kpi-row">
+      <div class="dash-kpi" onclick="openModal('Corsi attivi')">
+        <div class="dash-kpi__value">46</div>
+        <div class="dash-kpi__label">Corsi attivi</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Corsi completati')">
+        <div class="dash-kpi__value">128</div>
+        <div class="dash-kpi__label">Corsi completati</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Certificati rilasciati')">
+        <div class="dash-kpi__value">312</div>
+        <div class="dash-kpi__label">Certificati rilasciati</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Corsi in attivazione (7gg)')">
+        <div class="dash-kpi__value">5</div>
+        <div class="dash-kpi__label">In attivazione (7gg)</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+      <div class="dash-kpi" onclick="openModal('Totale iscrizioni')">
+        <div class="dash-kpi__value">2.054</div>
+        <div class="dash-kpi__label">Totale iscrizioni</div>
+        <div class="dash-kpi__hint">🔍</div>
+      </div>
+    </div>
+
+    <div class="dash-subblock">
+      <div class="dash-subblock__title">Corsi più visionati <span style="color:#8a9fc4; font-weight:400;">(esempio drill-down)</span></div>
+      <table class="dash-table-preview">
+        <tr><th>Corso</th><th>Iscritti</th><th>Completati</th><th>Stato</th></tr>
+        <tr><td>Sicurezza sul lavoro — Base</td><td>312</td><td>290</td><td><span class="pui-badge pui-badge--success">Attivo</span></td></tr>
+        <tr><td>Privacy e GDPR</td><td>248</td><td>201</td><td><span class="pui-badge pui-badge--success">Attivo</span></td></tr>
+        <tr><td>Onboarding nuovi assunti</td><td>190</td><td>120</td><td><span class="pui-badge pui-badge--info">In corso</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="dash-modal-demo" id="modalDemo">
+  <div class="dash-modal-demo__box">
+    <div class="dash-modal-demo__head">
+      <h3 id="modalTitle">Dettaglio</h3>
+      <button class="dash-modal-demo__close" onclick="closeModal()">✕</button>
+    </div>
+    <p style="color:#8a9fc4; font-size:13px;">Qui comparirà la tabella di dettaglio (utenti, aziende o corsi) relativa al KPI cliccato — coerente con i dialog già usati nel backoffice.</p>
+    <table class="dash-table-preview">
+      <tr><th>Nome</th><th>Dettaglio</th><th>Data</th></tr>
+      <tr><td>Esempio riga 1</td><td>—</td><td>16/06/2026</td></tr>
+      <tr><td>Esempio riga 2</td><td>—</td><td>15/06/2026</td></tr>
+    </table>
+  </div>
+</div>
+
+<script>
+function openModal(title) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalDemo').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalDemo').classList.remove('open');
+}
+function setScope(scope) {
+  document.querySelectorAll('.dash-periods .dash-period-pill').forEach(function(){});
+  var pills = document.querySelectorAll('.dash-header .dash-period-pill');
+  pills.forEach(function(p){ p.classList.remove('dash-period-pill--active'); });
+  event.target.classList.add('dash-period-pill--active');
+  document.getElementById('scopeLabel').textContent = scope === 'superadmin'
+    ? 'Vista Superadmin — dati su tutta la piattaforma'
+    : 'Vista Amministratore — dati limitati alla tua azienda/organigramma';
+}
+</script>
+
+</body>
+</html>
