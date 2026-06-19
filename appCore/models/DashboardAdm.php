@@ -1174,4 +1174,99 @@ class DashboardAdm extends Model
 
         return $output;
     }
+
+    /**
+     * Numero di iscrizioni completate (_CUS_END = 2), opzionalmente filtrate
+     * su un periodo (false = nessun filtro periodo, conteggio totale).
+     */
+    public function getCoursesCompletedCount($period = false)
+    {
+        $query = 'SELECT COUNT(*) FROM %lms_courseuser WHERE status = 2 ';
+        if ($period) {
+            list($from, $to) = $this->periodToRange($period);
+            $query .= " AND date_complete BETWEEN '" . $from . "' AND '" . $to . "' ";
+        }
+        $query .= $this->scopeFilterSql('idUser', 'idCourse');
+
+        list($count) = $this->db->fetch_row($this->db->query($query));
+
+        return (int) $count;
+    }
+
+    /**
+     * Numero di certificati rilasciati (learning_certificate_assign),
+     * opzionalmente filtrati su un periodo.
+     */
+    public function getCertificatesIssuedCount($period = false)
+    {
+        $query = 'SELECT COUNT(*) FROM %lms_certificate_assign WHERE 1=1 ';
+        if ($period) {
+            list($from, $to) = $this->periodToRange($period);
+            $query .= " AND on_date BETWEEN '" . $from . "' AND '" . $to . "' ";
+        }
+        $query .= $this->scopeFilterSql('id_user', 'id_course');
+
+        list($count) = $this->db->fetch_row($this->db->query($query));
+
+        return (int) $count;
+    }
+
+    /**
+     * Andamento mensile (ultimi $how_many_months mesi) di Iscrizioni vs
+     * Completamenti, per il grafico a doppia serie della sezione Corsi.
+     */
+    public function getCoursesEnrollmentCompletionTrend($how_many_months = 6)
+    {
+        $output = [];
+        for ($i = $how_many_months - 1; $i >= 0; --$i) {
+            $month_start = date('Y-m-01 00:00:00', strtotime('-' . $i . ' months'));
+            $month_end = date('Y-m-t 23:59:59', strtotime('-' . $i . ' months'));
+
+            $sub_query = 'SELECT COUNT(*) FROM %lms_courseuser '
+                . " WHERE date_inscr BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
+                . $this->scopeFilterSql('idUser', 'idCourse');
+            list($subs) = $this->db->fetch_row($this->db->query($sub_query));
+
+            $comp_query = 'SELECT COUNT(*) FROM %lms_courseuser '
+                . " WHERE status = 2 AND date_complete BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
+                . $this->scopeFilterSql('idUser', 'idCourse');
+            list($comp) = $this->db->fetch_row($this->db->query($comp_query));
+
+            $output[] = ['label' => date('M', strtotime($month_start)), 'subscriptions' => (int) $subs, 'completions' => (int) $comp];
+        }
+
+        return $output;
+    }
+
+    /**
+     * Top corsi per numero di iscritti.
+     */
+    public function getTopViewedCourses($limit = 5)
+    {
+        $query = 'SELECT c.idCourse, c.name, '
+            . ' (SELECT COUNT(*) FROM %lms_courseuser WHERE idCourse = c.idCourse) AS enrolled, '
+            . ' (SELECT COUNT(*) FROM %lms_courseuser WHERE idCourse = c.idCourse AND status = 2) AS completed, '
+            . ' c.status '
+            . ' FROM %lms_course c WHERE 1=1 ';
+        if ($this->courses_filter !== false) {
+            $query .= empty($this->courses_filter)
+                ? ' AND 0 '
+                : ' AND c.idCourse IN (' . implode(',', $this->courses_filter) . ') ';
+        }
+        $query .= ' ORDER BY enrolled DESC LIMIT ' . (int) $limit;
+
+        $res = $this->db->query($query);
+        $rows = [];
+        while (list($idCourse, $name, $enrolled, $completed, $status) = $this->db->fetch_row($res)) {
+            $rows[] = [
+                'idCourse' => $idCourse,
+                'name' => $name,
+                'enrolled' => (int) $enrolled,
+                'completed' => (int) $completed,
+                'active' => (int) $status === 1,
+            ];
+        }
+
+        return $rows;
+    }
 }
