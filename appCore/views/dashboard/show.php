@@ -52,7 +52,7 @@
                     <?php
                     $max_access = max(1, max(array_column($users_access_trend, 'count')));
                     foreach ($users_access_trend as $idx => $pt) {
-                        $h = max(18, round(($pt['count'] / $max_access) * 100));
+                        $h = round(($pt['count'] / $max_access) * 100);
                         $cls = ($idx === count($users_access_trend) - 1) ? 'b now' : 'b';
                         echo '<div class="' . $cls . '" style="height:' . $h . '%" title="' . htmlspecialchars($pt['label']) . ': ' . (int) $pt['count'] . '"></div>';
                     }
@@ -73,7 +73,7 @@
                     <?php
                     $max_active = max(1, max(array_column($users_active_trend, 'count')));
                     foreach ($users_active_trend as $idx => $pt) {
-                        $h = max(18, round(($pt['count'] / $max_active) * 100));
+                        $h = round(($pt['count'] / $max_active) * 100);
                         $cls = ($idx === count($users_active_trend) - 1) ? 'b now' : 'b';
                         echo '<div class="' . $cls . '" style="height:' . $h . '%" title="' . htmlspecialchars($pt['label']) . ': ' . (int) $pt['count'] . '"></div>';
                     }
@@ -99,7 +99,7 @@
                     <?php
                     $max_comp = max(1, max(array_column($companies_trend, 'count')));
                     foreach ($companies_trend as $idx => $pt) {
-                        $h = max(18, round(($pt['count'] / $max_comp) * 100));
+                        $h = round(($pt['count'] / $max_comp) * 100);
                         $cls = ($idx === count($companies_trend) - 1) ? 'b now' : 'b';
                         echo '<div class="' . $cls . '" style="height:' . $h . '%" title="' . htmlspecialchars($pt['label']) . ': ' . (int) $pt['count'] . '"></div>';
                     }
@@ -160,8 +160,8 @@
                         $max_course = max($max_course, $pt['subscriptions'], $pt['completions']);
                     }
                     foreach ($courses_trend as $idx => $pt) {
-                        $h_sub = max(15, round(($pt['subscriptions'] / $max_course) * 100));
-                        $h_comp = max(15, round(($pt['completions'] / $max_course) * 100));
+                        $h_sub = round(($pt['subscriptions'] / $max_course) * 100);
+                        $h_comp = round(($pt['completions'] / $max_course) * 100);
                         $cls = ($idx === count($courses_trend) - 1) ? 'grp now' : 'grp';
                         echo '<div class="' . $cls . '" title="' . htmlspecialchars($pt['label']) . '">'
                             . '<div class="b b--sub" style="height:' . $h_sub . '%"></div>'
