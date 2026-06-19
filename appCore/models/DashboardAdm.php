@@ -901,7 +901,12 @@ class DashboardAdm extends Model
     {
         list($from, $to) = $this->periodToRange($period);
 
+        // join di validazione: learning_tracksession puo' contenere righe storiche
+        // di utenti nel frattempo cancellati da core_user (stesso problema verificato
+        // su learning_certificate_assign) — contiamo solo utenti ancora esistenti,
+        // cosi' il numero coincide sempre con l'elenco mostrabile nel drill-down.
         $query = 'SELECT COUNT(DISTINCT ts.idUser) FROM %lms_tracksession ts '
+            . ' JOIN %adm_user u ON u.idst = ts.idUser '
             . " WHERE ts.enterTime BETWEEN '" . $from . "' AND '" . $to . "' "
             . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
             . ' AND ts.idUser NOT IN ('
@@ -929,7 +934,9 @@ class DashboardAdm extends Model
         // learning_commontrack.idReference points to learning_organization.idOrg, NOT
         // to learning_course.idCourse directly — must join through learning_organization
         // to filter by course (see lib.stats.php:176-180 for the established pattern).
+        // Join anche su %adm_user per lo stesso motivo di getUsersAccessCount() sopra.
         $query = 'SELECT COUNT(DISTINCT ct.idUser) FROM %lms_commontrack ct '
+            . ' JOIN %adm_user u ON u.idst = ct.idUser '
             . ' JOIN %lms_organization org ON org.idOrg = ct.idReference '
             . " WHERE ct.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "' "
             . $this->scopeFilterSql('ct.idUser', 'org.idCourse');
@@ -954,13 +961,17 @@ class DashboardAdm extends Model
             $month_end = date('Y-m-t 23:59:59', strtotime('-' . $i . ' months'));
 
             if ($type === 'active') {
-                // same idReference -> idOrg join as getUsersActiveCount() above
+                // same idReference -> idOrg join + %adm_user validation as
+                // getUsersActiveCount() above
                 $query = 'SELECT COUNT(DISTINCT ct.idUser) FROM %lms_commontrack ct '
+                    . ' JOIN %adm_user u ON u.idst = ct.idUser '
                     . ' JOIN %lms_organization org ON org.idOrg = ct.idReference '
                     . " WHERE ct.dateAttempt BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
                     . $this->scopeFilterSql('ct.idUser', 'org.idCourse');
             } else {
+                // %adm_user validation as getUsersAccessCount() above
                 $query = 'SELECT COUNT(DISTINCT ts.idUser) FROM %lms_tracksession ts '
+                    . ' JOIN %adm_user u ON u.idst = ts.idUser '
                     . " WHERE ts.enterTime BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
                     . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
                     . ' AND ts.idUser NOT IN ('
