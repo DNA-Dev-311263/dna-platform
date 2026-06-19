@@ -11,7 +11,8 @@
  * License https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
 
-$html = '<p style="font-size:12px;color:#8a9fc4;margin-bottom:10px;">' . htmlspecialchars($current_name) . '</p>';
+$html = '<div class="dash-dialog-body">';
+$html .= '<p style="font-size:13px;color:#5a6a85;margin-bottom:10px;">' . htmlspecialchars($current_name) . '</p>';
 $html .= '<table class="dash-table-preview"><tr><th>Nodo</th><th></th></tr>';
 foreach ($children as $c) {
     $html .= '<tr><td>' . htmlspecialchars($c['name']) . '</td><td>';
@@ -23,7 +24,7 @@ foreach ($children as $c) {
 if (empty($children)) {
     $html .= '<tr><td colspan="2">' . Lang::t('_NONE', 'standard') . '</td></tr>';
 }
-$html .= '</table>';
+$html .= '</table></div>';
 
 if (isset($json)) {
     echo $json->encode([

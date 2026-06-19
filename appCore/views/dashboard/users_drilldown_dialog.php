@@ -11,7 +11,7 @@
  * License https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
  */
 
-$html = '<table class="dash-table-preview">';
+$html = '<div class="dash-dialog-body"><table class="dash-table-preview">';
 $html .= '<tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th></tr>';
 foreach ($rows as $r) {
     $html .= '<tr><td>' . htmlspecialchars($r['userid']) . '</td><td>' . htmlspecialchars($r['name']) . '</td></tr>';
@@ -19,7 +19,7 @@ foreach ($rows as $r) {
 if (empty($rows)) {
     $html .= '<tr><td colspan="2">' . Lang::t('_NONE', 'standard') . '</td></tr>';
 }
-$html .= '</table>';
+$html .= '</table></div>';
 
 if (isset($json)) {
     echo $json->encode([
