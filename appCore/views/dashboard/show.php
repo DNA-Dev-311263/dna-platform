@@ -17,22 +17,22 @@
             <div class="dash-col__title"><span class="dot dot--users"></span> <?php echo Lang::t('_USERS', 'dashboard'); ?></div>
 
             <div class="dash-kpi-grid">
-                <div class="dash-kpi" id="dash_kpi_users_total">
+                <div class="dash-kpi" id="dash_kpi_users_total" onclick="dashOpenDrilldown('total')">
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['all'] - 1; ?></div>
                     <div class="dash-kpi__label">Totale caricati</div>
                 </div>
                 <?php if ($permissions['view_user']) { ?>
-                <div class="dash-kpi" id="dash_kpi_users_online">
+                <div class="dash-kpi" id="dash_kpi_users_online" onclick="dashOpenDrilldown('online')">
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['now_online']; ?></div>
                     <div class="dash-kpi__label">Connessi ora</div>
                 </div>
                 <?php } ?>
-                <div class="dash-kpi" id="dash_kpi_users_admin">
+                <div class="dash-kpi" id="dash_kpi_users_admin" onclick="dashOpenDrilldown('admin')">
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['admin']; ?></div>
                     <div class="dash-kpi__label">Amministratori</div>
                 </div>
                 <?php if ($is_godadmin) { ?>
-                <div class="dash-kpi" id="dash_kpi_users_superadmin">
+                <div class="dash-kpi" id="dash_kpi_users_superadmin" onclick="dashOpenDrilldown('superadmin')">
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['superadmin']; ?></div>
                     <div class="dash-kpi__label">Super admin</div>
                 </div>
@@ -44,9 +44,9 @@
                     <div class="dash-tw__title">Accessi <span class="dash-tw__info" title="Utenti che entrano in piattaforma ma non visionano contenuti">&#9432;</span></div>
                 </div>
                 <div class="dash-tw-row">
-                    <div class="dash-tw-num" id="dash_access_month"><div class="dash-tw-num__v"><?php echo (int) $users_access['month']; ?></div><div class="dash-tw-num__l"><?php echo htmlspecialchars($current_month_label); ?></div></div>
-                    <div class="dash-tw-num" id="dash_access_3m"><div class="dash-tw-num__v"><?php echo (int) $users_access['3months']; ?></div><div class="dash-tw-num__l">3 mesi</div></div>
-                    <div class="dash-tw-num" id="dash_access_6m"><div class="dash-tw-num__v"><?php echo (int) $users_access['6months']; ?></div><div class="dash-tw-num__l">6 mesi</div></div>
+                    <div class="dash-tw-num" id="dash_access_month" onclick="dashOpenDrilldown('access','month')"><div class="dash-tw-num__v"><?php echo (int) $users_access['month']; ?></div><div class="dash-tw-num__l"><?php echo htmlspecialchars($current_month_label); ?></div></div>
+                    <div class="dash-tw-num" id="dash_access_3m" onclick="dashOpenDrilldown('access','3months')"><div class="dash-tw-num__v"><?php echo (int) $users_access['3months']; ?></div><div class="dash-tw-num__l">3 mesi</div></div>
+                    <div class="dash-tw-num" id="dash_access_6m" onclick="dashOpenDrilldown('access','6months')"><div class="dash-tw-num__v"><?php echo (int) $users_access['6months']; ?></div><div class="dash-tw-num__l">6 mesi</div></div>
                 </div>
                 <div class="dash-spark">
                     <?php
@@ -65,9 +65,9 @@
                     <div class="dash-tw__title">Utenti attivi <?php echo date('Y'); ?> <span class="dash-tw__info" title="Hanno visionato almeno un contenuto formativo">&#9432;</span></div>
                 </div>
                 <div class="dash-tw-row">
-                    <div class="dash-tw-num" id="dash_active_month"><div class="dash-tw-num__v"><?php echo (int) $users_active['month']; ?></div><div class="dash-tw-num__l"><?php echo htmlspecialchars($current_month_label); ?></div></div>
-                    <div class="dash-tw-num" id="dash_active_3m"><div class="dash-tw-num__v"><?php echo (int) $users_active['3months']; ?></div><div class="dash-tw-num__l">3 mesi</div></div>
-                    <div class="dash-tw-num" id="dash_active_6m"><div class="dash-tw-num__v"><?php echo (int) $users_active['6months']; ?></div><div class="dash-tw-num__l">6 mesi</div></div>
+                    <div class="dash-tw-num" id="dash_active_month" onclick="dashOpenDrilldown('active','month')"><div class="dash-tw-num__v"><?php echo (int) $users_active['month']; ?></div><div class="dash-tw-num__l"><?php echo htmlspecialchars($current_month_label); ?></div></div>
+                    <div class="dash-tw-num" id="dash_active_3m" onclick="dashOpenDrilldown('active','3months')"><div class="dash-tw-num__v"><?php echo (int) $users_active['3months']; ?></div><div class="dash-tw-num__l">3 mesi</div></div>
+                    <div class="dash-tw-num" id="dash_active_6m" onclick="dashOpenDrilldown('active','6months')"><div class="dash-tw-num__v"><?php echo (int) $users_active['6months']; ?></div><div class="dash-tw-num__l">6 mesi</div></div>
                 </div>
                 <div class="dash-spark">
                     <?php
@@ -109,4 +109,25 @@
         </div>
 
     </div>
+    <?php
+    $this->widget('dialog', [
+        'id' => 'users_drilldown_dialog',
+        'width' => '600px',
+        'dynamicContent' => true,
+        'ajaxUrl' => 'function(){ return YAHOO.util.Dom.get("dash_drilldown_url").value; }',
+        'dynamicAjaxUrl' => true,
+        'constrainToViewport' => false,
+        'confirmOnly' => true,
+        'fixedCenter' => true,
+        'callObjectFunc' => 'Dashboard.oDialogCaller',
+    ]);
+    ?>
+    <input type="hidden" id="dash_drilldown_url" value="" />
+    <script type="text/javascript">
+        function dashOpenDrilldown(kind, period) {
+            var url = 'ajax.adm_server.php?r=adm/dashboard/users_drilldown&kind=' + kind + (period ? '&period=' + period : '');
+            YAHOO.util.Dom.get('dash_drilldown_url').value = url;
+            Dashboard.oDialogCaller['users_drilldown_dialog']();
+        }
+    </script>
 </div>

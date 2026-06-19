@@ -1,0 +1,33 @@
+<?php
+
+/*
+ * FORMA - The E-Learning Suite
+ *
+ * Copyright (c) 2013-2023 (Forma)
+ * https://www.formalms.org
+ * License https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+ *
+ * from docebo 4.0.5 CE 2008-2012 (c) docebo
+ * License https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+ */
+
+$html = '<table class="dash-table-preview">';
+$html .= '<tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th></tr>';
+foreach ($rows as $r) {
+    $html .= '<tr><td>' . htmlspecialchars($r['userid']) . '</td><td>' . htmlspecialchars($r['name']) . '</td></tr>';
+}
+if (empty($rows)) {
+    $html .= '<tr><td colspan="2">' . Lang::t('_NONE', 'standard') . '</td></tr>';
+}
+$html .= '</table>';
+
+if (isset($json)) {
+    echo $json->encode([
+        'success' => true,
+        'header' => $title,
+        'body' => $html,
+    ]);
+} else {
+    echo getTitleArea($title);
+    echo '<div class="std_block">' . $html . '</div>';
+}

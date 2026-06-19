@@ -4,6 +4,8 @@
 var E = YAHOO.util.Event, D = YAHOO.util.Dom;
 var Dashboard = {
 
+	oDialogCaller: {},
+
 	createUserRenderEvent: function() {
 		//YAHOO.util.Dom.get("username").focus();
 		E.onAvailable("create_user_tabview", function() {

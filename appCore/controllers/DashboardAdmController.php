@@ -236,6 +236,27 @@ class DashboardAdmController extends AdmController
         echo $this->json->encode($output);
     }
 
+    public function users_drilldownTask()
+    {
+        $kind = FormaLms\lib\Get::req('kind', DOTY_ALPHANUM, 'total');
+        $period = FormaLms\lib\Get::req('period', DOTY_ALPHANUM, 'month');
+
+        $titles = [
+            'total' => 'Totale utenti caricati',
+            'online' => 'Utenti connessi ora',
+            'admin' => 'Totale amministratori',
+            'superadmin' => 'Totale super admin',
+            'access' => 'Accessi',
+            'active' => 'Utenti attivi',
+        ];
+
+        $this->render('users_drilldown_dialog', [
+            'rows' => $this->model->getUsersDrilldownList($kind, $period),
+            'title' => isset($titles[$kind]) ? $titles[$kind] : 'Dettaglio',
+            'json' => $this->json,
+        ]);
+    }
+
     public function exportformatTask()
     {
         $this->render('export_dialog', [

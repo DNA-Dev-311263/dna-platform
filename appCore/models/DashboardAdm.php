@@ -975,4 +975,203 @@ class DashboardAdm extends Model
 
         return $output;
     }
+
+    /**
+     * Elenco utenti per il drill-down della Dashboard.
+     *
+     * @param string $kind 'total','online','admin','superadmin','access','active'
+     * @param string|false $period 'month'|'3months'|'6months', usato solo per 'access'/'active'
+     */
+    public function getUsersDrilldownList($kind, $period = false)
+    {
+        $aclManager = Docebo::user()->getACLManager();
+        $rows = [];
+
+        if ($kind === 'admin' || $kind === 'superadmin') {
+            $idst_group = $aclManager->getGroupST($kind === 'superadmin' ? ADMIN_GROUP_GODADMIN : ADMIN_GROUP_ADMIN);
+            $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, u.email FROM %adm_user u '
+                . ' JOIN %adm_group_members gm ON gm.idstMember = u.idst '
+                . " WHERE gm.idst = " . (int) $idst_group;
+            $res = $this->db->query($query);
+            while (list($idst, $userid, $firstname, $lastname, $email) = $this->db->fetch_row($res)) {
+                $rows[] = ['idst' => $idst, 'userid' => $userid, 'name' => $firstname . ' ' . $lastname, 'email' => $email];
+            }
+
+            return $rows;
+        }
+
+        if ($kind === 'access' || $kind === 'active') {
+            list($from, $to) = $this->periodToRange($period ?: 'month');
+            if ($kind === 'active') {
+                // ct.idReference -> learning_organization.idOrg, not idCourse directly;
+                // join through organization to filter by course (same fix as Task 4's
+                // getUsersActiveCount/getUsersMonthlyTrend).
+                $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
+                    . ' JOIN %lms_commontrack ct ON ct.idUser = u.idst '
+                    . ' JOIN %lms_organization org ON org.idOrg = ct.idReference '
+                    . " WHERE ct.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "' "
+                    . $this->scopeFilterSql('ct.idUser', 'org.idCourse');
+            } else {
+                $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
+                    . ' JOIN %lms_tracksession ts ON ts.idUser = u.idst '
+                    . " WHERE ts.enterTime BETWEEN '" . $from . "' AND '" . $to . "' "
+                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
+                    . ' AND ts.idUser NOT IN ('
+                    . "   SELECT DISTINCT ct2.idUser FROM %lms_commontrack ct2"
+                    . "   WHERE ct2.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "'"
+                    . ' )';
+            }
+            $res = $this->db->query($query);
+            while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
+                $rows[] = ['idst' => $idst, 'userid' => $userid, 'name' => $firstname . ' ' . $lastname];
+            }
+
+            return $rows;
+        }
+
+        // 'total' or 'online'
+        $data = new PeopleDataRetriever($GLOBALS['dbConn'], $GLOBALS['prefix_fw']);
+        if (!empty($this->users_filter)) {
+            $data->setUserFilter($this->users_filter);
+        }
+        if ($kind === 'online') {
+            $data->addFieldFilter('lastenter', date('Y-m-d H:i:s', time() - REFRESH_LAST_ENTER), '>');
+        }
+        // getRows() returns a raw DB resource (SELECT idst, userid, firstname, lastname, email, valid, signature),
+        // not an array — fetch it row by row like the rest of this codebase does.
+        $res = $data->getRows(0, 500);
+        while ($row = sql_fetch_assoc($res)) {
+            $rows[] = ['idst' => $row['idst'], 'userid' => $row['userid'], 'name' => $row['firstname'] . ' ' . $row['lastname']];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Risale dal nodo di organigramma dell'admin corrente fino al nodo di
+     * primo livello (l'"azienda" che gestisce). Ritorna false per il GodAdmin
+     * (che non e' scoped su una singola azienda) o se l'admin non e' legato
+     * a nessun nodo.
+     */
+    public function getAdminCompanyNode()
+    {
+        if ($this->user_level == ADMIN_GROUP_GODADMIN) {
+            return false;
+        }
+
+        $query = 'SELECT oct.idOrg, oct.idParent FROM core_org_chart_tree oct '
+            . ' JOIN core_group_members gm ON (gm.idst = oct.idst_oc OR gm.idst = oct.idst_ocd) '
+            . ' WHERE gm.idstMember = ' . (int) Docebo::user()->getIdSt()
+            . ' LIMIT 1';
+        $res = $this->db->query($query);
+        if (!$res || $this->db->num_rows($res) <= 0) {
+            return false;
+        }
+        list($idOrg, $idParent) = $this->db->fetch_row($res);
+
+        // risale fino al nodo con idParent = 0
+        while ((int) $idParent !== 0) {
+            $query = 'SELECT idOrg, idParent FROM core_org_chart_tree WHERE idOrg = ' . (int) $idParent;
+            $res = $this->db->query($query);
+            if (!$res || $this->db->num_rows($res) <= 0) {
+                break;
+            }
+            list($idOrg, $idParent) = $this->db->fetch_row($res);
+        }
+
+        return (int) $idOrg;
+    }
+
+    /**
+     * Numero di "aziende" (nodi di primo livello dell'organigramma).
+     * Per un Admin scoped su una singola azienda, ritorna sempre 1 (o 0 se
+     * non e' legato a nessun nodo).
+     */
+    public function getCompaniesCount()
+    {
+        if ($this->user_level != ADMIN_GROUP_GODADMIN) {
+            return $this->getAdminCompanyNode() ? 1 : 0;
+        }
+
+        list($count) = $this->db->fetch_row(
+            $this->db->query('SELECT COUNT(*) FROM core_org_chart_tree WHERE idParent = 0')
+        );
+
+        return (int) $count;
+    }
+
+    /**
+     * Elenco delle aziende (nodi di primo livello) con il numero di utenti
+     * totali nel loro sottoalbero. Per un Admin, elenco con la sola azienda
+     * gestita.
+     */
+    public function getCompaniesList()
+    {
+        $where = 'oct.idParent = 0';
+        if ($this->user_level != ADMIN_GROUP_GODADMIN) {
+            $node = $this->getAdminCompanyNode();
+            $where = $node ? 'oct.idOrg = ' . (int) $node : '0';
+        }
+
+        $query = 'SELECT oct.idOrg, oct.iLeft, oct.iRight, c.translation '
+            . ' FROM core_org_chart_tree oct '
+            . ' JOIN core_org_chart c ON c.id_dir = oct.idOrg AND c.lang_code = "' . getLanguage() . '" '
+            . ' WHERE ' . $where
+            . ' ORDER BY c.translation ASC';
+        $res = $this->db->query($query);
+
+        $rows = [];
+        while (list($idOrg, $iLeft, $iRight, $name) = $this->db->fetch_row($res)) {
+            $users_query = 'SELECT COUNT(*) FROM %adm_group_members gm '
+                . ' JOIN core_org_chart_tree d ON (d.idst_oc = gm.idst OR d.idst_ocd = gm.idst) '
+                . ' WHERE d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
+            list($users_count) = $this->db->fetch_row($this->db->query($users_query));
+
+            $rows[] = ['idOrg' => $idOrg, 'name' => $name, 'users_count' => (int) $users_count];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Figli diretti di un nodo di organigramma (per il drill-down ricorsivo).
+     */
+    public function getCompanyChildren($idOrg)
+    {
+        $query = 'SELECT oct.idOrg, c.translation '
+            . ' FROM core_org_chart_tree oct '
+            . ' JOIN core_org_chart c ON c.id_dir = oct.idOrg AND c.lang_code = "' . getLanguage() . '" '
+            . ' WHERE oct.idParent = ' . (int) $idOrg
+            . ' ORDER BY c.translation ASC';
+        $res = $this->db->query($query);
+
+        $rows = [];
+        while (list($childId, $name) = $this->db->fetch_row($res)) {
+            $has_children_query = 'SELECT COUNT(*) FROM core_org_chart_tree WHERE idParent = ' . (int) $childId;
+            list($has_children) = $this->db->fetch_row($this->db->query($has_children_query));
+            $rows[] = ['idOrg' => $childId, 'name' => $name, 'has_children' => (int) $has_children > 0];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Andamento mensile (ultimi $how_many_months mesi) di nuove aziende
+     * (nodi di primo livello) create, basato su date_created.
+     */
+    public function getCompaniesMonthlyTrend($how_many_months = 6)
+    {
+        $output = [];
+        for ($i = $how_many_months - 1; $i >= 0; --$i) {
+            $month_start = date('Y-m-01 00:00:00', strtotime('-' . $i . ' months'));
+            $month_end = date('Y-m-t 23:59:59', strtotime('-' . $i . ' months'));
+
+            $query = 'SELECT COUNT(*) FROM core_org_chart_tree '
+                . " WHERE idParent = 0 AND date_created BETWEEN '" . $month_start . "' AND '" . $month_end . "'";
+            list($count) = $this->db->fetch_row($this->db->query($query));
+            $output[] = ['label' => date('M', strtotime($month_start)), 'count' => (int) $count];
+        }
+
+        return $output;
+    }
 }
