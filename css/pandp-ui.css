@@ -812,13 +812,13 @@
 .dash-tw-num__v { font-size:18px; font-weight:700; color:#1a2b4a; transition: color .12s; }
 .dash-tw-num__l { font-size:10px; color:#8a9fc4; text-transform:uppercase; font-weight:700; margin-top:3px; }
 
-.dash-spark { display:flex; align-items:flex-end; gap:3px; height:34px; margin-top:8px; }
+.dash-spark { display:flex; align-items:flex-end; gap:4px; height:40px; margin-top:10px; }
 .dash-spark .b { flex:1; background:#cfe0fb; border-radius:2px 2px 0 0; }
 .dash-spark .b.now { background:#1a6ef7; }
 .dash-spark.companies .b { background:#cdebd9; }
 .dash-spark.companies .b.now { background:#28a745; }
 
-.dash-spark-dual { display:flex; align-items:flex-end; gap:6px; height:48px; margin-top:8px; }
+.dash-spark-dual { display:flex; align-items:flex-end; gap:8px; height:54px; margin-top:10px; }
 .dash-spark-dual .grp { flex:1; display:flex; align-items:flex-end; gap:2px; height:100%; }
 .dash-spark-dual .grp .b { flex:1; border-radius:2px 2px 0 0; }
 .dash-spark-dual .grp .b--sub { background:#fde3b8; }
