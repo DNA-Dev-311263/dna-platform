@@ -39,6 +39,8 @@ YAHOO.util.Event.onDOMReady(function() {
 	}
 
 	<?php echo $callEvents; ?>
+	<?php echo isset($callDelegateEvents) ? $callDelegateEvents : ''; ?>
+	<?php echo isset($callObjectFunc) ? $callObjectFunc : ''; ?>
 
 });
 </script>
