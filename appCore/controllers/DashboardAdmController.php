@@ -62,11 +62,7 @@ class DashboardAdmController extends AdmController
         Util::get_js(FormaLms\lib\Get::rel_path('adm') . '/views/dashboard/dashboard.js', true, true);
         Util::get_js(FormaLms\lib\Get::rel_path('adm') . '/views/dashboard/js/show.js', true, true);
         Util::get_css(FormaLms\lib\Get::rel_path('adm') . '/views/dashboard/css/show.css', true, true);
-        Util::get_js(FormaLms\lib\Get::rel_path('base') . '/addons/jquery/chartist/chartist.min.js', true, true);
-        Util::get_js(FormaLms\lib\Get::rel_path('base') . '/addons/jquery/chartist-plugin-pointlabels/chartist-plugin-pointlabels.min.js', true, true);
-        Util::get_css(FormaLms\lib\Get::rel_path('base') . '/addons/jquery/chartist/chartist.min.css', true, true);
         Util::get_css(FormaLms\lib\Get::rel_path('base') . '/css/pandp-ui.css', true, true);
-        $charts_num_days = 7;
 
         //check if there are any problems with technical configuration of the server
         $php_conf = ini_get_all(); //this
@@ -94,28 +90,27 @@ class DashboardAdmController extends AdmController
 
             'can_approve' => checkPerm('approve_waiting_user', true, 'directory', 'framework'),
             'version' => $this->model->getVersionExternalInfo(),
+            'is_godadmin' => Docebo::user()->getUserLevelId() == ADMIN_GROUP_GODADMIN,
 
             'user_stats' => $this->model->getUsersStats(),
+            'users_access' => [
+                'month' => $this->model->getUsersAccessCount('month'),
+                '3months' => $this->model->getUsersAccessCount('3months'),
+                '6months' => $this->model->getUsersAccessCount('6months'),
+            ],
+            'users_active' => [
+                'month' => $this->model->getUsersActiveCount('month'),
+                '3months' => $this->model->getUsersActiveCount('3months'),
+                '6months' => $this->model->getUsersActiveCount('6months'),
+            ],
+            'users_access_trend' => $this->model->getUsersMonthlyTrend('access', 6),
+            'users_active_trend' => $this->model->getUsersMonthlyTrend('active', 6),
+            'current_month_label' => Lang::t('_MONTH_' . date('m'), 'standard'),
 
             'course_stats' => $this->model->getCoursesStats(),
             'course_months_stats' => $this->model->getCoursesMonthsStats(),
 
-            'userdata_accesses' => $this->json->encode($this->model->getUsersChartAccessData($charts_num_days)),
-            'userdata_accesses_js' => $this->model->getUsersChartAccessDataJS($charts_num_days),
-            'userdata_registrations' => $this->json->encode($this->model->getUsersChartRegisterData($charts_num_days)),
-            'userdata_registrations_js' => $this->model->getUsersChartRegisterDataJS($charts_num_days),
-
-            'coursedata_subscriptions' => $this->json->encode($this->model->getCoursesChartSubscriptionData($charts_num_days)),
-            'coursedata_subscriptions_js' => $this->model->getCoursesChartSubscriptionDataJS($charts_num_days),
-
-            'coursedata_startattendings' => $this->json->encode($this->model->getCoursesChartStartAttendingData($charts_num_days)),
-            'coursedata_startattendings_js' => $this->model->getCoursesChartStartAttendingDataJS($charts_num_days),
-
-            'coursedata_completed' => $this->json->encode($this->model->getCoursesChartCompletedData($charts_num_days)),
-            'coursedata_completed_js' => $this->model->getCoursesChartCompletedDataJS($charts_num_days),
-
             'permissions' => $this->permissions,
-
             'reports' => $arr_report,
         ]);
     }

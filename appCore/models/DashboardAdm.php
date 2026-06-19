@@ -848,4 +848,131 @@ class DashboardAdm extends Model
 
         return sql_query($query);
     }
+
+    /**
+     * Convert a period key ('month','3months','6months') into a [from, to] date range.
+     *
+     * @param string $period
+     * @return array
+     */
+    private function periodToRange($period)
+    {
+        $to = date('Y-m-d 23:59:59');
+        switch ($period) {
+            case '3months':
+                $from = date('Y-m-01 00:00:00', strtotime('-2 months'));
+                break;
+            case '6months':
+                $from = date('Y-m-01 00:00:00', strtotime('-5 months'));
+                break;
+            case 'month':
+            default:
+                $from = date('Y-m-01 00:00:00');
+                break;
+        }
+
+        return [$from, $to];
+    }
+
+    private function scopeFilterSql($users_column, $courses_column)
+    {
+        $sql = '';
+        if ($this->user_level != ADMIN_GROUP_GODADMIN) {
+            if ($this->users_filter !== false) {
+                $sql .= empty($this->users_filter)
+                    ? ' AND 0 '
+                    : ' AND ' . $users_column . ' IN (' . implode(',', $this->users_filter) . ') ';
+            }
+            if ($this->courses_filter !== false) {
+                $sql .= empty($this->courses_filter)
+                    ? ' AND 0 '
+                    : ' AND ' . $courses_column . ' IN (' . implode(',', $this->courses_filter) . ') ';
+            }
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Utenti che hanno aperto una sessione nel periodo ma non hanno visionato
+     * nessun contenuto formativo nello stesso periodo.
+     */
+    public function getUsersAccessCount($period)
+    {
+        list($from, $to) = $this->periodToRange($period);
+
+        $query = 'SELECT COUNT(DISTINCT ts.idUser) FROM %lms_tracksession ts '
+            . " WHERE ts.enterTime BETWEEN '" . $from . "' AND '" . $to . "' "
+            . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
+            . ' AND ts.idUser NOT IN ('
+            . "   SELECT DISTINCT ct.idUser FROM %lms_commontrack ct"
+            . "   WHERE ct.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "'"
+            . ' )';
+
+        list($count) = $this->db->fetch_row($this->db->query($query));
+
+        return (int) $count;
+    }
+
+    /**
+     * Utenti che hanno visionato almeno un contenuto formativo nel periodo
+     * (sempre filtrato sull'anno corrente, come richiesto dalla spec).
+     */
+    public function getUsersActiveCount($period)
+    {
+        list($from, $to) = $this->periodToRange($period);
+        $year_start = date('Y-01-01 00:00:00');
+        if ($from < $year_start) {
+            $from = $year_start;
+        }
+
+        // learning_commontrack.idReference points to learning_organization.idOrg, NOT
+        // to learning_course.idCourse directly — must join through learning_organization
+        // to filter by course (see lib.stats.php:176-180 for the established pattern).
+        $query = 'SELECT COUNT(DISTINCT ct.idUser) FROM %lms_commontrack ct '
+            . ' JOIN %lms_organization org ON org.idOrg = ct.idReference '
+            . " WHERE ct.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "' "
+            . $this->scopeFilterSql('ct.idUser', 'org.idCourse');
+
+        list($count) = $this->db->fetch_row($this->db->query($query));
+
+        return (int) $count;
+    }
+
+    /**
+     * Andamento mensile (ultimi $how_many_months mesi) per Accessi o Utenti attivi.
+     *
+     * @param string $type 'access' o 'active'
+     * @param int $how_many_months
+     * @return array lista di ['label' => 'Gen', 'count' => N], dal piu' vecchio al piu' recente
+     */
+    public function getUsersMonthlyTrend($type, $how_many_months = 6)
+    {
+        $output = [];
+        for ($i = $how_many_months - 1; $i >= 0; --$i) {
+            $month_start = date('Y-m-01 00:00:00', strtotime('-' . $i . ' months'));
+            $month_end = date('Y-m-t 23:59:59', strtotime('-' . $i . ' months'));
+
+            if ($type === 'active') {
+                // same idReference -> idOrg join as getUsersActiveCount() above
+                $query = 'SELECT COUNT(DISTINCT ct.idUser) FROM %lms_commontrack ct '
+                    . ' JOIN %lms_organization org ON org.idOrg = ct.idReference '
+                    . " WHERE ct.dateAttempt BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
+                    . $this->scopeFilterSql('ct.idUser', 'org.idCourse');
+            } else {
+                $query = 'SELECT COUNT(DISTINCT ts.idUser) FROM %lms_tracksession ts '
+                    . " WHERE ts.enterTime BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
+                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
+                    . ' AND ts.idUser NOT IN ('
+                    . "   SELECT DISTINCT ct.idUser FROM %lms_commontrack ct"
+                    . "   WHERE ct.dateAttempt BETWEEN '" . $month_start . "' AND '" . $month_end . "'"
+                    . ' )';
+            }
+
+            list($count) = $this->db->fetch_row($this->db->query($query));
+            $output[] = ['label' => date('M', strtotime($month_start)), 'count' => (int) $count];
+        }
+
+        return $output;
+    }
 }
