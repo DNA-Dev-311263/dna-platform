@@ -1197,12 +1197,18 @@ class DashboardAdm extends Model
      */
     public function getCoursesCompletedCount($period = false)
     {
-        $query = 'SELECT COUNT(*) FROM %lms_courseuser WHERE status = 2 ';
+        // join di validazione: learning_courseuser puo' contenere righe storiche
+        // che puntano a utenti/corsi nel frattempo cancellati (verificato sui dati
+        // reali) — contiamo solo completamenti riferiti a utenti/corsi esistenti.
+        $query = 'SELECT COUNT(*) FROM %lms_courseuser cu '
+            . ' JOIN %adm_user u ON u.idst = cu.idUser '
+            . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
+            . ' WHERE cu.status = 2 ';
         if ($period) {
             list($from, $to) = $this->periodToRange($period);
-            $query .= " AND date_complete BETWEEN '" . $from . "' AND '" . $to . "' ";
+            $query .= " AND cu.date_complete BETWEEN '" . $from . "' AND '" . $to . "' ";
         }
-        $query .= $this->scopeFilterSql('idUser', 'idCourse');
+        $query .= $this->scopeFilterSql('cu.idUser', 'cu.idCourse');
 
         list($count) = $this->db->fetch_row($this->db->query($query));
 
@@ -1211,16 +1217,20 @@ class DashboardAdm extends Model
 
     /**
      * Numero di certificati rilasciati (learning_certificate_assign),
-     * opzionalmente filtrati su un periodo.
+     * opzionalmente filtrati su un periodo. Stesso join di validazione di
+     * getCoursesCompletedCount(): solo certificati di utenti/corsi esistenti.
      */
     public function getCertificatesIssuedCount($period = false)
     {
-        $query = 'SELECT COUNT(*) FROM %lms_certificate_assign WHERE 1=1 ';
+        $query = 'SELECT COUNT(*) FROM %lms_certificate_assign ce '
+            . ' JOIN %adm_user u ON u.idst = ce.id_user '
+            . ' JOIN %lms_course c ON c.idCourse = ce.id_course '
+            . ' WHERE 1=1 ';
         if ($period) {
             list($from, $to) = $this->periodToRange($period);
-            $query .= " AND on_date BETWEEN '" . $from . "' AND '" . $to . "' ";
+            $query .= " AND ce.on_date BETWEEN '" . $from . "' AND '" . $to . "' ";
         }
-        $query .= $this->scopeFilterSql('id_user', 'id_course');
+        $query .= $this->scopeFilterSql('ce.id_user', 'ce.id_course');
 
         list($count) = $this->db->fetch_row($this->db->query($query));
 
@@ -1238,14 +1248,18 @@ class DashboardAdm extends Model
             $month_start = date('Y-m-01 00:00:00', strtotime('-' . $i . ' months'));
             $month_end = date('Y-m-t 23:59:59', strtotime('-' . $i . ' months'));
 
-            $sub_query = 'SELECT COUNT(*) FROM %lms_courseuser '
-                . " WHERE date_inscr BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
-                . $this->scopeFilterSql('idUser', 'idCourse');
+            $sub_query = 'SELECT COUNT(*) FROM %lms_courseuser cu '
+                . ' JOIN %adm_user u ON u.idst = cu.idUser '
+                . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
+                . " WHERE cu.date_inscr BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
+                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse');
             list($subs) = $this->db->fetch_row($this->db->query($sub_query));
 
-            $comp_query = 'SELECT COUNT(*) FROM %lms_courseuser '
-                . " WHERE status = 2 AND date_complete BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
-                . $this->scopeFilterSql('idUser', 'idCourse');
+            $comp_query = 'SELECT COUNT(*) FROM %lms_courseuser cu '
+                . ' JOIN %adm_user u ON u.idst = cu.idUser '
+                . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
+                . " WHERE cu.status = 2 AND cu.date_complete BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
+                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse');
             list($comp) = $this->db->fetch_row($this->db->query($comp_query));
 
             $output[] = ['label' => date('M', strtotime($month_start)), 'subscriptions' => (int) $subs, 'completions' => (int) $comp];
@@ -1255,13 +1269,14 @@ class DashboardAdm extends Model
     }
 
     /**
-     * Top corsi per numero di iscritti.
+     * Top corsi per numero di iscritti. Le subquery validano anche l'utente
+     * per lo stesso motivo delle altre metriche Corsi (vedi sopra).
      */
     public function getTopViewedCourses($limit = 5)
     {
         $query = 'SELECT c.idCourse, c.name, '
-            . ' (SELECT COUNT(*) FROM %lms_courseuser WHERE idCourse = c.idCourse) AS enrolled, '
-            . ' (SELECT COUNT(*) FROM %lms_courseuser WHERE idCourse = c.idCourse AND status = 2) AS completed, '
+            . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse) AS enrolled, '
+            . ' (SELECT COUNT(*) FROM %lms_courseuser cu3 JOIN %adm_user u3 ON u3.idst = cu3.idUser WHERE cu3.idCourse = c.idCourse AND cu3.status = 2) AS completed, '
             . ' c.status '
             . ' FROM %lms_course c WHERE 1=1 ';
         if ($this->courses_filter !== false) {
@@ -1280,6 +1295,108 @@ class DashboardAdm extends Model
                 'enrolled' => (int) $enrolled,
                 'completed' => (int) $completed,
                 'active' => (int) $status === 1,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Elenco di dettaglio per il drill-down dei KPI della sezione Corsi.
+     *
+     * @param string $kind 'active','activating','completed','certificates','subscriptions'
+     */
+    public function getCoursesDrilldownList($kind)
+    {
+        $rows = [];
+        $courses_filter_sql = '';
+        if ($this->courses_filter !== false) {
+            $courses_filter_sql = empty($this->courses_filter)
+                ? ' AND 0 '
+                : ' AND idCourse IN (' . implode(',', $this->courses_filter) . ') ';
+        }
+
+        if ($kind === 'active') {
+            $query = "SELECT idCourse, name FROM %lms_course WHERE status = '1' " . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
+            $res = $this->db->query($query);
+            while (list($idCourse, $name) = $this->db->fetch_row($res)) {
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ''];
+            }
+
+            return $rows;
+        }
+
+        if ($kind === 'activating') {
+            $from = date('Y-m-d H:i:s');
+            $to = date('Y-m-d', time() + 7 * 24 * 3600) . ' 23:59:59';
+            $query = "SELECT idCourse, name, date_begin FROM %lms_course WHERE date_begin > '" . $from . "' AND date_begin < '" . $to . "' "
+                . $courses_filter_sql . ' ORDER BY date_begin ASC LIMIT 200';
+            $res = $this->db->query($query);
+            while (list($idCourse, $name, $date_begin) = $this->db->fetch_row($res)) {
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => date('d/m/Y', strtotime($date_begin))];
+            }
+
+            return $rows;
+        }
+
+        if ($kind === 'completed') {
+            $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, c.name, cu.date_complete '
+                . ' FROM %lms_courseuser cu '
+                . ' JOIN %adm_user u ON u.idst = cu.idUser '
+                . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
+                . ' WHERE cu.status = 2 '
+                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse')
+                . ' ORDER BY cu.date_complete DESC LIMIT 200';
+            $res = $this->db->query($query);
+            while (list($idst, $userid, $firstname, $lastname, $name, $date_complete) = $this->db->fetch_row($res)) {
+                $rows[] = [
+                    'userid' => ltrim($userid, '/'),
+                    'name' => $firstname . ' ' . $lastname,
+                    'course' => $name,
+                    'detail' => date('d/m/Y', strtotime($date_complete)),
+                ];
+            }
+
+            return $rows;
+        }
+
+        if ($kind === 'certificates') {
+            $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, c.name, ce.on_date, cert.name AS cert_name '
+                . ' FROM %lms_certificate_assign ce '
+                . ' JOIN %adm_user u ON u.idst = ce.id_user '
+                . ' JOIN %lms_course c ON c.idCourse = ce.id_course '
+                . ' JOIN %lms_certificate cert ON cert.id_certificate = ce.id_certificate '
+                . ' WHERE 1=1 '
+                . $this->scopeFilterSql('ce.id_user', 'ce.id_course')
+                . ' ORDER BY ce.on_date DESC LIMIT 200';
+            $res = $this->db->query($query);
+            while (list($idst, $userid, $firstname, $lastname, $name, $on_date, $cert_name) = $this->db->fetch_row($res)) {
+                $rows[] = [
+                    'userid' => ltrim($userid, '/'),
+                    'name' => $firstname . ' ' . $lastname,
+                    'course' => $name . ' (' . $cert_name . ')',
+                    'detail' => date('d/m/Y', strtotime($on_date)),
+                ];
+            }
+
+            return $rows;
+        }
+
+        // 'subscriptions'
+        $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, c.name, cu.date_inscr '
+            . ' FROM %lms_courseuser cu '
+            . ' JOIN %adm_user u ON u.idst = cu.idUser '
+            . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
+            . ' WHERE cu.waiting = 0 '
+            . $this->scopeFilterSql('cu.idUser', 'cu.idCourse')
+            . ' ORDER BY cu.date_inscr DESC LIMIT 200';
+        $res = $this->db->query($query);
+        while (list($idst, $userid, $firstname, $lastname, $name, $date_inscr) = $this->db->fetch_row($res)) {
+            $rows[] = [
+                'userid' => ltrim($userid, '/'),
+                'name' => $firstname . ' ' . $lastname,
+                'course' => $name,
+                'detail' => date('d/m/Y', strtotime($date_inscr)),
             ];
         }
 

@@ -129,23 +129,23 @@
             <div class="dash-col__title"><span class="dot dot--courses"></span> Corsi</div>
 
             <div class="dash-kpi-grid dash-kpi-grid--3">
-                <div class="dash-kpi">
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('active')">
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['active']; ?></div>
                     <div class="dash-kpi__label">Attivi</div>
                 </div>
-                <div class="dash-kpi">
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('completed')">
                     <div class="dash-kpi__value"><?php echo (int) $courses_completed; ?></div>
                     <div class="dash-kpi__label">Completati</div>
                 </div>
-                <div class="dash-kpi">
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('certificates')">
                     <div class="dash-kpi__value"><?php echo (int) $certificates_issued; ?></div>
                     <div class="dash-kpi__label">Certificati</div>
                 </div>
-                <div class="dash-kpi">
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('activating')">
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['active_seven']; ?></div>
                     <div class="dash-kpi__label">In attivaz. 7gg</div>
                 </div>
-                <div class="dash-kpi">
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('subscriptions')">
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['user_subscription']; ?></div>
                     <div class="dash-kpi__label">Iscrizioni</div>
                 </div>
@@ -259,6 +259,28 @@
             var url = 'ajax.adm_server.php?r=adm/dashboard/course_drilldown&idCourse=' + idCourse;
             YAHOO.util.Dom.get('dash_course_drilldown_url').value = url;
             Dashboard.oDialogCaller['course_drilldown_dialog']();
+        }
+    </script>
+
+    <?php
+    $this->widget('dialog', [
+        'id' => 'courses_drilldown_dialog',
+        'width' => '650px',
+        'dynamicContent' => true,
+        'ajaxUrl' => 'function(){ return YAHOO.util.Dom.get("dash_courses_drilldown_url").value; }',
+        'dynamicAjaxUrl' => true,
+        'constrainToViewport' => false,
+        'confirmOnly' => true,
+        'fixedCenter' => true,
+        'callObjectFunc' => 'Dashboard.oDialogCaller',
+    ]);
+    ?>
+    <input type="hidden" id="dash_courses_drilldown_url" value="" />
+    <script type="text/javascript">
+        function dashOpenCoursesDrilldown(kind) {
+            var url = 'ajax.adm_server.php?r=adm/dashboard/courses_drilldown&kind=' + kind;
+            YAHOO.util.Dom.get('dash_courses_drilldown_url').value = url;
+            Dashboard.oDialogCaller['courses_drilldown_dialog']();
         }
     </script>
 </div>

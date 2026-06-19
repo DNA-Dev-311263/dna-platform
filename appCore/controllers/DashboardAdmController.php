@@ -297,6 +297,17 @@ class DashboardAdmController extends AdmController
         ]);
     }
 
+    public function courses_drilldownTask()
+    {
+        $kind = FormaLms\lib\Get::req('kind', DOTY_ALPHANUM, 'active');
+
+        $this->render('courses_drilldown_dialog', [
+            'kind' => $kind,
+            'rows' => $this->model->getCoursesDrilldownList($kind),
+            'json' => $this->json,
+        ]);
+    }
+
     public function exportformatTask()
     {
         $this->render('export_dialog', [
