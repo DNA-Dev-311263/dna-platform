@@ -105,6 +105,9 @@ class DashboardAdmController extends AdmController
             ],
             'users_access_trend' => $this->model->getUsersMonthlyTrend('access', 6),
             'users_active_trend' => $this->model->getUsersMonthlyTrend('active', 6),
+            'companies_count' => $this->model->getCompaniesCount(),
+            'companies_list' => $this->model->getCompaniesList(),
+            'companies_trend' => $this->model->getCompaniesMonthlyTrend(6),
             'current_month_label' => Lang::t('_MONTH_' . date('m'), 'standard'),
 
             'course_stats' => $this->model->getCoursesStats(),
@@ -253,6 +256,29 @@ class DashboardAdmController extends AdmController
         $this->render('users_drilldown_dialog', [
             'rows' => $this->model->getUsersDrilldownList($kind, $period),
             'title' => isset($titles[$kind]) ? $titles[$kind] : 'Dettaglio',
+            'json' => $this->json,
+        ]);
+    }
+
+    public function companies_drilldownTask()
+    {
+        $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
+
+        if ($idOrg <= 0) {
+            // root: per GodAdmin, lista delle aziende; per Admin, la sua azienda
+            $companies = $this->model->getCompaniesList();
+            $children = array_map(function ($c) {
+                return ['idOrg' => $c['idOrg'], 'name' => $c['name'], 'has_children' => true];
+            }, $companies);
+            $current_name = 'Tutte le aziende';
+        } else {
+            $children = $this->model->getCompanyChildren($idOrg);
+            $current_name = 'Sotto-nodi';
+        }
+
+        $this->render('companies_drilldown_dialog', [
+            'children' => $children,
+            'current_name' => $current_name,
             'json' => $this->json,
         ]);
     }

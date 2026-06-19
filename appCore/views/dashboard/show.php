@@ -82,10 +82,46 @@
             </div>
         </div>
 
-        <!-- COLONNA AZIENDE (placeholder, future task completes it) -->
+        <!-- COLONNA AZIENDE -->
         <div class="dash-col">
             <div class="dash-col__title"><span class="dot dot--companies"></span> Aziende</div>
-            <p style="font-size:12px;color:#aebcd8;">Sezione in arrivo.</p>
+
+            <div class="dash-kpi-grid">
+                <div class="dash-kpi" onclick="dashOpenCompanyDrilldown(0)">
+                    <div class="dash-kpi__value"><?php echo (int) $companies_count; ?></div>
+                    <div class="dash-kpi__label">Aziende caricate</div>
+                </div>
+            </div>
+
+            <div class="dash-tw">
+                <div class="dash-tw__head"><div class="dash-tw__title">Nuove aziende — ultimi 6 mesi</div></div>
+                <div class="dash-spark companies">
+                    <?php
+                    $max_comp = max(1, max(array_column($companies_trend, 'count')));
+                    foreach ($companies_trend as $idx => $pt) {
+                        $h = max(8, round(($pt['count'] / $max_comp) * 100));
+                        $cls = ($idx === count($companies_trend) - 1) ? 'b now' : 'b';
+                        echo '<div class="' . $cls . '" style="height:' . $h . '%" title="' . htmlspecialchars($pt['label']) . ': ' . (int) $pt['count'] . '"></div>';
+                    }
+                    ?>
+                </div>
+                <div class="dash-drill-note">Conteggio storico approssimato: il tracciamento delle date e' iniziato il 19/06/2026</div>
+            </div>
+
+            <div class="dash-tw">
+                <div class="dash-tw__head"><div class="dash-tw__title">Aziende — elenco rapido</div></div>
+                <table class="dash-table-preview">
+                    <tr><th>Azienda</th><th>Utenti</th><th></th></tr>
+                    <?php foreach ($companies_list as $c) { ?>
+                        <tr>
+                            <td class="dash-link" onclick="dashOpenCompanyDrilldown(<?php echo (int) $c['idOrg']; ?>)"><?php echo htmlspecialchars($c['name']); ?></td>
+                            <td><?php echo (int) $c['users_count']; ?></td>
+                            <td>&#128269;</td>
+                        </tr>
+                    <?php } ?>
+                </table>
+                <div class="dash-drill-note">&#8627; click su un'azienda per esplorare i nodi figli e i sotto-nodi</div>
+            </div>
         </div>
 
         <!-- COLONNA CORSI (placeholder, future task completes it) -->
@@ -128,6 +164,28 @@
             var url = 'ajax.adm_server.php?r=adm/dashboard/users_drilldown&kind=' + kind + (period ? '&period=' + period : '');
             YAHOO.util.Dom.get('dash_drilldown_url').value = url;
             Dashboard.oDialogCaller['users_drilldown_dialog']();
+        }
+    </script>
+
+    <?php
+    $this->widget('dialog', [
+        'id' => 'companies_drilldown_dialog',
+        'width' => '600px',
+        'dynamicContent' => true,
+        'ajaxUrl' => 'function(){ return YAHOO.util.Dom.get("dash_company_drilldown_url").value; }',
+        'dynamicAjaxUrl' => true,
+        'constrainToViewport' => false,
+        'confirmOnly' => true,
+        'fixedCenter' => true,
+        'callObjectFunc' => 'Dashboard.oDialogCaller',
+    ]);
+    ?>
+    <input type="hidden" id="dash_company_drilldown_url" value="" />
+    <script type="text/javascript">
+        function dashOpenCompanyDrilldown(idOrg) {
+            var url = 'ajax.adm_server.php?r=adm/dashboard/companies_drilldown&idOrg=' + idOrg;
+            YAHOO.util.Dom.get('dash_company_drilldown_url').value = url;
+            Dashboard.oDialogCaller['companies_drilldown_dialog']();
         }
     </script>
 </div>
