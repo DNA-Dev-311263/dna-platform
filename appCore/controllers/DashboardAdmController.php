@@ -112,6 +112,10 @@ class DashboardAdmController extends AdmController
 
             'course_stats' => $this->model->getCoursesStats(),
             'course_months_stats' => $this->model->getCoursesMonthsStats(),
+            'courses_completed' => $this->model->getCoursesCompletedCount(),
+            'certificates_issued' => $this->model->getCertificatesIssuedCount(),
+            'courses_trend' => $this->model->getCoursesEnrollmentCompletionTrend(6),
+            'top_courses' => $this->model->getTopViewedCourses(5),
 
             'permissions' => $this->permissions,
             'reports' => $arr_report,

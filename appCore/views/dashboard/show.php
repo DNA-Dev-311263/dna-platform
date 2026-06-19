@@ -124,13 +124,22 @@
             </div>
         </div>
 
-        <!-- COLONNA CORSI (placeholder, future task completes it) -->
+        <!-- COLONNA CORSI -->
         <div class="dash-col">
             <div class="dash-col__title"><span class="dot dot--courses"></span> Corsi</div>
-            <div class="dash-kpi-grid">
+
+            <div class="dash-kpi-grid dash-kpi-grid--3">
                 <div class="dash-kpi">
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['active']; ?></div>
                     <div class="dash-kpi__label">Attivi</div>
+                </div>
+                <div class="dash-kpi">
+                    <div class="dash-kpi__value"><?php echo (int) $courses_completed; ?></div>
+                    <div class="dash-kpi__label">Completati</div>
+                </div>
+                <div class="dash-kpi">
+                    <div class="dash-kpi__value"><?php echo (int) $certificates_issued; ?></div>
+                    <div class="dash-kpi__label">Certificati</div>
                 </div>
                 <div class="dash-kpi">
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['active_seven']; ?></div>
@@ -141,7 +150,49 @@
                     <div class="dash-kpi__label">Iscrizioni</div>
                 </div>
             </div>
-            <p style="font-size:12px;color:#aebcd8;">Completati, certificati e grafico in arrivo.</p>
+
+            <div class="dash-tw">
+                <div class="dash-tw__head"><div class="dash-tw__title">Iscrizioni vs Completamenti — ultimi 6 mesi</div></div>
+                <div class="dash-spark-dual">
+                    <?php
+                    $max_course = 1;
+                    foreach ($courses_trend as $pt) {
+                        $max_course = max($max_course, $pt['subscriptions'], $pt['completions']);
+                    }
+                    foreach ($courses_trend as $idx => $pt) {
+                        $h_sub = max(6, round(($pt['subscriptions'] / $max_course) * 100));
+                        $h_comp = max(6, round(($pt['completions'] / $max_course) * 100));
+                        $cls = ($idx === count($courses_trend) - 1) ? 'grp now' : 'grp';
+                        echo '<div class="' . $cls . '" title="' . htmlspecialchars($pt['label']) . '">'
+                            . '<div class="b b--sub" style="height:' . $h_sub . '%"></div>'
+                            . '<div class="b b--comp" style="height:' . $h_comp . '%"></div>'
+                            . '</div>';
+                    }
+                    ?>
+                </div>
+                <div class="dash-legend">
+                    <span><i style="background:#fde3b8"></i> Iscrizioni</span>
+                    <span><i style="background:#f0a93e"></i> Completamenti</span>
+                </div>
+            </div>
+
+            <div class="dash-tw">
+                <div class="dash-tw__head"><div class="dash-tw__title">Corsi più visti</div></div>
+                <table class="dash-table-preview">
+                    <tr><th>Corso</th><th>Iscritti</th><th>Compl.</th><th></th></tr>
+                    <?php foreach ($top_courses as $tc) { ?>
+                        <tr>
+                            <td><a href="index.php?r=alms/course/show&id_course=<?php echo (int) $tc['idCourse']; ?>"><?php echo htmlspecialchars($tc['name']); ?></a></td>
+                            <td><?php echo (int) $tc['enrolled']; ?></td>
+                            <td><?php echo (int) $tc['completed']; ?></td>
+                            <td><span class="pui-badge <?php echo $tc['active'] ? 'pui-badge--success' : 'pui-badge--neutral'; ?>"><?php echo $tc['active'] ? 'Attivo' : 'Non attivo'; ?></span></td>
+                        </tr>
+                    <?php } ?>
+                    <?php if (empty($top_courses)) { ?>
+                        <tr><td colspan="4"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
+                    <?php } ?>
+                </table>
+            </div>
         </div>
 
     </div>
