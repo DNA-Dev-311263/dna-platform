@@ -17,13 +17,14 @@ $titles = [
     'completed' => 'Completamenti',
     'certificates' => 'Certificati rilasciati',
     'subscriptions' => 'Iscrizioni',
+    'category' => 'Corsi per categoria',
 ];
 $title = isset($titles[$kind]) ? $titles[$kind] : 'Dettaglio';
 
 $html = '<div class="dash-dialog-body"><table class="dash-table-preview">';
 
-if ($kind === 'active' || $kind === 'activating') {
-    $html .= '<tr><th>Corso</th><th>' . ($kind === 'activating' ? 'Data inizio' : '') . '</th></tr>';
+if ($kind === 'active' || $kind === 'activating' || $kind === 'category') {
+    $html .= '<tr><th>Corso</th><th>' . ($kind === 'activating' ? 'Data inizio' : ($kind === 'category' ? 'Stato' : '')) . '</th></tr>';
     foreach ($rows as $r) {
         $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . htmlspecialchars($r['detail']) . '</td></tr>';
     }

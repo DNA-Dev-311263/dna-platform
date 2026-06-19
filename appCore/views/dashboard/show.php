@@ -17,7 +17,7 @@
             <div class="dash-col__title"><span class="dot dot--users"></span> <?php echo Lang::t('_USERS', 'dashboard'); ?></div>
 
             <div class="dash-kpi-grid">
-                <div class="dash-kpi" id="dash_kpi_users_total" onclick="dashOpenDrilldown('total')">
+                <div class="dash-kpi dash-kpi--static">
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['all'] - 1; ?></div>
                     <div class="dash-kpi__label">Totale caricati</div>
                 </div>
@@ -133,10 +133,6 @@
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['active']; ?></div>
                     <div class="dash-kpi__label">Attivi</div>
                 </div>
-                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('completed')">
-                    <div class="dash-kpi__value"><?php echo (int) $courses_completed; ?></div>
-                    <div class="dash-kpi__label">Completati</div>
-                </div>
                 <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('certificates')">
                     <div class="dash-kpi__value"><?php echo (int) $certificates_issued; ?></div>
                     <div class="dash-kpi__label">Certificati</div>
@@ -190,6 +186,22 @@
                     <?php } ?>
                     <?php if (empty($top_courses)) { ?>
                         <tr><td colspan="4"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
+                    <?php } ?>
+                </table>
+            </div>
+
+            <div class="dash-tw">
+                <div class="dash-tw__head"><div class="dash-tw__title">Corsi per categoria</div></div>
+                <table class="dash-table-preview">
+                    <tr><th>Categoria</th><th>Corsi</th></tr>
+                    <?php foreach ($courses_by_category as $cc) { ?>
+                        <tr>
+                            <td class="dash-link" onclick="dashOpenCoursesDrilldown('category', <?php echo (int) $cc['idCategory']; ?>)"><?php echo htmlspecialchars($cc['name']); ?></td>
+                            <td><?php echo (int) $cc['count']; ?></td>
+                        </tr>
+                    <?php } ?>
+                    <?php if (empty($courses_by_category)) { ?>
+                        <tr><td colspan="2"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
                     <?php } ?>
                 </table>
             </div>
@@ -277,8 +289,8 @@
     ?>
     <input type="hidden" id="dash_courses_drilldown_url" value="" />
     <script type="text/javascript">
-        function dashOpenCoursesDrilldown(kind) {
-            var url = 'ajax.adm_server.php?r=adm/dashboard/courses_drilldown&kind=' + kind;
+        function dashOpenCoursesDrilldown(kind, idCategory) {
+            var url = 'ajax.adm_server.php?r=adm/dashboard/courses_drilldown&kind=' + kind + (idCategory ? '&idCategory=' + idCategory : '');
             YAHOO.util.Dom.get('dash_courses_drilldown_url').value = url;
             Dashboard.oDialogCaller['courses_drilldown_dialog']();
         }

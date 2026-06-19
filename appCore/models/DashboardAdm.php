@@ -1302,11 +1302,44 @@ class DashboardAdm extends Model
     }
 
     /**
+     * Numero di corsi per categoria (learning_category), solo categorie con
+     * almeno un corso.
+     */
+    public function getCoursesByCategory()
+    {
+        $courses_filter_sql = '';
+        if ($this->courses_filter !== false) {
+            $courses_filter_sql = empty($this->courses_filter)
+                ? ' AND 0 '
+                : ' AND c.idCourse IN (' . implode(',', $this->courses_filter) . ') ';
+        }
+
+        $query = 'SELECT cat.idCategory, cat.path, COUNT(c.idCourse) AS num_courses '
+            . ' FROM %lms_category cat '
+            . ' JOIN %lms_course c ON c.idCategory = cat.idCategory '
+            . ' WHERE 1=1 ' . $courses_filter_sql
+            . ' GROUP BY cat.idCategory, cat.path '
+            . ' ORDER BY num_courses DESC';
+        $res = $this->db->query($query);
+
+        $rows = [];
+        while (list($idCategory, $path, $num_courses) = $this->db->fetch_row($res)) {
+            // path e' del tipo "/root/Pacchetto Office": mostriamo solo l'ultimo segmento
+            $parts = explode('/', $path);
+            $name = trim(end($parts));
+            $rows[] = ['idCategory' => $idCategory, 'name' => $name, 'count' => (int) $num_courses];
+        }
+
+        return $rows;
+    }
+
+    /**
      * Elenco di dettaglio per il drill-down dei KPI della sezione Corsi.
      *
-     * @param string $kind 'active','activating','completed','certificates','subscriptions'
+     * @param string $kind 'active','activating','certificates','subscriptions','category'
+     * @param int $idCategory usato solo per $kind === 'category'
      */
-    public function getCoursesDrilldownList($kind)
+    public function getCoursesDrilldownList($kind, $idCategory = 0)
     {
         $rows = [];
         $courses_filter_sql = '';
@@ -1321,6 +1354,17 @@ class DashboardAdm extends Model
             $res = $this->db->query($query);
             while (list($idCourse, $name) = $this->db->fetch_row($res)) {
                 $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ''];
+            }
+
+            return $rows;
+        }
+
+        if ($kind === 'category') {
+            $query = 'SELECT idCourse, name, status FROM %lms_course WHERE idCategory = ' . (int) $idCategory . ' '
+                . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
+            $res = $this->db->query($query);
+            while (list($idCourse, $name, $status) = $this->db->fetch_row($res)) {
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ((int) $status === 1 ? 'Attivo' : 'Non attivo')];
             }
 
             return $rows;

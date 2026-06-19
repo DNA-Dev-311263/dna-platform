@@ -112,10 +112,10 @@ class DashboardAdmController extends AdmController
 
             'course_stats' => $this->model->getCoursesStats(),
             'course_months_stats' => $this->model->getCoursesMonthsStats(),
-            'courses_completed' => $this->model->getCoursesCompletedCount(),
             'certificates_issued' => $this->model->getCertificatesIssuedCount(),
             'courses_trend' => $this->model->getCoursesEnrollmentCompletionTrend(6),
             'top_courses' => $this->model->getTopViewedCourses(5),
+            'courses_by_category' => $this->model->getCoursesByCategory(),
 
             'permissions' => $this->permissions,
             'reports' => $arr_report,
@@ -300,10 +300,11 @@ class DashboardAdmController extends AdmController
     public function courses_drilldownTask()
     {
         $kind = FormaLms\lib\Get::req('kind', DOTY_ALPHANUM, 'active');
+        $idCategory = FormaLms\lib\Get::req('idCategory', DOTY_INT, 0);
 
         $this->render('courses_drilldown_dialog', [
             'kind' => $kind,
-            'rows' => $this->model->getCoursesDrilldownList($kind),
+            'rows' => $this->model->getCoursesDrilldownList($kind, $idCategory),
             'json' => $this->json,
         ]);
     }
