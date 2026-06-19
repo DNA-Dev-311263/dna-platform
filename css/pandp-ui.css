@@ -782,9 +782,14 @@
 /* =============================================================
    Dashboard — 3-column KPI board
    ============================================================= */
-.dash-board { display:grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 32px; align-items:start; }
+/* Sfondo dedicato alla Dashboard: il backoffice ha pagina bianca (base.css),
+   ma il mockup approvato presuppone uno sfondo grigio chiaro dietro le card
+   bianche per dare risalto alla separazione tra le 3 colonne. */
+.dash-canvas { background:#f4f7fb; border-radius:16px; padding:20px; }
 
-.dash-col { background:#fff; border-radius:12px; box-shadow:0 3px 18px rgba(20,40,80,.10); padding:24px; }
+.dash-board { display:grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 18px; align-items:start; }
+
+.dash-col { background:#fff; border-radius:12px; box-shadow:0 2px 14px rgba(0,0,0,.07); padding:24px; }
 .dash-col__title { font-size:13px; font-weight:700; color:#1a2b4a; text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:8px; margin-bottom:4px; }
 .dash-col__title .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .dot--users { background:#1a6ef7; }

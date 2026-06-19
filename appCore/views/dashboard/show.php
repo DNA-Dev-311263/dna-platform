@@ -10,6 +10,7 @@
         </div>
     </div>
 
+    <div class="dash-canvas">
     <div class="dash-board">
 
         <!-- COLONNA UTENTI -->
@@ -207,6 +208,7 @@
             </div>
         </div>
 
+    </div>
     </div>
     <?php
     $this->widget('dialog', [
