@@ -994,7 +994,13 @@ class DashboardAdm extends Model
                 . " WHERE gm.idst = " . (int) $idst_group;
             $res = $this->db->query($query);
             while (list($idst, $userid, $firstname, $lastname, $email) = $this->db->fetch_row($res)) {
-                $rows[] = ['idst' => $idst, 'userid' => $userid, 'name' => $firstname . ' ' . $lastname, 'email' => $email];
+                $rows[] = [
+                    'idst' => $idst,
+                    'userid' => ltrim($userid, '/'),
+                    'name' => $firstname . ' ' . $lastname,
+                    'email' => $email,
+                    'company' => $this->getCompanyNameForUser($idst),
+                ];
             }
 
             return $rows;
@@ -1023,7 +1029,12 @@ class DashboardAdm extends Model
             }
             $res = $this->db->query($query);
             while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
-                $rows[] = ['idst' => $idst, 'userid' => $userid, 'name' => $firstname . ' ' . $lastname];
+                $rows[] = [
+                    'idst' => $idst,
+                    'userid' => ltrim($userid, '/'),
+                    'name' => $firstname . ' ' . $lastname,
+                    'company' => $this->getCompanyNameForUser($idst),
+                ];
             }
 
             return $rows;
@@ -1041,7 +1052,12 @@ class DashboardAdm extends Model
         // not an array — fetch it row by row like the rest of this codebase does.
         $res = $data->getRows(0, 500);
         while ($row = sql_fetch_assoc($res)) {
-            $rows[] = ['idst' => $row['idst'], 'userid' => $row['userid'], 'name' => $row['firstname'] . ' ' . $row['lastname']];
+            $rows[] = [
+                'idst' => $row['idst'],
+                'userid' => ltrim($row['userid'], '/'),
+                'name' => $row['firstname'] . ' ' . $row['lastname'],
+                'company' => $this->getCompanyNameForUser($row['idst']),
+            ];
         }
 
         return $rows;

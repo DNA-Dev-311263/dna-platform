@@ -12,14 +12,12 @@
  */
 
 $html = '<div class="dash-dialog-body"><table class="dash-table-preview">';
-$html .= '<tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th></tr>';
+$html .= '<tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th><th>Azienda</th></tr>';
 foreach ($rows as $r) {
-    // userid in DB ha sempre un prefisso "/" (convenzione interna ACL), non va mostrato
-    $userid = ltrim($r['userid'], '/');
-    $html .= '<tr><td>' . htmlspecialchars($userid) . '</td><td>' . htmlspecialchars($r['name']) . '</td></tr>';
+    $html .= '<tr><td>' . htmlspecialchars($r['userid']) . '</td><td>' . htmlspecialchars($r['name']) . '</td><td>' . htmlspecialchars($r['company']) . '</td></tr>';
 }
 if (empty($rows)) {
-    $html .= '<tr><td colspan="2">' . Lang::t('_NONE', 'standard') . '</td></tr>';
+    $html .= '<tr><td colspan="3">' . Lang::t('_NONE', 'standard') . '</td></tr>';
 }
 $html .= '</table></div>';
 
