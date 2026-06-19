@@ -182,7 +182,7 @@
                     <tr><th>Corso</th><th>Iscritti</th><th>Compl.</th><th></th></tr>
                     <?php foreach ($top_courses as $tc) { ?>
                         <tr>
-                            <td><a href="index.php?r=alms/course/show&id_course=<?php echo (int) $tc['idCourse']; ?>"><?php echo htmlspecialchars($tc['name']); ?></a></td>
+                            <td class="dash-link" onclick="dashOpenCourseDrilldown(<?php echo (int) $tc['idCourse']; ?>)"><?php echo htmlspecialchars($tc['name']); ?></td>
                             <td><?php echo (int) $tc['enrolled']; ?></td>
                             <td><?php echo (int) $tc['completed']; ?></td>
                             <td><span class="pui-badge <?php echo $tc['active'] ? 'pui-badge--success' : 'pui-badge--neutral'; ?>"><?php echo $tc['active'] ? 'Attivo' : 'Non attivo'; ?></span></td>
@@ -237,6 +237,28 @@
             var url = 'ajax.adm_server.php?r=adm/dashboard/companies_drilldown&idOrg=' + idOrg;
             YAHOO.util.Dom.get('dash_company_drilldown_url').value = url;
             Dashboard.oDialogCaller['companies_drilldown_dialog']();
+        }
+    </script>
+
+    <?php
+    $this->widget('dialog', [
+        'id' => 'course_drilldown_dialog',
+        'width' => '650px',
+        'dynamicContent' => true,
+        'ajaxUrl' => 'function(){ return YAHOO.util.Dom.get("dash_course_drilldown_url").value; }',
+        'dynamicAjaxUrl' => true,
+        'constrainToViewport' => false,
+        'confirmOnly' => true,
+        'fixedCenter' => true,
+        'callObjectFunc' => 'Dashboard.oDialogCaller',
+    ]);
+    ?>
+    <input type="hidden" id="dash_course_drilldown_url" value="" />
+    <script type="text/javascript">
+        function dashOpenCourseDrilldown(idCourse) {
+            var url = 'ajax.adm_server.php?r=adm/dashboard/course_drilldown&idCourse=' + idCourse;
+            YAHOO.util.Dom.get('dash_course_drilldown_url').value = url;
+            Dashboard.oDialogCaller['course_drilldown_dialog']();
         }
     </script>
 </div>

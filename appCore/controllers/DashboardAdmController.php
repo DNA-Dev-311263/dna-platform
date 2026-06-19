@@ -287,6 +287,16 @@ class DashboardAdmController extends AdmController
         ]);
     }
 
+    public function course_drilldownTask()
+    {
+        $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+
+        $this->render('course_drilldown_dialog', [
+            'rows' => $this->model->getCourseEnrolledUsers($idCourse),
+            'json' => $this->json,
+        ]);
+    }
+
     public function exportformatTask()
     {
         $this->render('export_dialog', [

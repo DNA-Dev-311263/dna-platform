@@ -1269,4 +1269,65 @@ class DashboardAdm extends Model
 
         return $rows;
     }
+
+    /**
+     * Nome dell'azienda (nodo di primo livello dell'organigramma) a cui
+     * appartiene un utente specifico. Ritorna '-' se l'utente non e' legato
+     * a nessun nodo. Generalizzazione di getAdminCompanyNode() per un idst
+     * arbitrario invece dell'utente corrente.
+     */
+    public function getCompanyNameForUser($idst)
+    {
+        $query = 'SELECT oct.idOrg, oct.idParent FROM core_org_chart_tree oct '
+            . ' JOIN core_group_members gm ON (gm.idst = oct.idst_oc OR gm.idst = oct.idst_ocd) '
+            . ' WHERE gm.idstMember = ' . (int) $idst
+            . ' LIMIT 1';
+        $res = $this->db->query($query);
+        if (!$res || $this->db->num_rows($res) <= 0) {
+            return '-';
+        }
+        list($idOrg, $idParent) = $this->db->fetch_row($res);
+
+        while ((int) $idParent !== 0) {
+            $query = 'SELECT idOrg, idParent FROM core_org_chart_tree WHERE idOrg = ' . (int) $idParent;
+            $res = $this->db->query($query);
+            if (!$res || $this->db->num_rows($res) <= 0) {
+                break;
+            }
+            list($idOrg, $idParent) = $this->db->fetch_row($res);
+        }
+
+        $query = 'SELECT translation FROM core_org_chart WHERE id_dir = ' . (int) $idOrg . ' AND lang_code = "' . getLanguage() . '"';
+        $res = $this->db->query($query);
+        if (!$res || $this->db->num_rows($res) <= 0) {
+            return '-';
+        }
+        list($name) = $this->db->fetch_row($res);
+
+        return $name;
+    }
+
+    /**
+     * Utenti iscritti a un corso, con l'azienda di provenienza di ciascuno.
+     */
+    public function getCourseEnrolledUsers($idCourse)
+    {
+        $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
+            . ' JOIN %lms_courseuser cu ON cu.idUser = u.idst '
+            . ' WHERE cu.idCourse = ' . (int) $idCourse
+            . ' ORDER BY u.lastname ASC';
+        $res = $this->db->query($query);
+
+        $rows = [];
+        while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
+            $rows[] = [
+                'idst' => $idst,
+                'userid' => ltrim($userid, '/'),
+                'name' => $firstname . ' ' . $lastname,
+                'company' => $this->getCompanyNameForUser($idst),
+            ];
+        }
+
+        return $rows;
+    }
 }
