@@ -894,8 +894,8 @@ class DashboardAdm extends Model
     }
 
     /**
-     * Utenti che hanno aperto una sessione nel periodo ma non hanno visionato
-     * nessun contenuto formativo nello stesso periodo.
+     * Utenti che hanno aperto una sessione nel periodo (accessi alla piattaforma,
+     * indipendentemente dal fatto che abbiano poi visionato contenuti o no).
      */
     public function getUsersAccessCount($period)
     {
@@ -908,11 +908,7 @@ class DashboardAdm extends Model
         $query = 'SELECT COUNT(DISTINCT ts.idUser) FROM %lms_tracksession ts '
             . ' JOIN %adm_user u ON u.idst = ts.idUser '
             . " WHERE ts.enterTime BETWEEN '" . $from . "' AND '" . $to . "' "
-            . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
-            . ' AND ts.idUser NOT IN ('
-            . "   SELECT DISTINCT ct.idUser FROM %lms_commontrack ct"
-            . "   WHERE ct.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "'"
-            . ' )';
+            . $this->scopeFilterSql('ts.idUser', 'ts.idCourse');
 
         list($count) = $this->db->fetch_row($this->db->query($query));
 
@@ -973,11 +969,7 @@ class DashboardAdm extends Model
                 $query = 'SELECT COUNT(DISTINCT ts.idUser) FROM %lms_tracksession ts '
                     . ' JOIN %adm_user u ON u.idst = ts.idUser '
                     . " WHERE ts.enterTime BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
-                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
-                    . ' AND ts.idUser NOT IN ('
-                    . "   SELECT DISTINCT ct.idUser FROM %lms_commontrack ct"
-                    . "   WHERE ct.dateAttempt BETWEEN '" . $month_start . "' AND '" . $month_end . "'"
-                    . ' )';
+                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse');
             }
 
             list($count) = $this->db->fetch_row($this->db->query($query));
@@ -1032,11 +1024,7 @@ class DashboardAdm extends Model
                 $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
                     . ' JOIN %lms_tracksession ts ON ts.idUser = u.idst '
                     . " WHERE ts.enterTime BETWEEN '" . $from . "' AND '" . $to . "' "
-                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
-                    . ' AND ts.idUser NOT IN ('
-                    . "   SELECT DISTINCT ct2.idUser FROM %lms_commontrack ct2"
-                    . "   WHERE ct2.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "'"
-                    . ' )';
+                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse');
             }
             $res = $this->db->query($query);
             while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
