@@ -321,6 +321,25 @@ class DashboardAdm extends Model
         return (int) $count;
     }
 
+    /**
+     * Etichetta dello stato corso, identica ai valori della tendina "Stato"
+     * nella scheda corso (vedi lib.course.php:280-284, $status_array).
+     */
+    public function getCourseStatusLabel($status)
+    {
+        require_once _lms_ . '/lib/lib.course.php';
+
+        $labels = [
+            CST_PREPARATION => Lang::t('_CST_PREPARATION', 'course'),
+            CST_AVAILABLE => Lang::t('_CST_AVAILABLE', 'course'),
+            CST_EFFECTIVE => Lang::t('_CST_CONFIRMED', 'course'),
+            CST_CONCLUDED => Lang::t('_CST_CONCLUDED', 'course'),
+            CST_CANCELLED => Lang::t('_CST_CANCELLED', 'course'),
+        ];
+
+        return isset($labels[(int) $status]) ? $labels[(int) $status] : '';
+    }
+
     public function getCoursesMonthsStats()
     {
         $output = [
@@ -1316,7 +1335,7 @@ class DashboardAdm extends Model
                 'name' => $name,
                 'enrolled' => (int) $enrolled,
                 'completed' => (int) $completed,
-                'active' => in_array((int) $status, [1, 2], true),
+                'status_label' => $this->getCourseStatusLabel($status),
             ];
         }
 
@@ -1386,7 +1405,7 @@ class DashboardAdm extends Model
                 . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
             $res = $this->db->query($query);
             while (list($idCourse, $name, $status) = $this->db->fetch_row($res)) {
-                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => (in_array((int) $status, [1, 2], true) ? 'Attivo' : 'Non attivo')];
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => $this->getCourseStatusLabel($status)];
             }
 
             return $rows;

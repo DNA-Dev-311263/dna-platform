@@ -182,7 +182,7 @@
                             <td class="dash-link" onclick="dashOpenCourseDrilldown(<?php echo (int) $tc['idCourse']; ?>)"><?php echo htmlspecialchars($tc['name']); ?></td>
                             <td><?php echo (int) $tc['enrolled']; ?></td>
                             <td><?php echo (int) $tc['completed']; ?></td>
-                            <td><span class="pui-badge <?php echo $tc['active'] ? 'pui-badge--success' : 'pui-badge--neutral'; ?>"><?php echo $tc['active'] ? 'Attivo' : 'Non attivo'; ?></span></td>
+                            <td><span class="pui-badge pui-badge--neutral"><?php echo htmlspecialchars($tc['status_label']); ?></span></td>
                         </tr>
                     <?php } ?>
                     <?php if (empty($top_courses)) { ?>
