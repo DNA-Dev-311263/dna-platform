@@ -131,7 +131,7 @@
 
             <div class="dash-kpi-grid dash-kpi-grid--3">
                 <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('active')">
-                    <div class="dash-kpi__value"><?php echo (int) $course_stats['active']; ?></div>
+                    <div class="dash-kpi__value"><?php echo (int) $courses_active; ?></div>
                     <div class="dash-kpi__label">Attivi</div>
                 </div>
                 <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('certificates')">

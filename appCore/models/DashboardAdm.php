@@ -298,6 +298,29 @@ class DashboardAdm extends Model
         return $course_man->getCoursesStats($this->courses_filter);
     }
 
+    /**
+     * Corsi attivi/accessibili agli utenti. La libreria framework
+     * (AdminCourseManagment::getCoursesStats) conta solo status=1
+     * (CST_AVAILABLE/"Disponibile"), ma il controllo di accesso reale al corso
+     * (vedi lib.course.php, switch su $course['status']) blocca l'accesso solo
+     * per CST_PREPARATION(0)/CST_CONCLUDED(3)/CST_CANCELLED(4) — quindi anche
+     * CST_EFFECTIVE(2, "Confermato") e' un corso pienamente attivo.
+     */
+    public function getActiveCoursesCount()
+    {
+        $courses_filter_sql = '';
+        if ($this->courses_filter !== false) {
+            $courses_filter_sql = empty($this->courses_filter)
+                ? ' AND 0 '
+                : ' AND idCourse IN (' . implode(',', $this->courses_filter) . ') ';
+        }
+
+        $query = "SELECT COUNT(*) FROM %lms_course WHERE status IN ('1','2') " . $courses_filter_sql;
+        list($count) = $this->db->fetch_row($this->db->query($query));
+
+        return (int) $count;
+    }
+
     public function getCoursesMonthsStats()
     {
         $output = [
@@ -1293,7 +1316,7 @@ class DashboardAdm extends Model
                 'name' => $name,
                 'enrolled' => (int) $enrolled,
                 'completed' => (int) $completed,
-                'active' => (int) $status === 1,
+                'active' => in_array((int) $status, [1, 2], true),
             ];
         }
 
@@ -1349,7 +1372,7 @@ class DashboardAdm extends Model
         }
 
         if ($kind === 'active') {
-            $query = "SELECT idCourse, name FROM %lms_course WHERE status = '1' " . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
+            $query = "SELECT idCourse, name FROM %lms_course WHERE status IN ('1','2') " . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
             $res = $this->db->query($query);
             while (list($idCourse, $name) = $this->db->fetch_row($res)) {
                 $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ''];
@@ -1363,7 +1386,7 @@ class DashboardAdm extends Model
                 . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
             $res = $this->db->query($query);
             while (list($idCourse, $name, $status) = $this->db->fetch_row($res)) {
-                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ((int) $status === 1 ? 'Attivo' : 'Non attivo')];
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => (in_array((int) $status, [1, 2], true) ? 'Attivo' : 'Non attivo')];
             }
 
             return $rows;
