@@ -259,6 +259,7 @@ class DashboardAdmController extends AdmController
         ];
 
         $this->render('users_drilldown_dialog', [
+            'kind' => $kind,
             'rows' => $this->model->getUsersDrilldownList($kind, $period),
             'title' => isset($titles[$kind]) ? $titles[$kind] : 'Dettaglio',
             'json' => $this->json,

@@ -1070,24 +1070,31 @@ class DashboardAdm extends Model
                 // ct.idReference -> learning_organization.idOrg, not idCourse directly;
                 // join through organization to filter by course (same fix as Task 4's
                 // getUsersActiveCount/getUsersMonthlyTrend).
-                $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
+                // MAX(ct.dateAttempt): data piu' recente di accesso al contenuto
+                // formativo nel periodo, una riga per utente.
+                $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, MAX(ct.dateAttempt) AS last_date FROM %adm_user u '
                     . ' JOIN %lms_commontrack ct ON ct.idUser = u.idst '
                     . ' JOIN %lms_organization org ON org.idOrg = ct.idReference '
                     . " WHERE ct.dateAttempt BETWEEN '" . $from . "' AND '" . $to . "' "
-                    . $this->scopeFilterSql('ct.idUser', 'org.idCourse');
+                    . $this->scopeFilterSql('ct.idUser', 'org.idCourse')
+                    . ' GROUP BY u.idst, u.userid, u.firstname, u.lastname';
             } else {
-                $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
+                // MAX(ts.enterTime): data/ora piu' recente di accesso alla
+                // piattaforma nel periodo, una riga per utente.
+                $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, MAX(ts.enterTime) AS last_date FROM %adm_user u '
                     . ' JOIN %lms_tracksession ts ON ts.idUser = u.idst '
                     . " WHERE ts.enterTime BETWEEN '" . $from . "' AND '" . $to . "' "
-                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse');
+                    . $this->scopeFilterSql('ts.idUser', 'ts.idCourse')
+                    . ' GROUP BY u.idst, u.userid, u.firstname, u.lastname';
             }
             $res = $this->db->query($query);
-            while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
+            while (list($idst, $userid, $firstname, $lastname, $last_date) = $this->db->fetch_row($res)) {
                 $rows[] = [
                     'idst' => $idst,
                     'userid' => ltrim($userid, '/'),
                     'name' => $firstname . ' ' . $lastname,
                     'company' => $this->getCompanyNameForUser($idst),
+                    'last_date' => $last_date ? date('d/m/Y H:i', strtotime($last_date)) : '-',
                 ];
             }
 
