@@ -1192,8 +1192,13 @@ class DashboardAdm extends Model
 
         $rows = [];
         while (list($idOrg, $iLeft, $iRight, $name) = $this->db->fetch_row($res)) {
-            $users_query = 'SELECT COUNT(*) FROM %adm_group_members gm '
+            // DISTINCT + join su %adm_user: senza questi, lo stesso utente viene
+            // contato due volte (e' membro sia del gruppo idst_oc che idst_ocd
+            // dello stesso nodo) e si contano anche righe dove idstMember e' a
+            // sua volta l'id di un gruppo (nodo figlio), non un utente reale.
+            $users_query = 'SELECT COUNT(DISTINCT gm.idstMember) FROM %adm_group_members gm '
                 . ' JOIN core_org_chart_tree d ON (d.idst_oc = gm.idst OR d.idst_ocd = gm.idst) '
+                . ' JOIN %adm_user u ON u.idst = gm.idstMember '
                 . ' WHERE d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
             list($users_count) = $this->db->fetch_row($this->db->query($users_query));
 
@@ -1232,16 +1237,27 @@ class DashboardAdm extends Model
      */
     public function getCompanyDirectUsers($idOrg)
     {
-        $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM core_org_chart_tree oct '
-            . ' JOIN %adm_group_members gm ON (gm.idst = oct.idst_oc OR gm.idst = oct.idst_ocd) '
+        $range_query = 'SELECT iLeft, iRight FROM core_org_chart_tree WHERE idOrg = ' . (int) $idOrg;
+        $range_res = $this->db->query($range_query);
+        if (!$range_res || $this->db->num_rows($range_res) <= 0) {
+            return [];
+        }
+        list($iLeft, $iRight) = $this->db->fetch_row($range_res);
+
+        // Sottoalbero completo (non solo il nodo esatto), cosi' l'elenco coincide
+        // sempre col conteggio "users_count" di getCompaniesList() — con la
+        // colonna Nodo per distinguere a quale sotto-nodo appartiene ciascuno.
+        $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname, n.translation AS node_name FROM core_org_chart_tree d '
+            . ' JOIN %adm_group_members gm ON (gm.idst = d.idst_oc OR gm.idst = d.idst_ocd) '
             . ' JOIN %adm_user u ON u.idst = gm.idstMember '
-            . ' WHERE oct.idOrg = ' . (int) $idOrg
+            . ' JOIN core_org_chart n ON n.id_dir = d.idOrg AND n.lang_code = "' . getLanguage() . '" '
+            . ' WHERE d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight
             . ' ORDER BY u.lastname ASC, u.firstname ASC';
         $res = $this->db->query($query);
 
         $rows = [];
-        while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
-            $rows[] = ['idst' => $idst, 'userid' => ltrim($userid, '/'), 'name' => trim($firstname . ' ' . $lastname)];
+        while (list($idst, $userid, $firstname, $lastname, $node_name) = $this->db->fetch_row($res)) {
+            $rows[] = ['idst' => $idst, 'userid' => ltrim($userid, '/'), 'name' => trim($firstname . ' ' . $lastname), 'node' => $node_name];
         }
 
         return $rows;

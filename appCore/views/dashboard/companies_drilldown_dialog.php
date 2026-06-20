@@ -28,9 +28,9 @@ if (!empty($children)) {
 
 if (!empty($users)) {
     $html .= '<p style="font-size:11px;font-weight:700;color:#8a9fc4;text-transform:uppercase;margin:14px 0 6px;">Utenti</p>';
-    $html .= '<table class="dash-table-preview"><tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th></tr>';
+    $html .= '<table class="dash-table-preview"><tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th><th>Nodo</th></tr>';
     foreach ($users as $u) {
-        $html .= '<tr><td>' . htmlspecialchars($u['userid']) . '</td><td>' . htmlspecialchars($u['name']) . '</td></tr>';
+        $html .= '<tr><td>' . htmlspecialchars($u['userid']) . '</td><td>' . htmlspecialchars($u['name']) . '</td><td>' . htmlspecialchars($u['node']) . '</td></tr>';
     }
     $html .= '</table>';
 }
