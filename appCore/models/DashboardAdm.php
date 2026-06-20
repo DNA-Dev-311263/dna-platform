@@ -340,6 +340,19 @@ class DashboardAdm extends Model
         return isset($labels[(int) $status]) ? $labels[(int) $status] : '';
     }
 
+    /**
+     * Classe colore badge per lo stato corso: rosso per In costruzione/Concluso/
+     * Cancellato, verde per Disponibile/Confermato.
+     */
+    public function getCourseStatusBadgeClass($status)
+    {
+        require_once _lms_ . '/lib/lib.course.php';
+
+        $red = [CST_PREPARATION, CST_CONCLUDED, CST_CANCELLED];
+
+        return in_array((int) $status, $red, true) ? 'pui-badge--danger' : 'pui-badge--success';
+    }
+
     public function getCoursesMonthsStats()
     {
         $output = [
@@ -1336,6 +1349,7 @@ class DashboardAdm extends Model
                 'enrolled' => (int) $enrolled,
                 'completed' => (int) $completed,
                 'status_label' => $this->getCourseStatusLabel($status),
+                'status_class' => $this->getCourseStatusBadgeClass($status),
             ];
         }
 
@@ -1405,7 +1419,7 @@ class DashboardAdm extends Model
                 . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
             $res = $this->db->query($query);
             while (list($idCourse, $name, $status) = $this->db->fetch_row($res)) {
-                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => $this->getCourseStatusLabel($status)];
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => $this->getCourseStatusLabel($status), 'detail_class' => $this->getCourseStatusBadgeClass($status)];
             }
 
             return $rows;

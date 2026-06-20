@@ -26,7 +26,10 @@ $html = '<div class="dash-dialog-body"><table class="dash-table-preview">';
 if ($kind === 'active' || $kind === 'activating' || $kind === 'category') {
     $html .= '<tr><th>Corso</th><th>' . ($kind === 'activating' ? 'Data inizio' : ($kind === 'category' ? 'Stato' : '')) . '</th></tr>';
     foreach ($rows as $r) {
-        $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . htmlspecialchars($r['detail']) . '</td></tr>';
+        $detail = isset($r['detail_class'])
+            ? '<span class="pui-badge ' . htmlspecialchars($r['detail_class']) . '">' . htmlspecialchars($r['detail']) . '</span>'
+            : htmlspecialchars($r['detail']);
+        $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . $detail . '</td></tr>';
     }
     $colspan = 2;
 } else {
