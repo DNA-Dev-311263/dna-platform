@@ -40,7 +40,7 @@
                 <?php } ?>
             </div>
 
-            <div class="dash-tw">
+            <div class="dash-tw dash-tw--grow">
                 <div class="dash-tw__head">
                     <div class="dash-tw__title">Accessi <span class="dash-tw__info" title="Utenti che entrano in piattaforma ma non visionano contenuti">&#9432;</span></div>
                 </div>
@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <div class="dash-tw">
+            <div class="dash-tw dash-tw--grow">
                 <div class="dash-tw__head">
                     <div class="dash-tw__title">Utenti attivi <?php echo date('Y'); ?> <span class="dash-tw__info" title="Hanno visionato almeno un contenuto formativo">&#9432;</span></div>
                 </div>
@@ -94,7 +94,7 @@
                 </div>
             </div>
 
-            <div class="dash-tw">
+            <div class="dash-tw dash-tw--grow">
                 <div class="dash-tw__head"><div class="dash-tw__title">Nuove aziende — ultimi 6 mesi</div></div>
                 <div class="dash-spark companies">
                     <?php

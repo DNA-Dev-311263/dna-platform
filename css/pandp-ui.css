@@ -787,9 +787,16 @@
    bianche per dare risalto alla separazione tra le 3 colonne. */
 .dash-canvas { background:#f4f7fb; border-radius:16px; padding:20px; }
 
-.dash-board { display:grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 18px; align-items:start; }
+.dash-board { display:grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 18px; align-items:stretch; }
 
-.dash-col { background:#fff; border-radius:12px; box-shadow:0 2px 14px rgba(0,0,0,.07); padding:24px; }
+.dash-col { background:#fff; border-radius:12px; box-shadow:0 2px 14px rgba(0,0,0,.07); padding:24px; display:flex; flex-direction:column; }
+
+/* Sezioni che assorbono lo spazio in eccesso quando la colonna viene
+   allungata per pareggiare l'altezza della colonna Corsi (la piu' alta):
+   solo i grafici (sparkline) crescono in verticale, non le tabelle/righe KPI. */
+.dash-tw--grow { display:flex; flex-direction:column; flex:1 1 auto; }
+.dash-tw--grow .dash-spark,
+.dash-tw--grow .dash-spark-dual { flex:1 1 auto; height:auto; min-height:36px; }
 .dash-col__title { font-size:13px; font-weight:700; color:#1a2b4a; text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:8px; margin-bottom:4px; }
 .dash-col__title .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .dot--users { background:#1a6ef7; }
