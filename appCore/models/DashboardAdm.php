@@ -1582,6 +1582,13 @@ class DashboardAdm extends Model
      */
     public function getCourseEnrolledUsers($idCourse)
     {
+        // Stessa logica di calcolo percentuale gia' usata dal modulo Report
+        // Utenti del backoffice (class.report_user.php, getTotLO/getPercLO):
+        // item completati/passati in learning_commontrack sul totale degli
+        // item del corso in learning_organization.
+        require_once _lms_ . '/lib/lib.stats.php';
+        $total_items = (int) getNumCourseItems($idCourse);
+
         $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
             . ' JOIN %lms_courseuser cu ON cu.idUser = u.idst '
             . ' WHERE cu.idCourse = ' . (int) $idCourse
@@ -1590,11 +1597,15 @@ class DashboardAdm extends Model
 
         $rows = [];
         while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
+            $completed_items = $total_items > 0 ? (int) getStatStatusCount($idst, $idCourse, ['completed', 'passed']) : 0;
+            $progress = $total_items > 0 ? min(100, (int) round(($completed_items / $total_items) * 100)) : 0;
+
             $rows[] = [
                 'idst' => $idst,
                 'userid' => ltrim($userid, '/'),
                 'name' => $firstname . ' ' . $lastname,
                 'company' => $this->getCompanyNameForUser($idst),
+                'progress' => $progress,
             ];
         }
 
