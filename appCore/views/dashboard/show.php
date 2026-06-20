@@ -112,12 +112,12 @@
             <div class="dash-tw">
                 <div class="dash-tw__head"><div class="dash-tw__title">Aziende — elenco rapido</div></div>
                 <table class="dash-table-preview">
-                    <tr><th>Azienda</th><th>Utenti</th><th></th></tr>
+                    <tr><th>Azienda</th><th>Utenti</th><th>Nodi</th></tr>
                     <?php foreach ($companies_list as $c) { ?>
                         <tr>
                             <td class="dash-link" onclick="dashOpenCompanyDrilldown(<?php echo (int) $c['idOrg']; ?>)"><?php echo htmlspecialchars($c['name']); ?></td>
                             <td><?php echo (int) $c['users_count']; ?></td>
-                            <td>&#128269;</td>
+                            <td><?php echo (int) $c['nodes_count']; ?></td>
                         </tr>
                     <?php } ?>
                 </table>

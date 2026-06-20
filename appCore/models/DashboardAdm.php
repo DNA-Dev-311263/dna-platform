@@ -1202,7 +1202,11 @@ class DashboardAdm extends Model
                 . ' WHERE d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
             list($users_count) = $this->db->fetch_row($this->db->query($users_query));
 
-            $rows[] = ['idOrg' => $idOrg, 'name' => $name, 'users_count' => (int) $users_count];
+            // Numero di nodi dell'organigramma di questa azienda (nodo principale
+            // incluso): formula standard del nested set model, (iRight-iLeft+1)/2.
+            $nodes_count = (int) (($iRight - $iLeft + 1) / 2);
+
+            $rows[] = ['idOrg' => $idOrg, 'name' => $name, 'users_count' => (int) $users_count, 'nodes_count' => $nodes_count];
         }
 
         return $rows;
