@@ -1226,6 +1226,28 @@ class DashboardAdm extends Model
     }
 
     /**
+     * Utenti assegnati direttamente a questo nodo dell'organigramma (non ai
+     * suoi sotto-nodi). Senza questo, un'azienda/nodo senza ulteriori
+     * sotto-nodi appare vuota nel drill-down anche quando ha utenti propri.
+     */
+    public function getCompanyDirectUsers($idOrg)
+    {
+        $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM core_org_chart_tree oct '
+            . ' JOIN %adm_group_members gm ON (gm.idst = oct.idst_oc OR gm.idst = oct.idst_ocd) '
+            . ' JOIN %adm_user u ON u.idst = gm.idstMember '
+            . ' WHERE oct.idOrg = ' . (int) $idOrg
+            . ' ORDER BY u.lastname ASC, u.firstname ASC';
+        $res = $this->db->query($query);
+
+        $rows = [];
+        while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
+            $rows[] = ['idst' => $idst, 'userid' => ltrim($userid, '/'), 'name' => trim($firstname . ' ' . $lastname)];
+        }
+
+        return $rows;
+    }
+
+    /**
      * Andamento mensile (ultimi $how_many_months mesi) di nuove aziende
      * (nodi di primo livello) create, basato su date_created.
      */

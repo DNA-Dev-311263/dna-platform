@@ -269,6 +269,7 @@ class DashboardAdmController extends AdmController
     {
         $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
 
+        $users = [];
         if ($idOrg <= 0) {
             // root: per GodAdmin, lista delle aziende; per Admin, la sua azienda
             $companies = $this->model->getCompaniesList();
@@ -278,11 +279,13 @@ class DashboardAdmController extends AdmController
             $current_name = 'Tutte le aziende';
         } else {
             $children = $this->model->getCompanyChildren($idOrg);
+            $users = $this->model->getCompanyDirectUsers($idOrg);
             $current_name = 'Sotto-nodi';
         }
 
         $this->render('companies_drilldown_dialog', [
             'children' => $children,
+            'users' => $users,
             'current_name' => $current_name,
             'json' => $this->json,
         ]);
