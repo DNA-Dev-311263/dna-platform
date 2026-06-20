@@ -59,6 +59,12 @@
                     }
                     ?>
                 </div>
+                <div class="dash-spark-labels">
+                    <?php foreach ($users_access_trend as $idx => $pt) {
+                        $cls = ($idx === count($users_access_trend) - 1) ? 'now' : '';
+                        echo '<span class="' . $cls . '">' . htmlspecialchars($pt['label']) . '</span>';
+                    } ?>
+                </div>
             </div>
 
             <div class="dash-tw dash-tw--grow">
@@ -79,6 +85,12 @@
                         echo '<div class="' . $cls . '" style="height:' . $h . '%" title="' . htmlspecialchars($pt['label']) . ': ' . (int) $pt['count'] . '"></div>';
                     }
                     ?>
+                </div>
+                <div class="dash-spark-labels">
+                    <?php foreach ($users_active_trend as $idx => $pt) {
+                        $cls = ($idx === count($users_active_trend) - 1) ? 'now' : '';
+                        echo '<span class="' . $cls . '">' . htmlspecialchars($pt['label']) . '</span>';
+                    } ?>
                 </div>
             </div>
         </div>
@@ -105,6 +117,12 @@
                         echo '<div class="' . $cls . '" style="height:' . $h . '%" title="' . htmlspecialchars($pt['label']) . ': ' . (int) $pt['count'] . '"></div>';
                     }
                     ?>
+                </div>
+                <div class="dash-spark-labels">
+                    <?php foreach ($companies_trend as $idx => $pt) {
+                        $cls = ($idx === count($companies_trend) - 1) ? 'now' : '';
+                        echo '<span class="' . $cls . '">' . htmlspecialchars($pt['label']) . '</span>';
+                    } ?>
                 </div>
                 <div class="dash-drill-note">Conteggio storico approssimato: il tracciamento delle date e' iniziato il 19/06/2026</div>
             </div>
@@ -166,6 +184,12 @@
                             . '</div>';
                     }
                     ?>
+                </div>
+                <div class="dash-spark-dual-labels">
+                    <?php foreach ($courses_trend as $idx => $pt) {
+                        $cls = ($idx === count($courses_trend) - 1) ? 'now' : '';
+                        echo '<span class="' . $cls . '">' . htmlspecialchars($pt['label']) . '</span>';
+                    } ?>
                 </div>
                 <div class="dash-legend">
                     <span><i style="background:#fde3b8"></i> Iscrizioni</span>
