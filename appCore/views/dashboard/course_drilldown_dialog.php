@@ -12,11 +12,11 @@
  */
 
 $html = '<div class="dash-dialog-body"><table class="dash-table-preview">';
-$html .= '<tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th><th>Azienda</th><th>Avanzamento</th></tr>';
+$html .= '<tr><th>' . Lang::t('_USERNAME', 'standard') . '</th><th>' . Lang::t('_FULLNAME', 'standard') . '</th><th>Azienda</th><th>Stato</th></tr>';
 foreach ($rows as $r) {
-    $badge_class = $r['progress'] >= 100 ? 'pui-badge--success' : 'pui-badge--neutral';
+    $badge_class = $r['status_done'] ? 'pui-badge--success' : 'pui-badge--neutral';
     $html .= '<tr><td>' . htmlspecialchars($r['userid']) . '</td><td>' . htmlspecialchars($r['name']) . '</td><td>' . htmlspecialchars($r['company']) . '</td>'
-        . '<td><span class="pui-badge ' . $badge_class . '">' . (int) $r['progress'] . '%</span></td></tr>';
+        . '<td><span class="pui-badge ' . $badge_class . '">' . htmlspecialchars($r['status_label']) . '</span></td></tr>';
 }
 if (empty($rows)) {
     $html .= '<tr><td colspan="4">' . Lang::t('_NONE', 'standard') . '</td></tr>';

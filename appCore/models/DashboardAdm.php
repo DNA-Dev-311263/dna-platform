@@ -1582,30 +1582,35 @@ class DashboardAdm extends Model
      */
     public function getCourseEnrolledUsers($idCourse)
     {
-        // Stessa logica di calcolo percentuale gia' usata dal modulo Report
-        // Utenti del backoffice (class.report_user.php, getTotLO/getPercLO):
-        // item completati/passati in learning_commontrack sul totale degli
-        // item del corso in learning_organization.
-        require_once _lms_ . '/lib/lib.stats.php';
-        $total_items = (int) getNumCourseItems($idCourse);
+        require_once _lms_ . '/lib/lib.subscribe.php';
 
-        $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname FROM %adm_user u '
+        // Stesse etichette del modulo Iscrizioni del backoffice
+        // (lib.subscribe.php:55-61, CourseSubscribe_Manager::array_user_status).
+        $status_labels = [
+            _CUS_WAITING_LIST => Lang::t('_WAITING_USERS', 'standard'),
+            _CUS_CONFIRMED => Lang::t('_USER_STATUS_CONFIRMED', 'standard'),
+            _CUS_SUBSCRIBED => Lang::t('_USER_STATUS_SUBS', 'standard'),
+            _CUS_BEGIN => Lang::t('_USER_STATUS_BEGIN', 'standard'),
+            _CUS_END => Lang::t('_USER_STATUS_END', 'standard'),
+            _CUS_SUSPEND => Lang::t('_USER_STATUS_SUSPEND', 'standard'),
+            _CUS_OVERBOOKING => Lang::t('_USER_STATUS_OVERBOOKING', 'subscribe'),
+        ];
+
+        $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, cu.status FROM %adm_user u '
             . ' JOIN %lms_courseuser cu ON cu.idUser = u.idst '
             . ' WHERE cu.idCourse = ' . (int) $idCourse
             . ' ORDER BY u.lastname ASC';
         $res = $this->db->query($query);
 
         $rows = [];
-        while (list($idst, $userid, $firstname, $lastname) = $this->db->fetch_row($res)) {
-            $completed_items = $total_items > 0 ? (int) getStatStatusCount($idst, $idCourse, ['completed', 'passed']) : 0;
-            $progress = $total_items > 0 ? min(100, (int) round(($completed_items / $total_items) * 100)) : 0;
-
+        while (list($idst, $userid, $firstname, $lastname, $status) = $this->db->fetch_row($res)) {
             $rows[] = [
                 'idst' => $idst,
                 'userid' => ltrim($userid, '/'),
                 'name' => $firstname . ' ' . $lastname,
                 'company' => $this->getCompanyNameForUser($idst),
-                'progress' => $progress,
+                'status_label' => isset($status_labels[(int) $status]) ? $status_labels[(int) $status] : '',
+                'status_done' => (int) $status === _CUS_END,
             ];
         }
 
