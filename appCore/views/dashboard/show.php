@@ -27,6 +27,10 @@
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['now_online']; ?></div>
                     <div class="dash-kpi__label">Connessi ora</div>
                 </div>
+                <div class="dash-kpi dash-kpi--static">
+                    <div class="dash-kpi__value"><?php echo (int) $user_stats['suspended']; ?></div>
+                    <div class="dash-kpi__label">Sospesi</div>
+                </div>
                 <?php } ?>
                 <div class="dash-kpi" id="dash_kpi_users_admin" onclick="dashOpenDrilldown('admin')">
                     <div class="dash-kpi__value"><?php echo (int) $user_stats['admin']; ?></div>
