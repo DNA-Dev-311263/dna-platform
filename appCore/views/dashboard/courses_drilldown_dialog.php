@@ -23,13 +23,17 @@ $title = isset($titles[$kind]) ? $titles[$kind] : 'Dettaglio';
 
 $html = '<div class="dash-dialog-body"><table class="dash-table-preview">';
 
-if ($kind === 'active' || $kind === 'activating' || $kind === 'category') {
-    $html .= '<tr><th>Corso</th><th>' . ($kind === 'activating' ? 'Data inizio' : ($kind === 'category' ? 'Stato' : '')) . '</th></tr>';
+if ($kind === 'category') {
+    $html .= '<tr><th>Corso</th><th>Iscritti</th><th>In attesa</th><th>Stato</th></tr>';
     foreach ($rows as $r) {
-        $detail = isset($r['detail_class'])
-            ? '<span class="pui-badge ' . htmlspecialchars($r['detail_class']) . '">' . htmlspecialchars($r['detail']) . '</span>'
-            : htmlspecialchars($r['detail']);
-        $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . $detail . '</td></tr>';
+        $detail = '<span class="pui-badge ' . htmlspecialchars($r['detail_class']) . '">' . htmlspecialchars($r['detail']) . '</span>';
+        $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . (int) $r['enrolled'] . '</td><td>' . (int) $r['waiting'] . '</td><td>' . $detail . '</td></tr>';
+    }
+    $colspan = 4;
+} elseif ($kind === 'active' || $kind === 'activating') {
+    $html .= '<tr><th>Corso</th><th>' . ($kind === 'activating' ? 'Data inizio' : '') . '</th></tr>';
+    foreach ($rows as $r) {
+        $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . htmlspecialchars($r['detail']) . '</td></tr>';
     }
     $colspan = 2;
 } else {

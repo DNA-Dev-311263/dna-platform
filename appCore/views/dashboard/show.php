@@ -176,17 +176,16 @@
             <div class="dash-tw">
                 <div class="dash-tw__head"><div class="dash-tw__title">Corsi più visti</div></div>
                 <table class="dash-table-preview">
-                    <tr><th>Corso</th><th>Iscritti</th><th>Compl.</th><th></th></tr>
+                    <tr><th>Corso</th><th>Iscritti</th><th>Stato</th></tr>
                     <?php foreach ($top_courses as $tc) { ?>
                         <tr>
                             <td class="dash-link" onclick="dashOpenCourseDrilldown(<?php echo (int) $tc['idCourse']; ?>)"><?php echo htmlspecialchars($tc['name']); ?></td>
                             <td><?php echo (int) $tc['enrolled']; ?></td>
-                            <td><?php echo (int) $tc['completed']; ?></td>
                             <td><span class="pui-badge <?php echo htmlspecialchars($tc['status_class']); ?>"><?php echo htmlspecialchars($tc['status_label']); ?></span></td>
                         </tr>
                     <?php } ?>
                     <?php if (empty($top_courses)) { ?>
-                        <tr><td colspan="4"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
+                        <tr><td colspan="3"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
                     <?php } ?>
                 </table>
             </div>
@@ -194,15 +193,17 @@
             <div class="dash-tw">
                 <div class="dash-tw__head"><div class="dash-tw__title">Corsi per categoria</div></div>
                 <table class="dash-table-preview">
-                    <tr><th>Categoria</th><th>Corsi</th></tr>
+                    <tr><th>Categoria</th><th>Corsi</th><th>Iscritti</th><th>In attesa</th></tr>
                     <?php foreach ($courses_by_category as $cc) { ?>
                         <tr>
                             <td class="dash-link" onclick="dashOpenCoursesDrilldown('category', <?php echo (int) $cc['idCategory']; ?>)"><?php echo htmlspecialchars($cc['name']); ?></td>
                             <td><?php echo (int) $cc['count']; ?></td>
+                            <td><?php echo (int) $cc['total_enrolled']; ?></td>
+                            <td><?php echo (int) $cc['total_waiting']; ?></td>
                         </tr>
                     <?php } ?>
                     <?php if (empty($courses_by_category)) { ?>
-                        <tr><td colspan="2"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
+                        <tr><td colspan="4"><?php echo Lang::t('_NONE', 'standard'); ?></td></tr>
                     <?php } ?>
                 </table>
             </div>

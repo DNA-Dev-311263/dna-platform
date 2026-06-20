@@ -1372,7 +1372,6 @@ class DashboardAdm extends Model
     {
         $query = 'SELECT c.idCourse, c.name, '
             . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse) AS enrolled, '
-            . ' (SELECT COUNT(*) FROM %lms_courseuser cu3 JOIN %adm_user u3 ON u3.idst = cu3.idUser WHERE cu3.idCourse = c.idCourse AND cu3.status = 2) AS completed, '
             . ' c.status '
             . ' FROM %lms_course c WHERE 1=1 ';
         if ($this->courses_filter !== false) {
@@ -1384,12 +1383,11 @@ class DashboardAdm extends Model
 
         $res = $this->db->query($query);
         $rows = [];
-        while (list($idCourse, $name, $enrolled, $completed, $status) = $this->db->fetch_row($res)) {
+        while (list($idCourse, $name, $enrolled, $status) = $this->db->fetch_row($res)) {
             $rows[] = [
                 'idCourse' => $idCourse,
                 'name' => $name,
                 'enrolled' => (int) $enrolled,
-                'completed' => (int) $completed,
                 'status_label' => $this->getCourseStatusLabel($status),
                 'status_class' => $this->getCourseStatusBadgeClass($status),
             ];
@@ -1411,20 +1409,30 @@ class DashboardAdm extends Model
                 : ' AND c.idCourse IN (' . implode(',', $this->courses_filter) . ') ';
         }
 
-        $query = 'SELECT cat.idCategory, cat.path, COUNT(c.idCourse) AS num_courses '
+        $query = 'SELECT cat.idCategory, cat.path, COUNT(DISTINCT c.idCourse) AS num_courses, '
+            . ' COUNT(CASE WHEN cu.waiting = 0 AND u.idst IS NOT NULL THEN 1 END) AS total_enrolled, '
+            . ' COUNT(CASE WHEN cu.waiting = 1 AND u.idst IS NOT NULL THEN 1 END) AS total_waiting '
             . ' FROM %lms_category cat '
             . ' JOIN %lms_course c ON c.idCategory = cat.idCategory '
+            . ' LEFT JOIN %lms_courseuser cu ON cu.idCourse = c.idCourse '
+            . ' LEFT JOIN %adm_user u ON u.idst = cu.idUser '
             . ' WHERE 1=1 ' . $courses_filter_sql
             . ' GROUP BY cat.idCategory, cat.path '
             . ' ORDER BY num_courses DESC';
         $res = $this->db->query($query);
 
         $rows = [];
-        while (list($idCategory, $path, $num_courses) = $this->db->fetch_row($res)) {
+        while (list($idCategory, $path, $num_courses, $total_enrolled, $total_waiting) = $this->db->fetch_row($res)) {
             // path e' del tipo "/root/Pacchetto Office": mostriamo solo l'ultimo segmento
             $parts = explode('/', $path);
             $name = trim(end($parts));
-            $rows[] = ['idCategory' => $idCategory, 'name' => $name, 'count' => (int) $num_courses];
+            $rows[] = [
+                'idCategory' => $idCategory,
+                'name' => $name,
+                'count' => (int) $num_courses,
+                'total_enrolled' => (int) $total_enrolled,
+                'total_waiting' => (int) $total_waiting,
+            ];
         }
 
         return $rows;
@@ -1457,11 +1465,23 @@ class DashboardAdm extends Model
         }
 
         if ($kind === 'category') {
-            $query = 'SELECT idCourse, name, status FROM %lms_course WHERE idCategory = ' . (int) $idCategory . ' '
-                . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
+            // Stessa logica di Totale Iscritti/Totale in attesa di getCoursesByCategory(),
+            // ma per singolo corso.
+            $query = 'SELECT c.idCourse, c.name, c.status, '
+                . ' (SELECT COUNT(*) FROM %lms_courseuser cu JOIN %adm_user u ON u.idst = cu.idUser WHERE cu.idCourse = c.idCourse AND cu.waiting = 0) AS enrolled, '
+                . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse AND cu2.waiting = 1) AS waiting '
+                . ' FROM %lms_course c WHERE c.idCategory = ' . (int) $idCategory . ' '
+                . $courses_filter_sql . ' ORDER BY c.name ASC LIMIT 200';
             $res = $this->db->query($query);
-            while (list($idCourse, $name, $status) = $this->db->fetch_row($res)) {
-                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => $this->getCourseStatusLabel($status), 'detail_class' => $this->getCourseStatusBadgeClass($status)];
+            while (list($idCourse, $name, $status, $enrolled, $waiting) = $this->db->fetch_row($res)) {
+                $rows[] = [
+                    'idCourse' => $idCourse,
+                    'name' => $name,
+                    'enrolled' => (int) $enrolled,
+                    'waiting' => (int) $waiting,
+                    'detail' => $this->getCourseStatusLabel($status),
+                    'detail_class' => $this->getCourseStatusBadgeClass($status),
+                ];
             }
 
             return $rows;
