@@ -66,6 +66,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	recomputeRecipients();
 
+	// History delete (must run before the "courseSelect" early-return below:
+	// this page-level link exists on the Storico tab, where #nl_course_select
+	// does not).
+	var deleteLinks = document.querySelectorAll('.nl_delete_history');
+	for (var di = 0; di < deleteLinks.length; di++) {
+		deleteLinks[di].addEventListener('click', function (e) {
+			e.preventDefault();
+			var link = this;
+			if (!confirm(link.getAttribute('data-confirm'))) {
+				return;
+			}
+			var id = link.getAttribute('data-id');
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', 'index.php?modname=newsletter&op=ajax_delete_history&id_send=' + encodeURIComponent(id), true);
+			xhr.onload = function () {
+				if (xhr.status !== 200) {
+					return;
+				}
+				var data = JSON.parse(xhr.responseText);
+				if (data.success) {
+					link.closest('tr').remove();
+				}
+			};
+			xhr.send();
+		});
+	}
+
 	// Course/edition recipients block
 	var courseSelect = document.getElementById('nl_course_select');
 	var editionSelect = document.getElementById('nl_edition_select');
@@ -219,29 +246,4 @@ document.addEventListener('DOMContentLoaded', function () {
 		};
 		xhr.send();
 	});
-
-	// History delete
-	var deleteLinks = document.querySelectorAll('.nl_delete_history');
-	for (var i = 0; i < deleteLinks.length; i++) {
-		deleteLinks[i].addEventListener('click', function (e) {
-			e.preventDefault();
-			var link = this;
-			if (!confirm(link.getAttribute('data-confirm'))) {
-				return;
-			}
-			var id = link.getAttribute('data-id');
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', 'index.php?modname=newsletter&op=ajax_delete_history&id_send=' + encodeURIComponent(id), true);
-			xhr.onload = function () {
-				if (xhr.status !== 200) {
-					return;
-				}
-				var data = JSON.parse(xhr.responseText);
-				if (data.success) {
-					link.closest('tr').remove();
-				}
-			};
-			xhr.send();
-		});
-	}
 });
