@@ -384,16 +384,6 @@ function newsletter()
         $out->add('<div class="pui-field"><label for="msg">' . $lang->def('_NL_MESSAGE_TEXT') . '</label>'
             . '<textarea class="pui-textarea nl-textarea--tall" id="msg" name="msg">' . htmlspecialchars($msg_value) . '</textarea></div>');
 
-        $out->add('<div class="pui-field"><label>' . $lang->def('_NL_ATTACHMENTS') . '</label>'
-            . '<div id="file">'
-            . $form->getHidden('file_number', 'file_number', '1')
-            . '<div id="div_file_1">'
-            . $form->getFilefield($lang->def('_ATTACHMENT'), 'file_1', 'file_1', '', '', '<a href="#" onclick="delFile(\'1\'); return false;"><span id="rem_span">' . $lang->def('_DEL') . '</span><a>')
-            . '</div>'
-            . '</div>'
-            . '<br/><a href="#" onclick="addFile(); return false;"><span id="add_span">' . $lang->def('_MORE_ATTACHMENT') . '</span></a>'
-            . '</div>');
-
         $out->add('</div>'); // pui-card (Section A)
 
         // Section B: recipients (course-based + additional Users/Groups/Org chart), unified
@@ -446,6 +436,19 @@ function newsletter()
         $out->add($form->getHidden('recipients_idst', 'recipients_idst', htmlspecialchars($prefill_idst, ENT_QUOTES)));
 
         $out->add('</div>'); // pui-card (Section B)
+
+        // Section C: attachments (in fondo, ultimo step prima dell'invio)
+        $out->add('<div class="pui-card">');
+        $out->add('<div class="pui-field"><label>' . $lang->def('_NL_ATTACHMENTS') . '</label>'
+            . '<div id="file">'
+            . $form->getHidden('file_number', 'file_number', '1')
+            . '<div id="div_file_1">'
+            . $form->getFilefield($lang->def('_ATTACHMENT'), 'file_1', 'file_1', '', '', '<a href="#" onclick="delFile(\'1\'); return false;"><span id="rem_span">' . $lang->def('_DEL') . '</span><a>')
+            . '</div>'
+            . '</div>'
+            . '<br/><a href="#" onclick="addFile(); return false;"><span id="add_span">' . $lang->def('_MORE_ATTACHMENT') . '</span></a>'
+            . '</div>');
+        $out->add('</div>'); // pui-card (Section C)
 
         // Buttons
         $out->add('<div class="pui-btn-row">');
