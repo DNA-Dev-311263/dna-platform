@@ -1049,7 +1049,10 @@ function newsletterHistory()
         $page_num = 0;
     }
 
-    $where = '1=1';
+    // 'draft' = riga creata appena si passa dal modulo "Nuova comunicazione" alla
+    // selezione destinatari (init_send()), prima che l'utente abbia davvero
+    // confermato l'invio. Non e' una comunicazione inviata: non va nello storico.
+    $where = "status <> 'draft'";
     if (Docebo::user()->getUserLevelId() != ADMIN_GROUP_GODADMIN) {
         $where .= ' AND id_user_creator = ' . (int) Docebo::user()->getIdSt();
     }
