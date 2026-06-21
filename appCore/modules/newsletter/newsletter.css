@@ -1,10 +1,10 @@
-.pui-field { margin-bottom: 16px; }
+.pui-field { margin-bottom: 10px; }
 
 .pui-field label {
     display: block;
     font-size: 13px;
     color: #555;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-weight: 600;
 }
 
@@ -16,7 +16,7 @@
     font-size: 13px;
     background: #fff;
     color: #2d3748;
-    min-height: 90px;
+    min-height: 70px;
     font-family: inherit;
     transition: border-color .2s;
 }
@@ -27,19 +27,45 @@
     box-shadow: 0 0 0 3px rgba(26,110,247,.1);
 }
 
-.pui-history-link {
-    text-align: right;
-    margin-bottom: 12px;
+/* Mittente/Oggetto: campi corti (email, riga di testo), non hanno senso a
+   piena larghezza pagina. */
+.nl-input--narrow {
+    width: 100%;
+    max-width: 420px;
 }
 
-.pui-history-link a {
+/* Titolo pagina + link storico sulla stessa riga, invece del link isolato
+   sotto come blocco a se' stante. */
+.nl-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.nl-title-row .page-header { margin: 0; }
+
+.pui-history-link {
     color: #1a6ef7;
     font-size: 13px;
     text-decoration: none;
     font-weight: 600;
+    white-space: nowrap;
 }
 
-.pui-history-link a:hover { text-decoration: underline; }
+.pui-history-link:hover { text-decoration: underline; }
+
+/* Pagina piu' compatta: meno spazio verticale fra stepper/card/sezioni,
+   scoperto alla sola pagina Newsletter (.nl-page) per non toccare le altre
+   pagine che condividono pandp-ui.css (es. Importa Utenti). */
+.nl-page .pui-stepper { margin-bottom: 18px; }
+.nl-page .pui-card { padding: 22px 26px; }
+.nl-page .pui-card + .pui-card { margin-top: 12px; }
+.nl-page .pui-sidebar,
+.nl-page .pui-main { padding: 18px 20px; }
+.nl-page .pui-section-block { margin-bottom: 16px; }
+.nl-page .pui-sidebar-section { padding: 10px 0; }
 
 .pui-count-info {
     margin-top: 10px;

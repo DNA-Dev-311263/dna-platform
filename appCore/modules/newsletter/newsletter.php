@@ -269,7 +269,16 @@ function newsletter()
     $form = new Form();
     $json = new Services_JSON();
 
-    $out->add(getTitleArea($lang->def('_NEWSLETTER'), 'newsletter'));
+    $active_tab = (FormaLms\lib\Get::req('tab', DOTY_ALPHANUM, '') === 'history') ? 'history' : 'new';
+
+    $title_html = getTitleArea($lang->def('_NEWSLETTER'), 'newsletter');
+    if ($active_tab === 'history') {
+        $out->add($title_html);
+    } else {
+        $out->add('<div class="nl-title-row">' . $title_html
+            . '<a class="pui-history-link" href="index.php?modname=newsletter&amp;op=newsletter&amp;tab=history">' . $lang->def('_NL_HISTORY_LINK') . ' &rarr;</a>'
+            . '</div>');
+    }
 
     $p_size = intval(ini_get('post_max_size'));
     $u_size = intval(ini_get('upload_max_filesize'));
@@ -324,9 +333,7 @@ function newsletter()
         $prefill_idst = implode(',', $resend_idst);
     }
 
-    $active_tab = (FormaLms\lib\Get::req('tab', DOTY_ALPHANUM, '') === 'history') ? 'history' : 'new';
-
-    $out->add('<div class="pui-page">');
+    $out->add('<div class="pui-page nl-page">');
 
     if ($active_tab == 'history') {
         // ---- Storico ----
@@ -336,8 +343,6 @@ function newsletter()
         $out->add('</div>');
     } else {
         // ---- Nuova comunicazione ----
-        $out->add('<div class="pui-history-link"><a href="index.php?modname=newsletter&amp;op=newsletter&amp;tab=history">' . $lang->def('_NL_HISTORY_LINK') . ' &rarr;</a></div>');
-
         $out->add('<div class="pui-stepper">'
             . '<div class="pui-step pui-step--active"><div class="pui-step__num">1</div><span>' . $lang->def('_NL_STEP1_LABEL') . '</span></div>'
             . '<div class="pui-step__line"></div>'
@@ -351,10 +356,10 @@ function newsletter()
         $out->add('<div class="pui-section-label">' . $lang->def('_NL_CONTENT_SECTION') . '</div>');
 
         $out->add('<div class="pui-field"><label for="fromemail">' . $lang->def('_SENDER') . '</label>'
-            . '<input type="text" class="pui-text-input" style="width:100%" id="fromemail" name="fromemail" maxlength="255" value="' . htmlspecialchars($fromemail_value, ENT_QUOTES) . '" /></div>');
+            . '<input type="text" class="pui-text-input nl-input--narrow" id="fromemail" name="fromemail" maxlength="255" value="' . htmlspecialchars($fromemail_value, ENT_QUOTES) . '" /></div>');
 
         $out->add('<div class="pui-field"><label for="sub">' . $lang->def('_SUBJECT') . '</label>'
-            . '<input type="text" class="pui-text-input" style="width:100%" id="sub" name="sub" maxlength="255" value="' . htmlspecialchars($sub_value, ENT_QUOTES) . '" /></div>');
+            . '<input type="text" class="pui-text-input nl-input--narrow" id="sub" name="sub" maxlength="255" value="' . htmlspecialchars($sub_value, ENT_QUOTES) . '" /></div>');
 
         $out->add('<div class="pui-field"><label for="msg">' . $lang->def('_DESCRIPTION') . '</label>'
             . '<textarea class="pui-textarea" id="msg" name="msg">' . htmlspecialchars($msg_value) . '</textarea></div>');
