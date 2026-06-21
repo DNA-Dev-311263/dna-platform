@@ -27,34 +27,31 @@
     box-shadow: 0 0 0 3px rgba(26,110,247,.1);
 }
 
-/* Mittente/Oggetto: campi corti (email, riga di testo), non hanno senso a
-   piena larghezza pagina. */
-.nl-input--narrow {
-    width: 100%;
-    max-width: 420px;
-}
-
-/* Titolo pagina + link storico sulla stessa riga, invece del link isolato
-   sotto come blocco a se' stante. */
-.nl-title-row {
+/* Righe a piu' campi: Mittente/Oggetto, poi Tipo invio/Lingua. Niente riga
+   dedicata per ciascun campo quando i dati sono pochi/corti. */
+.nl-field-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    gap: 24px;
     flex-wrap: wrap;
 }
-
-.nl-title-row .page-header { margin: 0; }
-
-.pui-history-link {
-    color: #1a6ef7;
-    font-size: 13px;
-    text-decoration: none;
-    font-weight: 600;
-    white-space: nowrap;
+.nl-field-row > .pui-field {
+    flex: 1 1 220px;
+    margin-bottom: 16px;
+}
+.nl-field-row > .pui-field .pui-text-input {
+    width: 100%;
 }
 
-.pui-history-link:hover { text-decoration: underline; }
+/* Pulsante Storico invii: prima del testo della comunicazione, chiude la
+   parte di impostazioni rapide prima della scrittura del messaggio. */
+.nl-history-row {
+    margin-bottom: 16px;
+}
+
+/* Testo della comunicazione: e' il contenuto principale, gli serve spazio. */
+.nl-textarea--tall {
+    min-height: 170px;
+}
 
 /* Pagina piu' compatta: meno spazio verticale fra stepper/card/sezioni,
    scoperto alla sola pagina Newsletter (.nl-page) per non toccare le altre

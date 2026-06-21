@@ -271,14 +271,7 @@ function newsletter()
 
     $active_tab = (FormaLms\lib\Get::req('tab', DOTY_ALPHANUM, '') === 'history') ? 'history' : 'new';
 
-    $title_html = getTitleArea($lang->def('_NEWSLETTER'), 'newsletter');
-    if ($active_tab === 'history') {
-        $out->add($title_html);
-    } else {
-        $out->add('<div class="nl-title-row">' . $title_html
-            . '<a class="pui-history-link" href="index.php?modname=newsletter&amp;op=newsletter&amp;tab=history">' . $lang->def('_NL_HISTORY_LINK') . ' &rarr;</a>'
-            . '</div>');
-    }
+    $out->add(getTitleArea($lang->def('_NEWSLETTER'), 'newsletter'));
 
     $p_size = intval(ini_get('post_max_size'));
     $u_size = intval(ini_get('upload_max_filesize'));
@@ -355,14 +348,41 @@ function newsletter()
         $out->add('<div class="pui-card">');
         $out->add('<div class="pui-section-label">' . $lang->def('_NL_CONTENT_SECTION') . '</div>');
 
-        $out->add('<div class="pui-field"><label for="fromemail">' . $lang->def('_SENDER') . '</label>'
-            . '<input type="text" class="pui-text-input nl-input--narrow" id="fromemail" name="fromemail" maxlength="255" value="' . htmlspecialchars($fromemail_value, ENT_QUOTES) . '" /></div>');
+        // Row 1: Mittente | Oggetto
+        $out->add('<div class="nl-field-row">'
+            . '<div class="pui-field"><label for="fromemail">' . $lang->def('_SENDER') . '</label>'
+            . '<input type="text" class="pui-text-input" id="fromemail" name="fromemail" maxlength="255" value="' . htmlspecialchars($fromemail_value, ENT_QUOTES) . '" /></div>'
+            . '<div class="pui-field"><label for="sub">' . $lang->def('_SUBJECT') . '</label>'
+            . '<input type="text" class="pui-text-input" id="sub" name="sub" maxlength="255" value="' . htmlspecialchars($sub_value, ENT_QUOTES) . '" /></div>'
+            . '</div>');
 
-        $out->add('<div class="pui-field"><label for="sub">' . $lang->def('_SUBJECT') . '</label>'
-            . '<input type="text" class="pui-text-input nl-input--narrow" id="sub" name="sub" maxlength="255" value="' . htmlspecialchars($sub_value, ENT_QUOTES) . '" /></div>');
+        // Row 2: Tipo invio | Lingua (stessa riga, niente righe dedicate per due dati cosi' piccoli)
+        $lang_list = Docebo::langManager()->getAllLangCode();
+        $lang_list = [_ANY_LANG_CODE => $lang->def('_ALL')] + $lang_list;
 
-        $out->add('<div class="pui-field"><label for="msg">' . $lang->def('_DESCRIPTION') . '</label>'
-            . '<textarea class="pui-textarea" id="msg" name="msg">' . htmlspecialchars($msg_value) . '</textarea></div>');
+        $lang_options = '';
+        foreach ($lang_list as $lang_key => $lang_label) {
+            $selected_attr = ((string) $lang_key === (string) $sel_lang_value) ? ' selected="selected"' : '';
+            $lang_options .= '<option value="' . htmlspecialchars($lang_key, ENT_QUOTES) . '"' . $selected_attr . '>' . htmlspecialchars($lang_label) . '</option>';
+        }
+        $out->add('<div class="nl-field-row">'
+            . '<div class="pui-field"><label>' . $lang->def('_NL_SEND_TYPE') . '</label>'
+            . '<div class="pui-radio-group">'
+            . '<label class="pui-radio-pill"><input type="radio" id="send_type_email" name="send_type" value="email"' . ($send_type_email_checked ? ' checked="checked"' : '') . ' /> ' . $lang->def('_EMAIL') . '</label>'
+            . '<label class="pui-radio-pill"><input type="radio" id="send_type_sms" name="send_type" value="sms"' . ($send_type_sms_checked ? ' checked="checked"' : '') . ' /> ' . $lang->def('_SEND_SMS') . '</label>'
+            . '</div></div>'
+            . '<div class="pui-field"><label for="sel_lang">' . $lang->def('_LANGUAGE') . '</label>'
+            . '<select class="pui-select" id="sel_lang" name="sel_lang">' . $lang_options . '</select></div>'
+            . '</div>');
+
+        // Storico invii: prima del testo della comunicazione, chiude la parte
+        // di impostazioni rapide prima di scrivere il messaggio.
+        $out->add('<div class="nl-history-row">'
+            . '<a class="pui-btn pui-btn--ghost" href="index.php?modname=newsletter&amp;op=newsletter&amp;tab=history">' . $lang->def('_NL_HISTORY_LINK') . '</a>'
+            . '</div>');
+
+        $out->add('<div class="pui-field"><label for="msg">' . $lang->def('_NL_MESSAGE_TEXT') . '</label>'
+            . '<textarea class="pui-textarea nl-textarea--tall" id="msg" name="msg">' . htmlspecialchars($msg_value) . '</textarea></div>');
 
         $out->add('<div class="pui-field"><label>' . $lang->def('_NL_ATTACHMENTS') . '</label>'
             . '<div id="file">'
@@ -373,25 +393,6 @@ function newsletter()
             . '</div>'
             . '<br/><a href="#" onclick="addFile(); return false;"><span id="add_span">' . $lang->def('_MORE_ATTACHMENT') . '</span></a>'
             . '</div>');
-
-        $lang_list = Docebo::langManager()->getAllLangCode();
-        $lang_list = [_ANY_LANG_CODE => $lang->def('_ALL')] + $lang_list;
-
-        $lang_options = '';
-        foreach ($lang_list as $lang_key => $lang_label) {
-            $selected_attr = ((string) $lang_key === (string) $sel_lang_value) ? ' selected="selected"' : '';
-            $lang_options .= '<option value="' . htmlspecialchars($lang_key, ENT_QUOTES) . '"' . $selected_attr . '>' . htmlspecialchars($lang_label) . '</option>';
-        }
-        $out->add('<div class="pui-field"><label for="sel_lang">' . $lang->def('_LANGUAGE') . '</label>'
-            . '<select class="pui-select" style="max-width:240px" id="sel_lang" name="sel_lang">' . $lang_options . '</select></div>');
-
-        $out->add('<div class="pui-section-block">');
-        $out->add('<div class="pui-section-label">' . $lang->def('_NL_SEND_TYPE') . '</div>');
-        $out->add('<div class="pui-radio-group">'
-            . '<label class="pui-radio-pill"><input type="radio" id="send_type_email" name="send_type" value="email"' . ($send_type_email_checked ? ' checked="checked"' : '') . ' /> ' . $lang->def('_EMAIL') . '</label>'
-            . '<label class="pui-radio-pill"><input type="radio" id="send_type_sms" name="send_type" value="sms"' . ($send_type_sms_checked ? ' checked="checked"' : '') . ' /> ' . $lang->def('_SEND_SMS') . '</label>'
-            . '</div>');
-        $out->add('</div>'); // pui-section-block
 
         $out->add('</div>'); // pui-card (Section A)
 
