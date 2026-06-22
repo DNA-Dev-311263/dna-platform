@@ -16,9 +16,16 @@
     <form id="ar_export_form" method="get" action="ajax.adm_server.php">
         <input type="hidden" name="r" value="adm/attendanceregister/export_selected" />
         <input type="hidden" name="idCourse" id="ar_export_idcourse" value="" />
+        <input type="hidden" name="authentic_request" value="<?php echo Util::getSignature(); ?>" />
         <div id="ar_users_container"></div>
     </form>
 </div>
+<script type="text/javascript">
+    // Ogni richiesta verso ajax.adm_server.php (anche GET) richiede questa
+    // firma anti-CSRF (Util::checkSignature()), altrimenti il server risponde
+    // con un errore "Security issue".
+    var AR_SIGNATURE = '<?php echo Util::getSignature(); ?>';
+</script>
 
 <?php
     $this->widget('dialog', [
@@ -36,7 +43,7 @@
 <input type="hidden" id="ar_sessions_url" value="" />
 <script type="text/javascript">
     function arOpenUserSessions(idCourse, idUser) {
-        var url = 'ajax.adm_server.php?r=adm/attendanceregister/user_sessions&idCourse=' + idCourse + '&idUser=' + idUser;
+        var url = 'ajax.adm_server.php?r=adm/attendanceregister/user_sessions&idCourse=' + idCourse + '&idUser=' + idUser + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE);
         YAHOO.util.Dom.get('ar_sessions_url').value = url;
         AttendanceRegister.oDialogCaller['ar_user_sessions_dialog']();
     }

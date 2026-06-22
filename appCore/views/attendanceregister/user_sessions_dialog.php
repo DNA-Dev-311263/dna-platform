@@ -25,7 +25,7 @@ $html .= '<tr style="font-weight:700;"><td>' . Lang::t('_TOTAL', 'standard') . '
 $html .= '</table>';
 
 $html .= '<div style="margin-top:14px;">'
-    . '<a class="pui-btn pui-btn--ghost" href="ajax.adm_server.php?r=adm/attendanceregister/export_user&idCourse=' . (int) FormaLms\lib\Get::req('idCourse', DOTY_INT, 0) . '&idUser=' . (int) FormaLms\lib\Get::req('idUser', DOTY_INT, 0) . '">'
+    . '<a class="pui-btn pui-btn--ghost" href="ajax.adm_server.php?r=adm/attendanceregister/export_user&idCourse=' . (int) FormaLms\lib\Get::req('idCourse', DOTY_INT, 0) . '&idUser=' . (int) FormaLms\lib\Get::req('idUser', DOTY_INT, 0) . '&authentic_request=' . urlencode(Util::getSignature()) . '">'
     . Lang::t('_EXPORT_XLS', 'standard') . '</a>'
     . '</div>';
 $html .= '</div>';

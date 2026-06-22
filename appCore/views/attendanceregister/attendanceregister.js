@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		usersContainer.innerHTML = '<div class="ar-loading">...</div>';
 
 		var xhr = new XMLHttpRequest();
-		xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/course_users&idCourse=' + encodeURIComponent(idCourse), true);
+		xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/course_users&idCourse=' + encodeURIComponent(idCourse) + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE), true);
 		xhr.onload = function () {
 			if (xhr.status !== 200) {
 				return;
