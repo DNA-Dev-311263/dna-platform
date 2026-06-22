@@ -336,6 +336,9 @@ $date_picker_param = 'data-provide="datepicker" data-date-autoclose=true data-da
         if (options.lengthChange !== undefined) {
             _options.lengthChange = options.lengthChange;
         }
+        if (options.lengthMenu !== undefined) {
+            _options.lengthMenu = options.lengthMenu;
+        }
         if (options.ordering !== undefined) {
             _options.ordering = options.ordering;
         }

@@ -319,6 +319,7 @@ function getTable($tb, $title = null, $id)
             scrollX: true,
             order: [[ 0, "asc" ]],
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tutti"]],
+            dom: "lBfrtip",
           });
         });
         </script>';
