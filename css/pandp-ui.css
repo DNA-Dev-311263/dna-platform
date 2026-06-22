@@ -876,3 +876,54 @@
 @media (max-width: 1100px) {
     .dash-board { grid-template-columns: 1fr; }
 }
+
+/* =============================================================
+   Registro presenze — pagina unica (Statistiche > Registro presenze)
+   ============================================================= */
+.ar-page .pui-card + form { margin-top: 16px; }
+
+.ar-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+    overflow: hidden;
+}
+
+.ar-table th {
+    text-align: left;
+    color: #8a9fc4;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f2f8;
+    background: #f8fafd;
+}
+
+.ar-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f7f8fb;
+    color: #2d3748;
+}
+
+.ar-table tr:last-child td { border-bottom: none; }
+
+.ar-link { color: #1a6ef7; cursor: pointer; font-weight: 600; }
+.ar-link:hover { text-decoration: underline; }
+
+.ar-actions { margin-top: 16px; }
+
+.ar-empty,
+.ar-loading {
+    padding: 24px;
+    text-align: center;
+    color: #8a9fc4;
+    font-size: 13px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+}
