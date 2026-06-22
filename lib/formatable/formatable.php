@@ -599,6 +599,13 @@ $date_picker_param = 'data-provide="datepicker" data-date-autoclose=true data-da
          */
         _options.language = {
             'sSearch': '<?php echo Lang::t('_SEARCH', 'standard'); ?>',
+            'sLengthMenu': '_MENU_ righe per pagina',
+            'sInfo': 'Visualizzazione da _START_ a _END_ di _TOTAL_ elementi',
+            'sInfoEmpty': '<?php echo Lang::t('_NO_DATA', 'standard'); ?>',
+            'sInfoFiltered': '(filtrati da _MAX_ elementi totali)',
+            'sZeroRecords': '<?php echo Lang::t('_NO_CONTENT', 'standard'); ?>',
+            'sEmptyTable': '<?php echo Lang::t('_NO_CONTENT', 'standard'); ?>',
+            'sProcessing': '<?php echo Lang::t('_LOADING', 'standard'); ?>',
             'oPaginate': {
                 'sFirst': '<?php echo Lang::t('_START', 'standard'); ?>',
                 'sPrevious': '<?php echo Lang::t('_PREV_B', 'standard'); ?>',

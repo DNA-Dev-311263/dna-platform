@@ -486,14 +486,8 @@ function formatSessionDuration($seconds)
     $hours = (int) ($seconds / 3600);
     $minutes = (int) (($seconds % 3600) / 60);
     $secs = (int) ($seconds % 60);
-    if ($minutes < 10) {
-        $minutes = '0' . $minutes;
-    }
-    if ($secs < 10) {
-        $secs = '0' . $secs;
-    }
 
-    return $hours . 'h ' . $minutes . 'm ' . $secs . 's ';
+    return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
 }
 
 /**
@@ -526,7 +520,11 @@ function userdetails_export()
         . '<th>' . $lang->def('_NUMBER_OF_OP') . '</th>'
         . '</tr>';
 
+    $session_count = 0;
+    $total_seconds = 0;
     while (list($session_start_at, $last_action_at, $how, $num_op) = sql_fetch_row($re_tracks)) {
+        ++$session_count;
+        $total_seconds += $how;
         $output .= '<tr>'
             . '<td>' . htmlspecialchars(Format::date($session_start_at)) . '</td>'
             . '<td>' . htmlspecialchars(Format::date($last_action_at, false, true)) . '</td>'
@@ -534,6 +532,14 @@ function userdetails_export()
             . '<td>' . (int) $num_op . '</td>'
             . '</tr>';
     }
+
+    $output .= '<tr>'
+        . '<td><b>' . $lang->def('_TOTAL') . '</b></td>'
+        . '<td><b>' . $lang->def('_NUMBER_OF_ACCESS') . ': ' . $session_count . '</b></td>'
+        . '<td><b>' . formatSessionDuration($total_seconds) . '</b></td>'
+        . '<td></td>'
+        . '</tr>';
+
     $output .= '</table>';
 
     sendStrAsFile($output, 'statistiche_utente_' . date('Ymd') . '.xls');
