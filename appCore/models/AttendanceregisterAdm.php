@@ -53,14 +53,33 @@ class AttendanceregisterAdm extends Model
 
     /**
      * Utenti iscritti al corso scelto (validati su core_user, niente righe
-     * orfane: stesso problema gia' risolto altrove in questa Dashboard).
+     * orfane: stesso problema gia' risolto altrove in questa Dashboard), con
+     * filtro opzionale per azienda (nodo di primo livello dell'organigramma,
+     * sotto-alberatura completa incluso, stesso pattern usato dalla
+     * Dashboard per "Elenco utenti azienda").
      */
-    public function getCourseUsers($idCourse)
+    public function getCourseUsers($idCourse, $idOrg = 0)
     {
-        $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname FROM %lms_courseuser cu '
-            . ' JOIN %adm_user u ON u.idst = cu.idUser '
-            . ' WHERE cu.idCourse = ' . (int) $idCourse
-            . ' ORDER BY u.lastname ASC, u.firstname ASC';
+        $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %lms_courseuser cu '
+            . ' JOIN %adm_user u ON u.idst = cu.idUser ';
+
+        if ($idOrg > 0) {
+            $range_query = 'SELECT iLeft, iRight FROM core_org_chart_tree WHERE idOrg = ' . (int) $idOrg;
+            $range_res = $this->db->query($range_query);
+            if (!$range_res || $this->db->num_rows($range_res) <= 0) {
+                return [];
+            }
+            list($iLeft, $iRight) = $this->db->fetch_row($range_res);
+
+            $query .= ' JOIN %adm_group_members gm ON gm.idstMember = u.idst '
+                . ' JOIN core_org_chart_tree d ON (d.idst_oc = gm.idst OR d.idst_ocd = gm.idst) '
+                . ' WHERE cu.idCourse = ' . (int) $idCourse
+                . ' AND d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
+        } else {
+            $query .= ' WHERE cu.idCourse = ' . (int) $idCourse;
+        }
+
+        $query .= ' ORDER BY u.lastname ASC, u.firstname ASC';
         $res = $this->db->query($query);
 
         $rows = [];
@@ -73,6 +92,38 @@ class AttendanceregisterAdm extends Model
         }
 
         return $rows;
+    }
+
+    /**
+     * Aziende (nodi di primo livello dell'organigramma) che hanno almeno un
+     * iscritto al corso scelto: solo queste vanno mostrate nella tendina di
+     * filtro, altrimenti si potrebbero scegliere aziende sempre vuote.
+     */
+    public function getCompaniesForCourse($idCourse)
+    {
+        $query = 'SELECT oct.idOrg, oct.iLeft, oct.iRight, c.translation '
+            . ' FROM core_org_chart_tree oct '
+            . ' JOIN core_org_chart c ON c.id_dir = oct.idOrg AND c.lang_code = "' . getLanguage() . '" '
+            . ' WHERE oct.idParent = 0 '
+            . ' ORDER BY c.translation ASC';
+        $res = $this->db->query($query);
+
+        $companies = [];
+        while (list($idOrg, $iLeft, $iRight, $name) = $this->db->fetch_row($res)) {
+            $count_query = 'SELECT COUNT(DISTINCT u.idst) FROM %lms_courseuser cu '
+                . ' JOIN %adm_user u ON u.idst = cu.idUser '
+                . ' JOIN %adm_group_members gm ON gm.idstMember = u.idst '
+                . ' JOIN core_org_chart_tree d ON (d.idst_oc = gm.idst OR d.idst_ocd = gm.idst) '
+                . ' WHERE cu.idCourse = ' . (int) $idCourse
+                . ' AND d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
+            list($count) = $this->db->fetch_row($this->db->query($count_query));
+
+            if ((int) $count > 0) {
+                $companies[] = ['idOrg' => $idOrg, 'name' => $name];
+            }
+        }
+
+        return $companies;
     }
 
     /**

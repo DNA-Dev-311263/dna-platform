@@ -1028,8 +1028,6 @@
 .ar-day-detail__table td { padding: 7px 14px; color: #5a6a85; border-bottom: 1px solid #eef1f7; }
 .ar-day-detail__table tr:last-child td { border-bottom: none; }
 
-.ar-detail__foot { padding: 14px 24px; border-top: 1px solid #f0f2f8; flex-shrink: 0; }
-
 @media (max-width: 900px) {
     .ar-split { grid-template-columns: 1fr; }
 }
@@ -1038,24 +1036,57 @@
    utenti/checkbox, niente pulsanti) e niente limiti di altezza/scroll, cosi'
    escono tutte le righe — riepilogo o dettagliate secondo il pulsante usato
    (vedi arPrint() in attendanceregister.js). */
+.ar-filters { display: flex; gap: 24px; flex-wrap: wrap; }
+
+/* Popup di scelta formato (Stampa / Excel / Word), dopo aver scelto
+   Riepilogo o Dettaglio sotto la lista utenti. */
+.ar-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 50, .45);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ar-modal__box {
+    position: relative;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
+    padding: 32px;
+    width: 360px;
+}
+.ar-modal__title { font-size: 15px; font-weight: 700; color: #1a2b4a; margin-bottom: 18px; }
+.ar-modal__actions { display: flex; flex-direction: column; gap: 10px; }
+.ar-modal__close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    color: #aebcd8;
+    cursor: pointer;
+}
+
+/* Area di stampa multi-utente: invisibile a video, mostrata solo durante la
+   stampa (vedi @media print sotto), che nasconde il resto della pagina. */
+.ar-print-multi { display: none; }
+
+.ar-print-section { margin-bottom: 28px; }
+.ar-print-section__title { font-size: 15px; margin-bottom: 8px; }
+.ar-print-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ar-print-table th,
+.ar-print-table td { border: 1px solid #d7dce8; padding: 6px 10px; text-align: left; }
+.ar-print-table tr.ar-print-subrow td { color: #5a6a85; font-size: 11px; }
+.ar-print-table tr.ar-print-total td { background: #f4f6fb; }
+
 @media print {
-    .ar-page .pui-card,
-    .ar-page #ar_export_form,
-    .ar-detail__foot {
+    body.ar-printing-multi .ar-page > *:not(#ar_print_multi) {
         display: none !important;
     }
-    .ar-split {
+    body.ar-printing-multi .ar-print-multi {
         display: block !important;
-    }
-    .ar-detail {
-        max-height: none !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-    }
-    .ar-detail__body {
-        overflow: visible !important;
-    }
-    .ar-detail__body th {
-        position: static !important;
     }
 }

@@ -1,29 +1,28 @@
 document.addEventListener('DOMContentLoaded', function () {
 	var courseSelect = document.getElementById('ar_course_select');
+	var companyField = document.getElementById('ar_company_field');
+	var companySelect = document.getElementById('ar_company_select');
 	var split = document.getElementById('ar_split');
 	var usersContainer = document.getElementById('ar_users_container');
 	var detail = document.getElementById('ar_detail');
 	var exportIdCourse = document.getElementById('ar_export_idcourse');
+	var exportIdOrg = document.getElementById('ar_export_idorg');
 
 	if (!courseSelect) {
 		return;
 	}
 
-	courseSelect.addEventListener('change', function () {
+	function loadUsers() {
 		var idCourse = courseSelect.value;
+		var idOrg = companySelect.value;
 		exportIdCourse.value = idCourse;
+		exportIdOrg.value = idOrg;
 
-		if (!idCourse) {
-			split.style.display = 'none';
-			return;
-		}
-
-		split.style.display = '';
 		usersContainer.innerHTML = '<div class="ar-empty">...</div>';
 		detail.innerHTML = '<div class="ar-detail__empty"></div>';
 
 		var xhr = new XMLHttpRequest();
-		xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/course_users&idCourse=' + encodeURIComponent(idCourse) + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE), true);
+		xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/course_users&idCourse=' + encodeURIComponent(idCourse) + '&idOrg=' + encodeURIComponent(idOrg) + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE), true);
 		xhr.onload = function () {
 			if (xhr.status !== 200) {
 				return;
@@ -31,7 +30,51 @@ document.addEventListener('DOMContentLoaded', function () {
 			usersContainer.innerHTML = xhr.responseText;
 		};
 		xhr.send();
+	}
+
+	function loadCompanies(idCourse) {
+		while (companySelect.options.length > 1) {
+			companySelect.remove(1);
+		}
+		companySelect.value = '';
+		companyField.style.display = 'none';
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/companies&idCourse=' + encodeURIComponent(idCourse) + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE), true);
+		xhr.onload = function () {
+			if (xhr.status !== 200) {
+				return;
+			}
+			var companies = JSON.parse(xhr.responseText);
+			if (!companies.length) {
+				return;
+			}
+			companies.forEach(function (c) {
+				var opt = document.createElement('option');
+				opt.value = c.idOrg;
+				opt.textContent = c.name;
+				companySelect.appendChild(opt);
+			});
+			companyField.style.display = '';
+		};
+		xhr.send();
+	}
+
+	courseSelect.addEventListener('change', function () {
+		var idCourse = courseSelect.value;
+
+		if (!idCourse) {
+			split.style.display = 'none';
+			companyField.style.display = 'none';
+			return;
+		}
+
+		split.style.display = '';
+		loadCompanies(idCourse);
+		loadUsers();
 	});
+
+	companySelect.addEventListener('change', loadUsers);
 });
 
 /**
@@ -53,32 +96,68 @@ function arToggleDay(rowEl) {
 	}
 }
 
+var arPendingDetailed = false;
+
 /**
- * Stampa il pannello dettaglio: forza tutte le righe giorno
- * espanse (true) o richiuse (false), stampa, poi ripristina lo stato
- * com'era prima (cosi' la stampa non altera quello che l'utente vedeva).
+ * Apre il popup "Stampa / Excel / Word" dopo aver scelto Riepilogo o
+ * Dettaglio. La scelta si applica agli utenti selezionati (checkbox o
+ * username cliccata), o a tutti se nessuno e' selezionato.
  */
-function arPrint(showDetail) {
-	var dayDetailRows = document.querySelectorAll('#ar_print_area tr.ar-day-detail');
-	var carets = document.querySelectorAll('#ar_print_area .ar-caret');
-	var previousDisplay = [];
-	var previousCaret = [];
-
-	dayDetailRows.forEach(function (row, i) {
-		previousDisplay[i] = row.style.display;
-		row.style.display = showDetail ? '' : 'none';
-	});
-	carets.forEach(function (caret, i) {
-		previousCaret[i] = caret.innerHTML;
-		caret.innerHTML = showDetail ? '&#9662;' : '&#9656;';
-	});
-
-	function restore() {
-		dayDetailRows.forEach(function (row, i) { row.style.display = previousDisplay[i]; });
-		carets.forEach(function (caret, i) { caret.innerHTML = previousCaret[i]; });
-		window.removeEventListener('afterprint', restore);
-	}
-	window.addEventListener('afterprint', restore);
-
-	window.print();
+function arOpenFormatModal(detailed) {
+	arPendingDetailed = detailed;
+	document.getElementById('ar_format_modal').style.display = 'flex';
 }
+
+function arCloseFormatModal() {
+	document.getElementById('ar_format_modal').style.display = 'none';
+}
+
+function arRunAction(action) {
+	arCloseFormatModal();
+
+	var form = document.getElementById('ar_export_form');
+	document.getElementById('ar_export_detailed').value = arPendingDetailed ? '1' : '0';
+
+	if (action === 'excel' || action === 'word') {
+		document.getElementById('ar_export_r').value = 'adm/attendanceregister/export_' + action;
+		form.submit();
+		return;
+	}
+
+	arPrintSelected();
+}
+
+/**
+ * Stampa (Riepilogo o Dettaglio) degli utenti selezionati, o di tutti se
+ * nessuno e' selezionato: carica via AJAX la sezione di ciascuno nell'area
+ * dedicata #ar_print_multi, poi richiama la stampa del browser. Al termine
+ * l'area viene svuotata, cosi' non resta nulla "nascosto" in pagina.
+ */
+function arPrintSelected() {
+	var form = document.getElementById('ar_export_form');
+	var params = new URLSearchParams(new FormData(form));
+	params.set('r', 'adm/attendanceregister/print_selected');
+
+	var printArea = document.getElementById('ar_print_multi');
+	printArea.innerHTML = '<div class="ar-empty">...</div>';
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'ajax.adm_server.php?' + params.toString(), true);
+	xhr.onload = function () {
+		if (xhr.status !== 200) {
+			return;
+		}
+		printArea.innerHTML = xhr.responseText;
+		document.body.classList.add('ar-printing-multi');
+		window.print();
+	};
+	xhr.send();
+}
+
+window.addEventListener('afterprint', function () {
+	document.body.classList.remove('ar-printing-multi');
+	var printArea = document.getElementById('ar_print_multi');
+	if (printArea) {
+		printArea.innerHTML = '';
+	}
+});

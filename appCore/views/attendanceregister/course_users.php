@@ -18,8 +18,8 @@
         </table>
     </div>
     <div class="ar-actions">
-        <button type="submit" name="r" value="adm/attendanceregister/export_excel" class="pui-btn pui-btn--primary"><?php echo Lang::t('_EXPORT_ALL_USERS_XLS', 'statistic'); ?></button>
-        <button type="submit" name="r" value="adm/attendanceregister/export_word" class="pui-btn pui-btn--ghost"><?php echo Lang::t('_EXPORT_ALL_USERS_WORD', 'statistic'); ?></button>
+        <button type="button" class="pui-btn pui-btn--primary" onclick="arOpenFormatModal(false)"><?php echo Lang::t('_SUMMARY_VIEW', 'statistic'); ?></button>
+        <button type="button" class="pui-btn pui-btn--ghost" onclick="arOpenFormatModal(true)"><?php echo Lang::t('_DETAILS', 'standard'); ?></button>
     </div>
     <div class="ar-actions__note"><?php echo Lang::t('_EXPORT_SELECTION_NOTE', 'statistic'); ?></div>
 <?php } ?>

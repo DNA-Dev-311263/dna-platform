@@ -34,24 +34,39 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
+     * AJAX: elenco aziende (con almeno un iscritto al corso scelto), per
+     * popolare la tendina di filtro accanto a quella del corso.
+     */
+    public function companiesTask()
+    {
+        $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+
+        header('Content-Type: application/json');
+        echo json_encode($idCourse > 0 ? $this->model->getCompaniesForCourse($idCourse) : []);
+        exit();
+    }
+
+    /**
      * AJAX: frammento HTML con l'elenco utenti del corso scelto (checkbox +
      * link al dettaglio sessioni), iniettato via innerHTML nel pannello
-     * sinistro della stessa schermata.
+     * sinistro della stessa schermata. Filtro azienda opzionale.
      */
     public function course_usersTask()
     {
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+        $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
 
         $this->render('course_users', [
             'idCourse' => $idCourse,
-            'users' => $idCourse > 0 ? $this->model->getCourseUsers($idCourse) : [],
+            'users' => $idCourse > 0 ? $this->model->getCourseUsers($idCourse, $idOrg) : [],
         ]);
     }
 
     /**
      * AJAX: frammento HTML con il dettaglio (sessioni raggruppate per
      * giorno) di un utente, iniettato nel pannello destro della stessa
-     * schermata (nessun popup).
+     * schermata (nessun popup, solo lettura: le azioni di export/stampa
+     * sono centralizzate sotto la lista utenti).
      */
     public function user_sessionsTask()
     {
@@ -64,8 +79,6 @@ class AttendanceregisterAdmController extends AdmController
         $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
 
         $this->render('user_detail', [
-            'idCourse' => $idCourse,
-            'idUser' => $idUser,
             'fullname' => $fullname !== '' ? $fullname : $username,
             'username' => $username,
             'data' => $this->model->getUserSessionsByDay($idCourse, $idUser),
@@ -73,44 +86,51 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * Export Excel di un solo utente (link dal pannello dettaglio),
-     * intestato col suo nome.
+     * AJAX: frammento HTML stampabile con una sezione per ciascun utente
+     * selezionato (o tutti gli iscritti, secondo le stesse regole degli
+     * export). Iniettato in un'area dedicata e poi stampato via window.print().
      */
-    public function export_userTask()
+    public function print_selectedTask()
     {
-        require_once _base_ . '/lib/lib.download.php';
-
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
-        $idUser = FormaLms\lib\Get::req('idUser', DOTY_INT, 0);
+        $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
+        $selected = FormaLms\lib\Get::req('selected_users', DOTY_MIXED, []);
+        $detailed = FormaLms\lib\Get::req('detailed', DOTY_INT, 0) == 1;
 
-        $acl_man = Docebo::user()->getAclManager();
-        $user_info = $acl_man->getUser($idUser, false);
-        $fullname = trim($user_info[ACL_INFO_LASTNAME] . ' ' . $user_info[ACL_INFO_FIRSTNAME]);
-        $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
+        $sections = [];
+        foreach ($this->resolveExportUsers($idCourse, $selected, $idOrg) as $u) {
+            $sections[] = [
+                'displayName' => $u['name'],
+                'username' => $u['userid'],
+                'data' => $this->model->getUserSessionsByDay($idCourse, $u['idst']),
+            ];
+        }
 
-        $output = $this->buildUserSection($fullname !== '' ? $fullname : $username, $username, $idCourse, $idUser);
-
-        sendStrAsFile('<table border="1">' . $output . '</table>', 'registro_presenze_' . preg_replace('/[^a-zA-Z0-9]/', '_', $username) . '_' . date('Ymd') . '.xls');
-        exit();
+        $this->render('print_multi', [
+            'sections' => $sections,
+            'detailed' => $detailed,
+        ]);
     }
 
     /**
      * Export Excel di utenti: se ci sono checkbox selezionate esporta solo
-     * quelle persone, altrimenti tutti gli iscritti al corso. Una sezione
-     * per allievo, intestata col suo nome. Stessa regola di selezione di
-     * export_wordTask().
+     * quelle persone, altrimenti tutti gli iscritti al corso (secondo
+     * l'eventuale filtro azienda). Una sezione per allievo, intestata col
+     * suo nome. Stessa regola di selezione di export_wordTask().
      */
     public function export_excelTask()
     {
         require_once _base_ . '/lib/lib.download.php';
 
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+        $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
         $selected = FormaLms\lib\Get::req('selected_users', DOTY_MIXED, []);
+        $detailed = FormaLms\lib\Get::req('detailed', DOTY_INT, 0) == 1;
 
-        $users = $this->resolveExportUsers($idCourse, $selected);
+        $users = $this->resolveExportUsers($idCourse, $selected, $idOrg);
         $output = '';
         foreach ($users as $u) {
-            $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst']);
+            $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst'], $detailed);
             $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
         }
         if (empty($users)) {
@@ -123,18 +143,20 @@ class AttendanceregisterAdmController extends AdmController
 
     /**
      * Export Word di utenti: stessa regola di selezione dell'export Excel
-     * (selezionati, o tutti se nessuno selezionato). Una sezione per
-     * allievo, intestata col suo nome.
+     * (selezionati, o tutti se nessuno selezionato, secondo l'eventuale
+     * filtro azienda). Una sezione per allievo, intestata col suo nome.
      */
     public function export_wordTask()
     {
         require_once _base_ . '/lib/lib.download.php';
 
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+        $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
         $selected = FormaLms\lib\Get::req('selected_users', DOTY_MIXED, []);
+        $detailed = FormaLms\lib\Get::req('detailed', DOTY_INT, 0) == 1;
         $courseName = $this->model->getCourseName($idCourse);
 
-        $users = $this->resolveExportUsers($idCourse, $selected);
+        $users = $this->resolveExportUsers($idCourse, $selected, $idOrg);
         $output = '<h2>' . htmlspecialchars($courseName) . '</h2>'
             . '<p>' . Lang::t('_ATTENDANCE_REGISTER', 'standard') . ' - ' . date('d/m/Y') . '</p>'
             . '<table border="1">';
@@ -143,7 +165,7 @@ class AttendanceregisterAdmController extends AdmController
             $output .= '<tr><td>' . Lang::t('_NO_DATA', 'standard') . '</td></tr>';
         }
         foreach ($users as $u) {
-            $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst']);
+            $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst'], $detailed);
             $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
         }
         $output .= '</table>';
@@ -153,10 +175,11 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * Utenti da esportare: solo quelli con checkbox selezionata, oppure
-     * tutti gli iscritti al corso se non e' stato selezionato nessuno.
+     * Utenti da esportare/stampare: solo quelli con checkbox selezionata
+     * (anche uno solo), oppure tutti gli iscritti al corso (con l'eventuale
+     * filtro azienda) se non e' stato selezionato nessuno.
      */
-    private function resolveExportUsers($idCourse, $selected)
+    private function resolveExportUsers($idCourse, $selected, $idOrg = 0)
     {
         if (!is_array($selected)) {
             $selected = [];
@@ -164,7 +187,7 @@ class AttendanceregisterAdmController extends AdmController
         $selected = array_filter(array_map('intval', $selected));
 
         if (empty($selected)) {
-            return $this->model->getCourseUsers($idCourse);
+            return $this->model->getCourseUsers($idCourse, $idOrg);
         }
 
         $acl_man = Docebo::user()->getAclManager();
@@ -188,9 +211,10 @@ class AttendanceregisterAdmController extends AdmController
 
     /**
      * Sezione (intestazione + righe per giorno + totali) per un singolo
-     * utente, condivisa fra tutte le esportazioni.
+     * utente, condivisa fra tutte le esportazioni. Con $detailed=true, sotto
+     * ogni giorno vengono aggiunte le singole sessioni che lo compongono.
      */
-    private function buildUserSection($displayName, $username, $idCourse, $idUser)
+    private function buildUserSection($displayName, $username, $idCourse, $idUser, $detailed = false)
     {
         $data = $this->model->getUserSessionsByDay($idCourse, $idUser);
 
@@ -211,6 +235,18 @@ class AttendanceregisterAdmController extends AdmController
                 . '<td>' . htmlspecialchars($row['duration']) . '</td>'
                 . '<td>' . (int) $row['num_op'] . '</td>'
                 . '</tr>';
+
+            if ($detailed) {
+                foreach ($row['sessions'] as $s) {
+                    $html .= '<tr>'
+                        . '<td></td>'
+                        . '<td>' . htmlspecialchars($s['enter']) . '</td>'
+                        . '<td>' . htmlspecialchars($s['exit']) . '</td>'
+                        . '<td>' . htmlspecialchars($s['duration']) . '</td>'
+                        . '<td>' . (int) $s['num_op'] . '</td>'
+                        . '</tr>';
+                }
+            }
         }
 
         $html .= '<tr>'

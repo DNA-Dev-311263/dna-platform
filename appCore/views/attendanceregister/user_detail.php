@@ -9,7 +9,7 @@
     <div><div class="ar-tot__v"><?php echo htmlspecialchars($data['total_duration']); ?></div><div class="ar-tot__l"><?php echo Lang::t('_HOW_MUCH_TIME', 'statistic'); ?></div></div>
 </div>
 
-<div class="ar-detail__body" id="ar_print_area">
+<div class="ar-detail__body">
     <table>
         <tr>
             <th><?php echo Lang::t('_DATE', 'standard'); ?></th>
@@ -51,12 +51,4 @@
             <tr><td colspan="5"><?php echo Lang::t('_NO_DATA', 'standard'); ?></td></tr>
         <?php } ?>
     </table>
-</div>
-
-<div class="ar-detail__foot">
-    <a class="pui-btn pui-btn--ghost" href="ajax.adm_server.php?r=adm/attendanceregister/export_user&idCourse=<?php echo (int) $idCourse; ?>&idUser=<?php echo (int) $idUser; ?>&authentic_request=<?php echo urlencode(Util::getSignature()); ?>">
-        <?php echo Lang::t('_EXPORT_XLS', 'standard'); ?>
-    </a>
-    <button type="button" class="pui-btn pui-btn--ghost" onclick="arPrint(false)"><?php echo Lang::t('_PRINT_SUMMARY', 'statistic'); ?></button>
-    <button type="button" class="pui-btn pui-btn--ghost" onclick="arPrint(true)"><?php echo Lang::t('_PRINT_DETAILED', 'statistic'); ?></button>
 </div>
