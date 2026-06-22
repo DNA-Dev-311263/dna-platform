@@ -275,7 +275,7 @@ function statistic()
     $GLOBALS['page']->add(getTable($tb, '_USERS_LIST_CAPTION', 'stats_users_list'), 'content');
 }
 
-function getTable($tb, $title = null, $id)
+function getTable($tb, $title = null, $id, $footer_html = '')
 {
     $table_head = '';
     foreach ($tb->table_head as $row) {
@@ -295,6 +295,10 @@ function getTable($tb, $title = null, $id)
         $table_body .= '</tr>';
     }
 
+    // tfoot, non tbody: cosi' la riga dei totali resta sempre fissa in fondo,
+    // senza essere ordinata/paginata insieme alle righe di dati da DataTables.
+    $table_foot = $footer_html !== '' ? '<tfoot>' . $footer_html . '</tfoot>' : '';
+
     return '
         <table class="table table-striped table-bordered display" style="width:100%" id="' . $id . '">
           <thead>
@@ -305,8 +309,9 @@ function getTable($tb, $title = null, $id)
         . '</thead>
           <tbody>' .
         $table_body
-        . '</tbody>
-        </table>'
+        . '</tbody>' .
+        $table_foot
+        . '</table>'
 
         . '<script>
         $(function() {
@@ -423,7 +428,9 @@ function userdetails()
     $tb->setColsStyle($type_h);
     $total_sec = 0;
     $chartData = [];
+    $session_count = 0;
     while (list($id_enter, $session_start_at, $last_action_at, $how, $num_op, $last_module, $last_op, $session_id) = sql_fetch_row($re_tracks)) {
+        ++$session_count;
         $readable = formatSessionDuration($how);
         $start = Format::date($session_start_at);
         $cont = [
@@ -442,12 +449,30 @@ function userdetails()
         $tb->addBody($cont);
     }
 
+    // Riga dei totali in fondo alla tabella (numero di accessi, tempo
+    // totale), allineata sotto le colonne corrispondenti.
+    $footer_cols = [
+        '<b>' . $lang->def('_TOTAL') . '</b>',
+        '<b>' . $lang->def('_NUMBER_OF_ACCESS') . ': ' . $session_count . '</b>',
+        '<b>' . formatSessionDuration($tot_time) . '</b>',
+        '',
+        '',
+    ];
+    if (FormaLms\lib\Get::sett('tracking') == 'on') {
+        $footer_cols[] = '';
+    }
+    $footer_html = '<tr>';
+    foreach ($footer_cols as $footer_col) {
+        $footer_html .= '<td>' . $footer_col . '</td>';
+    }
+    $footer_html .= '</tr>';
+
     cout(
         '<div>'
         . '<span class="text_bold">' . $lang->def('_USER_TOTAL_TIME') . ' : </span>' . formatSessionDuration($tot_time)
         . ' &nbsp; <a href="index.php?modname=statistic&amp;op=userdetails_export&amp;id=' . $idst_user . '" class="ico-wt-sprite subs_xls" title="' . Lang::t('_EXPORT_XLS', 'standard') . '">'
         . '<span>' . Lang::t('_EXPORT_XLS', 'standard') . '</span></a>'
-        . getTable($tb, '_USERS_LIST_DETAILS_CAPTION', 'stats_user_details')
+        . getTable($tb, '_USERS_LIST_DETAILS_CAPTION', 'stats_user_details', $footer_html)
         . getBackUi('index.php?modname=statistic&amp;op=statistic', $lang->def('_BACK'))
         . '</div>', 'content');
 }
