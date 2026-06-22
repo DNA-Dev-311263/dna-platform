@@ -16,13 +16,10 @@ defined('IN_FORMA') or exit('Direct access is forbidden');
 class AttendanceregisterAdmController extends AdmController
 {
     protected $model;
-    protected $json;
 
     public function init()
     {
         parent::init();
-        require_once _base_ . '/lib/lib.json.php';
-        $this->json = new Services_JSON();
         $this->model = new AttendanceregisterAdm();
     }
 
@@ -38,8 +35,8 @@ class AttendanceregisterAdmController extends AdmController
 
     /**
      * AJAX: frammento HTML con l'elenco utenti del corso scelto (checkbox +
-     * link al dettaglio sessioni), iniettato via innerHTML nella stessa
-     * schermata.
+     * link al dettaglio sessioni), iniettato via innerHTML nel pannello
+     * sinistro della stessa schermata.
      */
     public function course_usersTask()
     {
@@ -52,8 +49,9 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * Popup con la tabella sessioni di un utente (stessa identica
-     * informazione di "Stat. Utilizzo", senza grafico).
+     * AJAX: frammento HTML con il dettaglio (sessioni raggruppate per
+     * giorno) di un utente, iniettato nel pannello destro della stessa
+     * schermata (nessun popup).
      */
     public function user_sessionsTask()
     {
@@ -63,16 +61,20 @@ class AttendanceregisterAdmController extends AdmController
         $acl_man = Docebo::user()->getAclManager();
         $user_info = $acl_man->getUser($idUser, false);
         $fullname = trim($user_info[ACL_INFO_LASTNAME] . ' ' . $user_info[ACL_INFO_FIRSTNAME]);
+        $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
 
-        $this->render('user_sessions_dialog', [
-            'fullname' => $fullname !== '' ? $fullname : $acl_man->relativeId($user_info[ACL_INFO_USERID]),
-            'data' => $this->model->getUserSessions($idCourse, $idUser),
-            'json' => $this->json,
+        $this->render('user_detail', [
+            'idCourse' => $idCourse,
+            'idUser' => $idUser,
+            'fullname' => $fullname !== '' ? $fullname : $username,
+            'username' => $username,
+            'data' => $this->model->getUserSessionsByDay($idCourse, $idUser),
         ]);
     }
 
     /**
-     * Export Excel di un solo utente (link dal popup), intestato col suo nome.
+     * Export Excel di un solo utente (link dal pannello dettaglio),
+     * intestato col suo nome.
      */
     public function export_userTask()
     {
@@ -123,7 +125,7 @@ class AttendanceregisterAdmController extends AdmController
             $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
 
             $output .= $this->buildUserSection($fullname !== '' ? $fullname : $username, $username, $idCourse, $idUser);
-            $output .= '<tr><td colspan="4">&nbsp;</td></tr>';
+            $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
         }
 
         sendStrAsFile('<table border="1">' . $output . '</table>', 'registro_presenze_' . date('Ymd') . '.xls');
@@ -152,7 +154,7 @@ class AttendanceregisterAdmController extends AdmController
 
         foreach ($users as $u) {
             $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst']);
-            $output .= '<tr><td colspan="4">&nbsp;</td></tr>';
+            $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
         }
 
         $output .= '</table>';
@@ -162,25 +164,27 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * Sezione (intestazione + righe sessioni + totali) per un singolo
-     * utente, condivisa fra export singolo e multiplo.
+     * Sezione (intestazione + righe per giorno + totali) per un singolo
+     * utente, condivisa fra tutte le esportazioni.
      */
     private function buildUserSection($displayName, $username, $idCourse, $idUser)
     {
-        $data = $this->model->getUserSessions($idCourse, $idUser);
+        $data = $this->model->getUserSessionsByDay($idCourse, $idUser);
 
-        $html = '<tr><th colspan="4">' . htmlspecialchars($displayName) . ' (' . htmlspecialchars($username) . ')</th></tr>'
+        $html = '<tr><th colspan="5">' . htmlspecialchars($displayName) . ' (' . htmlspecialchars($username) . ')</th></tr>'
             . '<tr>'
-            . '<th>' . Lang::t('_SESSION_STARTED', 'statistic') . '</th>'
-            . '<th>' . Lang::t('_LAST_ACTION_AT', 'statistic') . '</th>'
+            . '<th>' . Lang::t('_DATE', 'standard') . '</th>'
+            . '<th>' . Lang::t('_FIRST_ENTRY', 'statistic') . '</th>'
+            . '<th>' . Lang::t('_LAST_EXIT', 'statistic') . '</th>'
             . '<th>' . Lang::t('_HOW_MUCH_TIME', 'statistic') . '</th>'
             . '<th>' . Lang::t('_NUMBER_OF_OP', 'statistic') . '</th>'
             . '</tr>';
 
         foreach ($data['rows'] as $row) {
             $html .= '<tr>'
-                . '<td>' . htmlspecialchars($row['start']) . '</td>'
-                . '<td>' . htmlspecialchars($row['end']) . '</td>'
+                . '<td>' . htmlspecialchars($row['date']) . '</td>'
+                . '<td>' . htmlspecialchars($row['first_entry']) . '</td>'
+                . '<td>' . htmlspecialchars($row['last_exit']) . '</td>'
                 . '<td>' . htmlspecialchars($row['duration']) . '</td>'
                 . '<td>' . (int) $row['num_op'] . '</td>'
                 . '</tr>';
@@ -189,6 +193,7 @@ class AttendanceregisterAdmController extends AdmController
         $html .= '<tr>'
             . '<td><b>' . Lang::t('_TOTAL', 'standard') . '</b></td>'
             . '<td><b>' . Lang::t('_NUMBER_OF_ACCESS', 'statistic') . ': ' . $data['session_count'] . '</b></td>'
+            . '<td></td>'
             . '<td><b>' . $data['total_duration'] . '</b></td>'
             . '<td></td>'
             . '</tr>';

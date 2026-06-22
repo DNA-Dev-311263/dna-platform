@@ -76,34 +76,43 @@ class AttendanceregisterAdm extends Model
     }
 
     /**
-     * Sessioni dell'utente nel corso scelto, stessa query/formato di
-     * "Stat. Utilizzo" (statistic.php::userdetails()).
+     * Sessioni dell'utente nel corso scelto, raggruppate per giorno (come un
+     * registro presenze: un giorno puo' avere piu' sessioni separate, qui
+     * diventano una riga con primo ingresso/ultima uscita/totali del giorno).
      */
-    public function getUserSessions($idCourse, $idUser)
+    public function getUserSessionsByDay($idCourse, $idUser)
     {
-        $query = 'SELECT enterTime, lastTime, (UNIX_TIMESTAMP(lastTime) - UNIX_TIMESTAMP(enterTime)) AS howm, numOp '
+        $query = 'SELECT DATE(enterTime) AS theday, MIN(enterTime) AS first_entry, MAX(lastTime) AS last_exit, '
+            . ' SUM(UNIX_TIMESTAMP(lastTime) - UNIX_TIMESTAMP(enterTime)) AS total_seconds, '
+            . ' SUM(numOp) AS total_num_op, COUNT(*) AS session_count '
             . ' FROM %lms_tracksession '
             . ' WHERE idCourse = ' . (int) $idCourse . ' AND idUser = ' . (int) $idUser
-            . ' ORDER BY enterTime ASC';
+            . ' GROUP BY DATE(enterTime) '
+            . ' ORDER BY theday ASC';
         $res = $this->db->query($query);
 
         $rows = [];
-        $total_seconds = 0;
-        while (list($enter, $last, $how, $num_op) = $this->db->fetch_row($res)) {
-            $total_seconds += (int) $how;
+        $grand_total_seconds = 0;
+        $grand_total_sessions = 0;
+        while (list($day, $first_entry, $last_exit, $day_seconds, $day_num_op, $day_sessions) = $this->db->fetch_row($res)) {
+            $grand_total_seconds += (int) $day_seconds;
+            $grand_total_sessions += (int) $day_sessions;
             $rows[] = [
-                'start' => Format::date($enter),
-                'end' => Format::date($last, false, true),
-                'duration' => $this->formatDuration($how),
-                'num_op' => (int) $num_op,
+                'date' => date('d/m/Y', strtotime($day)),
+                'first_entry' => date('H:i', strtotime($first_entry)),
+                'last_exit' => date('H:i', strtotime($last_exit)),
+                'duration' => $this->formatDuration($day_seconds),
+                'num_op' => (int) $day_num_op,
+                'session_count' => (int) $day_sessions,
             ];
         }
 
         return [
             'rows' => $rows,
-            'session_count' => count($rows),
-            'total_seconds' => $total_seconds,
-            'total_duration' => $this->formatDuration($total_seconds),
+            'day_count' => count($rows),
+            'session_count' => $grand_total_sessions,
+            'total_seconds' => $grand_total_seconds,
+            'total_duration' => $this->formatDuration($grand_total_seconds),
         ];
     }
 

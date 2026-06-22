@@ -929,8 +929,7 @@
 
 .ar-actions { margin-top: 18px; display: flex; gap: 12px; }
 
-.ar-empty,
-.ar-loading {
+.ar-empty {
     padding: 24px;
     text-align: center;
     color: #8a9fc4;
@@ -938,4 +937,72 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+}
+
+/* Layout a due colonne: lista utenti sempre visibile a sinistra, dettaglio
+   a destra che si aggiorna al click su un utente — niente popup. */
+.ar-split {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 16px;
+}
+
+.ar-table tbody tr.ar-row-active td { background: #eaf1ff; }
+
+.ar-detail {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+    display: flex;
+    flex-direction: column;
+    max-height: 640px;
+    overflow: hidden;
+}
+
+.ar-detail__empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: #aebcd8;
+    font-size: 13px;
+}
+
+.ar-detail__head { padding: 22px 24px; border-bottom: 1px solid #f0f2f8; flex-shrink: 0; }
+.ar-detail__title { font-size: 16px; font-weight: 700; color: #1a2b4a; }
+.ar-detail__sub { font-size: 12px; color: #8a9fc4; margin-top: 3px; }
+
+.ar-detail__totals {
+    padding: 14px 24px;
+    background: #f8fafd;
+    border-bottom: 1px solid #f0f2f8;
+    display: flex;
+    gap: 28px;
+    flex-shrink: 0;
+}
+.ar-tot__v { font-size: 18px; font-weight: 700; color: #1a2b4a; }
+.ar-tot__l { font-size: 10px; color: #8a9fc4; text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+
+.ar-detail__body { overflow-y: auto; flex: 1 1 auto; }
+.ar-detail__body table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ar-detail__body th {
+    position: sticky;
+    top: 0;
+    text-align: left;
+    color: #8a9fc4;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 10px 24px;
+    background: #fff;
+    border-bottom: 1px solid #f0f2f8;
+}
+.ar-detail__body td { padding: 10px 24px; border-bottom: 1px solid #f7f8fb; color: #2d3748; }
+.ar-detail__body tr:hover td { background: #f8fafd; }
+
+.ar-detail__foot { padding: 14px 24px; border-top: 1px solid #f0f2f8; flex-shrink: 0; }
+
+@media (max-width: 900px) {
+    .ar-split { grid-template-columns: 1fr; }
 }

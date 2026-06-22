@@ -11,7 +11,7 @@
             <?php foreach ($users as $u) { ?>
                 <tr>
                     <td><input type="checkbox" name="selected_users[]" value="<?php echo (int) $u['idst']; ?>" /></td>
-                    <td class="ar-link" onclick="arOpenUserSessions(<?php echo (int) $idCourse; ?>, <?php echo (int) $u['idst']; ?>)"><?php echo htmlspecialchars($u['userid']); ?></td>
+                    <td class="ar-link" onclick="arOpenUserSessions(<?php echo (int) $idCourse; ?>, <?php echo (int) $u['idst']; ?>, this.parentNode)"><?php echo htmlspecialchars($u['userid']); ?></td>
                     <td><?php echo htmlspecialchars($u['name']); ?></td>
                 </tr>
             <?php } ?>
