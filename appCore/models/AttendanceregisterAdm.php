@@ -95,35 +95,65 @@ class AttendanceregisterAdm extends Model
     }
 
     /**
-     * Aziende (nodi di primo livello dell'organigramma) che hanno almeno un
-     * iscritto al corso scelto: solo queste vanno mostrate nella tendina di
-     * filtro, altrimenti si potrebbero scegliere aziende sempre vuote.
+     * Nodi dell'organigramma (aziende di primo livello e relativi sotto-nodi/
+     * filiali) che hanno almeno un iscritto al corso scelto: solo questi
+     * vanno mostrati nella tendina di filtro, altrimenti si potrebbero
+     * scegliere nodi sempre vuoti. Ordine ad albero (un nodo subito dopo il
+     * suo genitore, come nell'organigramma), con indentazione nel nome per
+     * far capire a quale livello appartiene ciascun nodo.
      */
     public function getCompaniesForCourse($idCourse)
     {
-        $query = 'SELECT oct.idOrg, oct.iLeft, oct.iRight, c.translation '
+        $query = 'SELECT oct.idOrg, oct.idParent, oct.iLeft, oct.iRight, c.translation '
             . ' FROM core_org_chart_tree oct '
             . ' JOIN core_org_chart c ON c.id_dir = oct.idOrg AND c.lang_code = "' . getLanguage() . '" '
-            . ' WHERE oct.idParent = 0 '
-            . ' ORDER BY c.translation ASC';
+            . ' ORDER BY oct.iLeft ASC';
         $res = $this->db->query($query);
 
+        $nodes = [];
+        while (list($idOrg, $idParent, $iLeft, $iRight, $name) = $this->db->fetch_row($res)) {
+            $nodes[(int) $idOrg] = [
+                'idParent' => (int) $idParent,
+                'iLeft' => (int) $iLeft,
+                'iRight' => (int) $iRight,
+                'name' => $name,
+            ];
+        }
+
         $companies = [];
-        while (list($idOrg, $iLeft, $iRight, $name) = $this->db->fetch_row($res)) {
+        foreach ($nodes as $idOrg => $node) {
             $count_query = 'SELECT COUNT(DISTINCT u.idst) FROM %lms_courseuser cu '
                 . ' JOIN %adm_user u ON u.idst = cu.idUser '
                 . ' JOIN %adm_group_members gm ON gm.idstMember = u.idst '
                 . ' JOIN core_org_chart_tree d ON (d.idst_oc = gm.idst OR d.idst_ocd = gm.idst) '
                 . ' WHERE cu.idCourse = ' . (int) $idCourse
-                . ' AND d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
+                . ' AND d.iLeft >= ' . $node['iLeft'] . ' AND d.iRight <= ' . $node['iRight'];
             list($count) = $this->db->fetch_row($this->db->query($count_query));
 
             if ((int) $count > 0) {
-                $companies[] = ['idOrg' => $idOrg, 'name' => $name];
+                $depth = $this->orgNodeDepth($idOrg, $nodes);
+                $indent = str_repeat("\u{00A0}\u{00A0}\u{00A0}\u{00A0}", $depth);
+                $prefix = $depth > 0 ? "\u{21B3} " : '';
+                $companies[] = ['idOrg' => $idOrg, 'name' => $indent . $prefix . $node['name']];
             }
         }
 
         return $companies;
+    }
+
+    /**
+     * Quanti livelli separano questo nodo dalla radice (azienda di primo
+     * livello), camminando all'indietro lungo idParent.
+     */
+    private function orgNodeDepth($idOrg, $nodes)
+    {
+        $depth = 0;
+        while (isset($nodes[$idOrg]) && $nodes[$idOrg]['idParent'] > 0) {
+            $idOrg = $nodes[$idOrg]['idParent'];
+            ++$depth;
+        }
+
+        return $depth;
     }
 
     /**
