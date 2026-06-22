@@ -1,10 +1,11 @@
+var arDetailedMode = false;
+
 document.addEventListener('DOMContentLoaded', function () {
 	var courseSelect = document.getElementById('ar_course_select');
 	var companyField = document.getElementById('ar_company_field');
 	var companySelect = document.getElementById('ar_company_select');
 	var split = document.getElementById('ar_split');
 	var usersContainer = document.getElementById('ar_users_container');
-	var detail = document.getElementById('ar_detail');
 	var exportIdCourse = document.getElementById('ar_export_idcourse');
 	var exportIdOrg = document.getElementById('ar_export_idorg');
 
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		exportIdOrg.value = idOrg;
 
 		usersContainer.innerHTML = '<div class="ar-empty">...</div>';
-		detail.innerHTML = '<div class="ar-detail__empty"></div>';
+		arRefreshPreview();
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/course_users&idCourse=' + encodeURIComponent(idCourse) + '&idOrg=' + encodeURIComponent(idOrg) + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE), true);
@@ -75,71 +76,68 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 	companySelect.addEventListener('change', loadUsers);
+
+	// Le checkbox vengono ricreate ad ogni caricamento della lista utenti
+	// (AJAX): la delega sul contenitore stabile evita di doverle riagganciare
+	// una per una ogni volta.
+	usersContainer.addEventListener('change', function (evt) {
+		if (evt.target && evt.target.matches('input[type="checkbox"]')) {
+			arRefreshPreview();
+		}
+	});
 });
 
 /**
- * Espande/richiude la riga di dettaglio (sessioni singole) sotto una riga
- * giorno, nel pannello dettaglio. Definita qui (non inline nel frammento
- * AJAX) perche' i <script> iniettati via innerHTML non vengono eseguiti dal
- * browser: serve una funzione globale gia' caricata sulla pagina.
+ * Selezionare un allievo si puo' fare sia dalla sua checkbox sia cliccando
+ * la username: in questo secondo caso la spunta viene messa in automatico.
  */
-function arToggleDay(rowEl) {
-	var detailRow = rowEl.nextElementSibling;
-	var caret = rowEl.querySelector('.ar-caret');
-	if (!detailRow) {
-		return;
+function arSelectUser(rowEl) {
+	var rows = document.querySelectorAll('#ar_users_container tr.ar-row-active');
+	for (var i = 0; i < rows.length; i++) {
+		rows[i].classList.remove('ar-row-active');
 	}
-	var isOpen = detailRow.style.display !== 'none';
-	detailRow.style.display = isOpen ? 'none' : '';
-	if (caret) {
-		caret.innerHTML = isOpen ? '&#9656;' : '&#9662;';
-	}
-}
+	rowEl.classList.add('ar-row-active');
 
-var arPendingDetailed = false;
-
-/**
- * Apre il popup "Stampa / Excel / Word" dopo aver scelto Riepilogo o
- * Dettaglio. La scelta si applica agli utenti selezionati (checkbox o
- * username cliccata), o a tutti se nessuno e' selezionato.
- */
-function arOpenFormatModal(detailed) {
-	arPendingDetailed = detailed;
-	document.getElementById('ar_format_modal').style.display = 'flex';
-}
-
-function arCloseFormatModal() {
-	document.getElementById('ar_format_modal').style.display = 'none';
-}
-
-function arRunAction(action) {
-	arCloseFormatModal();
-
-	var form = document.getElementById('ar_export_form');
-	document.getElementById('ar_export_detailed').value = arPendingDetailed ? '1' : '0';
-
-	if (action === 'excel' || action === 'word') {
-		document.getElementById('ar_export_r').value = 'adm/attendanceregister/export_' + action;
-		form.submit();
-		return;
+	var checkbox = rowEl.querySelector('input[type="checkbox"]');
+	if (checkbox) {
+		checkbox.checked = true;
 	}
 
-	arPrintSelected();
+	arRefreshPreview();
 }
 
 /**
- * Stampa (Riepilogo o Dettaglio) degli utenti selezionati, o di tutti se
- * nessuno e' selezionato: carica via AJAX la sezione di ciascuno nell'area
- * dedicata #ar_print_multi, poi richiama la stampa del browser. Al termine
- * l'area viene svuotata, cosi' non resta nulla "nascosto" in pagina.
+ * Passa tra Riepilogo e Dettaglio: l'anteprima si aggiorna subito, niente
+ * popup. Si puo' cambiare idea quante volte si vuole prima di stampare o
+ * esportare.
  */
-function arPrintSelected() {
+function arSetMode(detailed) {
+	arDetailedMode = detailed;
+	document.getElementById('ar_mode_summary').classList.toggle('ar-preview__toggle-btn--active', !detailed);
+	document.getElementById('ar_mode_detailed').classList.toggle('ar-preview__toggle-btn--active', detailed);
+	document.getElementById('ar_export_detailed').value = detailed ? '1' : '0';
+	arRefreshPreview();
+}
+
+/**
+ * Ricarica l'anteprima (Riepilogo o Dettaglio) per gli utenti attualmente
+ * selezionati (o tutti, se nessuno e' selezionato): stessa regola usata da
+ * stampa ed export, cosi' quello che si vede e' esattamente quello che si
+ * otterrebbe scegliendo di stampare o esportare in quel momento.
+ */
+function arRefreshPreview() {
 	var form = document.getElementById('ar_export_form');
+	var container = document.getElementById('ar_preview_container');
+	var idCourse = document.getElementById('ar_export_idcourse').value;
+
+	if (!idCourse) {
+		return;
+	}
+
 	var params = new URLSearchParams(new FormData(form));
-	params.set('r', 'adm/attendanceregister/print_selected');
+	params.set('r', 'adm/attendanceregister/preview');
 
-	var printArea = document.getElementById('ar_print_multi');
-	printArea.innerHTML = '<div class="ar-empty">...</div>';
+	container.innerHTML = '<div class="ar-empty">...</div>';
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', 'ajax.adm_server.php?' + params.toString(), true);
@@ -147,17 +145,26 @@ function arPrintSelected() {
 		if (xhr.status !== 200) {
 			return;
 		}
-		printArea.innerHTML = xhr.responseText;
-		document.body.classList.add('ar-printing-multi');
-		window.print();
+		container.innerHTML = xhr.responseText;
 	};
 	xhr.send();
 }
 
-window.addEventListener('afterprint', function () {
-	document.body.classList.remove('ar-printing-multi');
-	var printArea = document.getElementById('ar_print_multi');
-	if (printArea) {
-		printArea.innerHTML = '';
-	}
-});
+/**
+ * Stampa quello che e' gia' visibile nell'anteprima (vedi @media print in
+ * pandp-ui.css): nessuna richiesta separata, e' lo stesso contenuto che si
+ * sta guardando in quel momento.
+ */
+function arDoPrint() {
+	window.print();
+}
+
+/**
+ * Esporta (Excel o Word) gli utenti attualmente selezionati (o tutti se
+ * nessuno e' selezionato), nella modalita' (Riepilogo/Dettaglio) corrente.
+ */
+function arDoExport(format) {
+	var form = document.getElementById('ar_export_form');
+	document.getElementById('ar_export_r').value = 'adm/attendanceregister/export_' + format;
+	form.submit();
+}

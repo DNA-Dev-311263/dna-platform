@@ -63,34 +63,15 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * AJAX: frammento HTML con il dettaglio (sessioni raggruppate per
-     * giorno) di un utente, iniettato nel pannello destro della stessa
-     * schermata (nessun popup, solo lettura: le azioni di export/stampa
-     * sono centralizzate sotto la lista utenti).
+     * AJAX: anteprima a video (Riepilogo o Dettaglio, secondo $detailed) di
+     * una sezione per ciascun utente selezionato (o tutti gli iscritti, con
+     * l'eventuale filtro azienda, se nessuno e' selezionato). Iniettata nel
+     * pannello destro: la si rivede ogni volta che cambia la selezione o si
+     * passa da Riepilogo a Dettaglio (e viceversa), prima di decidere se
+     * stampare o esportare. La stampa riusa direttamente questo stesso
+     * contenuto (vedi @media print in pandp-ui.css), niente fetch separato.
      */
-    public function user_sessionsTask()
-    {
-        $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
-        $idUser = FormaLms\lib\Get::req('idUser', DOTY_INT, 0);
-
-        $acl_man = Docebo::user()->getAclManager();
-        $user_info = $acl_man->getUser($idUser, false);
-        $fullname = trim($user_info[ACL_INFO_LASTNAME] . ' ' . $user_info[ACL_INFO_FIRSTNAME]);
-        $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
-
-        $this->render('user_detail', [
-            'fullname' => $fullname !== '' ? $fullname : $username,
-            'username' => $username,
-            'data' => $this->model->getUserSessionsByDay($idCourse, $idUser),
-        ]);
-    }
-
-    /**
-     * AJAX: frammento HTML stampabile con una sezione per ciascun utente
-     * selezionato (o tutti gli iscritti, secondo le stesse regole degli
-     * export). Iniettato in un'area dedicata e poi stampato via window.print().
-     */
-    public function print_selectedTask()
+    public function previewTask()
     {
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
         $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
@@ -106,7 +87,7 @@ class AttendanceregisterAdmController extends AdmController
             ];
         }
 
-        $this->render('print_multi', [
+        $this->render('preview', [
             'sections' => $sections,
             'detailed' => $detailed,
         ]);

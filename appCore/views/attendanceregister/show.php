@@ -31,21 +31,20 @@
             <div id="ar_users_container"></div>
         </form>
 
-        <div class="ar-detail" id="ar_detail">
-            <div class="ar-detail__empty"><?php echo Lang::t('_SELECT', 'standard'); ?></div>
-        </div>
-    </div>
-
-    <div id="ar_print_multi" class="ar-print-multi"></div>
-
-    <div class="ar-modal" id="ar_format_modal" style="display:none;">
-        <div class="ar-modal__box">
-            <button type="button" class="ar-modal__close" onclick="arCloseFormatModal()">&times;</button>
-            <div class="ar-modal__title"><?php echo Lang::t('_CHOOSE_EXPORT_FORMAT', 'statistic'); ?></div>
-            <div class="ar-modal__actions">
-                <button type="button" class="pui-btn pui-btn--primary" onclick="arRunAction('print')"><?php echo Lang::t('_PRINT', 'statistic'); ?></button>
-                <button type="button" class="pui-btn pui-btn--ghost" onclick="arRunAction('excel')"><?php echo Lang::t('_EXPORT_ALL_USERS_XLS', 'statistic'); ?></button>
-                <button type="button" class="pui-btn pui-btn--ghost" onclick="arRunAction('word')"><?php echo Lang::t('_EXPORT_ALL_USERS_WORD', 'statistic'); ?></button>
+        <div class="ar-preview" id="ar_preview">
+            <div class="ar-preview__head">
+                <div class="ar-preview__toggle">
+                    <button type="button" class="ar-preview__toggle-btn ar-preview__toggle-btn--active" id="ar_mode_summary" onclick="arSetMode(false)"><?php echo Lang::t('_SUMMARY_VIEW', 'statistic'); ?></button>
+                    <button type="button" class="ar-preview__toggle-btn" id="ar_mode_detailed" onclick="arSetMode(true)"><?php echo Lang::t('_DETAILS', 'standard'); ?></button>
+                </div>
+            </div>
+            <div class="ar-preview__body" id="ar_preview_container">
+                <div class="ar-empty"><?php echo Lang::t('_SELECT', 'standard'); ?></div>
+            </div>
+            <div class="ar-preview__foot">
+                <button type="button" class="pui-btn pui-btn--primary" onclick="arDoPrint()"><?php echo Lang::t('_PRINT', 'statistic'); ?></button>
+                <button type="button" class="pui-btn pui-btn--ghost" onclick="arDoExport('excel')"><?php echo Lang::t('_EXPORT_ALL_USERS_XLS', 'statistic'); ?></button>
+                <button type="button" class="pui-btn pui-btn--ghost" onclick="arDoExport('word')"><?php echo Lang::t('_EXPORT_ALL_USERS_WORD', 'statistic'); ?></button>
             </div>
         </div>
     </div>
@@ -56,34 +55,4 @@
     // firma anti-CSRF (Util::checkSignature()), altrimenti il server risponde
     // con un errore "Security issue".
     var AR_SIGNATURE = '<?php echo Util::getSignature(); ?>';
-
-    function arOpenUserSessions(idCourse, idUser, rowEl) {
-        var rows = document.querySelectorAll('#ar_users_container tr.ar-row-active');
-        for (var i = 0; i < rows.length; i++) {
-            rows[i].classList.remove('ar-row-active');
-        }
-        if (rowEl) {
-            rowEl.classList.add('ar-row-active');
-            // Aprire il dettaglio di un utente lo seleziona anche per
-            // l'export/stampa: si puo' "scegliere l'allievo" sia dalla
-            // checkbox sia cliccando la sua username.
-            var checkbox = rowEl.querySelector('input[type="checkbox"]');
-            if (checkbox) {
-                checkbox.checked = true;
-            }
-        }
-
-        var detail = document.getElementById('ar_detail');
-        detail.innerHTML = '<div class="ar-detail__empty">...</div>';
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'ajax.adm_server.php?r=adm/attendanceregister/user_sessions&idCourse=' + idCourse + '&idUser=' + idUser + '&authentic_request=' + encodeURIComponent(AR_SIGNATURE), true);
-        xhr.onload = function () {
-            if (xhr.status !== 200) {
-                return;
-            }
-            detail.innerHTML = xhr.responseText;
-        };
-        xhr.send();
-    }
 </script>

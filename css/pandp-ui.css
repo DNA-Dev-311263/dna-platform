@@ -952,7 +952,13 @@
 
 .ar-table tbody tr.ar-row-active td { background: #eaf1ff; }
 
-.ar-detail {
+.ar-filters { display: flex; gap: 24px; flex-wrap: wrap; }
+
+/* Pannello anteprima: niente popup, si aggiorna in automatico ogni volta che
+   cambia la selezione o si passa da Riepilogo a Dettaglio (e viceversa).
+   Le azioni (Stampa/Excel/Word) sono sempre visibili in fondo, agiscono su
+   quello che si sta guardando in quel momento. */
+.ar-preview {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
@@ -962,131 +968,61 @@
     overflow: hidden;
 }
 
-.ar-detail__empty {
-    padding: 60px 24px;
-    text-align: center;
-    color: #aebcd8;
-    font-size: 13px;
+.ar-preview__head { padding: 18px 24px; border-bottom: 1px solid #f0f2f8; flex-shrink: 0; }
+.ar-preview__toggle { display: inline-flex; background: #f0f2f8; border-radius: 8px; padding: 3px; gap: 2px; }
+.ar-preview__toggle-btn {
+    border: none;
+    background: none;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #5a6a85;
+    cursor: pointer;
 }
+.ar-preview__toggle-btn--active { background: #fff; color: #1a2b4a; box-shadow: 0 1px 4px rgba(0, 0, 0, .08); }
 
-.ar-detail__head { padding: 22px 24px; border-bottom: 1px solid #f0f2f8; flex-shrink: 0; }
-.ar-detail__title { font-size: 16px; font-weight: 700; color: #1a2b4a; }
-.ar-detail__sub { font-size: 12px; color: #8a9fc4; margin-top: 3px; }
+.ar-preview__body { overflow-y: auto; flex: 1 1 auto; padding: 20px 24px; }
+.ar-preview__foot { padding: 14px 24px; border-top: 1px solid #f0f2f8; flex-shrink: 0; display: flex; gap: 12px; }
 
-.ar-detail__totals {
-    padding: 14px 24px;
-    background: #f8fafd;
-    border-bottom: 1px solid #f0f2f8;
-    display: flex;
-    gap: 28px;
-    flex-shrink: 0;
-}
-.ar-tot__v { font-size: 18px; font-weight: 700; color: #1a2b4a; }
-.ar-tot__l { font-size: 10px; color: #8a9fc4; text-transform: uppercase; font-weight: 700; margin-top: 2px; }
-
-.ar-detail__body { overflow-y: auto; flex: 1 1 auto; }
-.ar-detail__body table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.ar-detail__body th {
-    position: sticky;
-    top: 0;
+.ar-preview-section { margin-bottom: 28px; }
+.ar-preview-section:last-child { margin-bottom: 0; }
+.ar-preview-section__title { font-size: 14px; font-weight: 700; color: #1a2b4a; margin-bottom: 10px; }
+.ar-preview-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ar-preview-table th {
     text-align: left;
     color: #8a9fc4;
     font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    padding: 10px 24px;
-    background: #fff;
+    padding: 8px 10px;
     border-bottom: 1px solid #f0f2f8;
 }
-.ar-detail__body td { padding: 10px 24px; border-bottom: 1px solid #f7f8fb; color: #2d3748; }
-.ar-detail__body tr.ar-day-row:hover td { background: #f8fafd; }
-.ar-detail__body tr.ar-day-row { cursor: pointer; }
-
-.ar-caret { display: inline-block; width: 10px; color: #aebcd8; font-size: 10px; }
-
-/* Riga di dettaglio (sessioni singole) espansa sotto una riga giorno. */
-.ar-day-detail td { padding: 0 24px 14px 48px; border-bottom: 1px solid #f7f8fb; }
-.ar-day-detail__table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    background: #f8fafd;
-    border-radius: 8px;
-    overflow: hidden;
-}
-.ar-day-detail__table th {
-    text-align: left;
-    color: #8a9fc4;
-    font-size: 9.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-    padding: 7px 14px;
-    border-bottom: 1px solid #eef1f7;
-}
-.ar-day-detail__table td { padding: 7px 14px; color: #5a6a85; border-bottom: 1px solid #eef1f7; }
-.ar-day-detail__table tr:last-child td { border-bottom: none; }
+.ar-preview-table td { padding: 8px 10px; border-bottom: 1px solid #f7f8fb; color: #2d3748; }
+.ar-preview-table tr.ar-preview-subrow td { color: #8a9fc4; font-size: 12px; }
+.ar-preview-table tr.ar-preview-total td { background: #f8fafd; }
 
 @media (max-width: 900px) {
     .ar-split { grid-template-columns: 1fr; }
 }
 
-/* Stampa: solo il pannello dettaglio (niente tendina corso, niente lista
-   utenti/checkbox, niente pulsanti) e niente limiti di altezza/scroll, cosi'
-   escono tutte le righe — riepilogo o dettagliate secondo il pulsante usato
-   (vedi arPrint() in attendanceregister.js). */
-.ar-filters { display: flex; gap: 24px; flex-wrap: wrap; }
-
-/* Popup di scelta formato (Stampa / Excel / Word), dopo aver scelto
-   Riepilogo o Dettaglio sotto la lista utenti. */
-.ar-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(20, 30, 50, .45);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.ar-modal__box {
-    position: relative;
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
-    padding: 32px;
-    width: 360px;
-}
-.ar-modal__title { font-size: 15px; font-weight: 700; color: #1a2b4a; margin-bottom: 18px; }
-.ar-modal__actions { display: flex; flex-direction: column; gap: 10px; }
-.ar-modal__close {
-    position: absolute;
-    top: 10px;
-    right: 14px;
-    border: none;
-    background: none;
-    font-size: 20px;
-    color: #aebcd8;
-    cursor: pointer;
-}
-
-/* Area di stampa multi-utente: invisibile a video, mostrata solo durante la
-   stampa (vedi @media print sotto), che nasconde il resto della pagina. */
-.ar-print-multi { display: none; }
-
-.ar-print-section { margin-bottom: 28px; }
-.ar-print-section__title { font-size: 15px; margin-bottom: 8px; }
-.ar-print-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.ar-print-table th,
-.ar-print-table td { border: 1px solid #d7dce8; padding: 6px 10px; text-align: left; }
-.ar-print-table tr.ar-print-subrow td { color: #5a6a85; font-size: 11px; }
-.ar-print-table tr.ar-print-total td { background: #f4f6fb; }
-
+/* Stampa: solo il contenuto dell'anteprima (niente tendine, niente lista
+   utenti/checkbox, niente toggle/pulsanti), senza limiti di altezza/scroll
+   cosi' escono tutte le righe. E' lo stesso contenuto visibile a video al
+   momento in cui si clicca "Stampa" (vedi arDoPrint() in attendanceregister.js). */
 @media print {
-    body.ar-printing-multi .ar-page > *:not(#ar_print_multi) {
+    .ar-page .pui-card,
+    .ar-page #ar_export_form,
+    .ar-preview__head,
+    .ar-preview__foot {
         display: none !important;
     }
-    body.ar-printing-multi .ar-print-multi {
-        display: block !important;
+    .ar-split { display: block !important; }
+    .ar-preview {
+        max-height: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
     }
+    .ar-preview__body { overflow: visible !important; }
 }
