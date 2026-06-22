@@ -241,6 +241,8 @@ function statistic()
         '<a href="index.php?r=coursestats/exportUsageStatistics" class="ico-wt-sprite subs_csv" title="' . Lang::t('_EXPORT_CSV', 'report') . '">
 		<span>' . Lang::t('_EXPORT_CSV', 'report') . '</span>
 	</a>'
+        . ' &nbsp; <a href="index.php?modname=statistic&amp;op=userdetails_export_all" class="ico-wt-sprite subs_xls" title="' . $lang->def('_EXPORT_ALL_USERS_XLS') . '">'
+        . '<span>' . $lang->def('_EXPORT_ALL_USERS_XLS') . '</span></a>'
         . '</div>', 'content'
     );
 
@@ -316,6 +318,7 @@ function getTable($tb, $title = null, $id)
             pagingType: "full_numbers",
             scrollX: true,
             order: [[ 0, "asc" ]],
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tutti"]],
           });
         });
         </script>';
@@ -420,17 +423,7 @@ function userdetails()
     $total_sec = 0;
     $chartData = [];
     while (list($id_enter, $session_start_at, $last_action_at, $how, $num_op, $last_module, $last_op, $session_id) = sql_fetch_row($re_tracks)) {
-        $hours = (int) ($how / 3600);
-        $minutes = (int) (($how % 3600) / 60);
-        $seconds = (int) ($how % 60);
-        if ($minutes < 10) {
-            $minutes = '0' . $minutes;
-        }
-        if ($seconds < 10) {
-            $seconds = '0' . $seconds;
-        }
-
-        $readable = $hours . 'h ' . $minutes . 'm ' . $seconds . 's ';
+        $readable = formatSessionDuration($how);
         $start = Format::date($session_start_at);
         $cont = [
             $start,
@@ -448,22 +441,142 @@ function userdetails()
         $tb->addBody($cont);
     }
 
-    $hours = (int) ($tot_time / 3600);
-    $minutes = (int) (($tot_time % 3600) / 60);
-    $seconds = (int) ($tot_time % 60);
-    if ($minutes < 10) {
-        $minutes = '0' . $minutes;
-    }
-    if ($seconds < 10) {
-        $seconds = '0' . $seconds;
-    }
-
     cout(
         '<div>'
-        . '<span class="text_bold">' . $lang->def('_USER_TOTAL_TIME') . ' : </span>' . $hours . 'h ' . $minutes . 'm ' . $seconds . 's '
+        . '<span class="text_bold">' . $lang->def('_USER_TOTAL_TIME') . ' : </span>' . formatSessionDuration($tot_time)
+        . ' &nbsp; <a href="index.php?modname=statistic&amp;op=userdetails_export&amp;id=' . $idst_user . '" class="ico-wt-sprite subs_xls" title="' . Lang::t('_EXPORT_XLS', 'standard') . '">'
+        . '<span>' . Lang::t('_EXPORT_XLS', 'standard') . '</span></a>'
         . getTable($tb, '_USERS_LIST_DETAILS_CAPTION', 'stats_user_details')
         . getBackUi('index.php?modname=statistic&amp;op=statistic', $lang->def('_BACK'))
         . '</div>', 'content');
+}
+
+/**
+ * Formatta una durata in secondi come "Hh MMm SSs " (stesso formato mostrato
+ * nelle pagine statistiche e usato nelle esportazioni Excel).
+ */
+function formatSessionDuration($seconds)
+{
+    $hours = (int) ($seconds / 3600);
+    $minutes = (int) (($seconds % 3600) / 60);
+    $secs = (int) ($seconds % 60);
+    if ($minutes < 10) {
+        $minutes = '0' . $minutes;
+    }
+    if ($secs < 10) {
+        $secs = '0' . $secs;
+    }
+
+    return $hours . 'h ' . $minutes . 'm ' . $secs . 's ';
+}
+
+/**
+ * Esporta in Excel (xls) le sessioni di un singolo utente in questo corso:
+ * stesse colonne mostrate a schermo in userdetails() (Sessione iniziata il,
+ * Sessione terminata a, Durata, Numero di op.).
+ */
+function userdetails_export()
+{
+    checkPerm('view');
+    require_once _base_ . '/lib/lib.download.php';
+
+    $session = \FormaLms\lib\Session\SessionManager::getInstance()->getSession();
+    $idCourse = $session->get('idCourse');
+    $idst_user = importVar('id', true, 0);
+
+    $lang = &DoceboLanguage::createInstance('statistic', 'lms');
+
+    $query_track = '
+	SELECT enterTime, lastTime, (UNIX_TIMESTAMP(lastTime) - UNIX_TIMESTAMP(enterTime)) AS howm, numOp
+	FROM %lms_tracksession
+	WHERE idCourse = "' . (int) $idCourse . '" AND idUser = "' . (int) $idst_user . '"
+	ORDER BY enterTime';
+    $re_tracks = sql_query($query_track);
+
+    $output = '<table border="1"><tr>'
+        . '<th>' . $lang->def('_SESSION_STARTED') . '</th>'
+        . '<th>' . $lang->def('_LAST_ACTION_AT') . '</th>'
+        . '<th>' . $lang->def('_HOW_MUCH_TIME') . '</th>'
+        . '<th>' . $lang->def('_NUMBER_OF_OP') . '</th>'
+        . '</tr>';
+
+    while (list($session_start_at, $last_action_at, $how, $num_op) = sql_fetch_row($re_tracks)) {
+        $output .= '<tr>'
+            . '<td>' . htmlspecialchars(Format::date($session_start_at)) . '</td>'
+            . '<td>' . htmlspecialchars(Format::date($last_action_at, false, true)) . '</td>'
+            . '<td>' . htmlspecialchars(formatSessionDuration($how)) . '</td>'
+            . '<td>' . (int) $num_op . '</td>'
+            . '</tr>';
+    }
+    $output .= '</table>';
+
+    sendStrAsFile($output, 'statistiche_utente_' . date('Ymd') . '.xls');
+    exit();
+}
+
+/**
+ * Esporta in Excel le sessioni di TUTTI gli utenti del corso corrente:
+ * stesse colonne di userdetails_export(), con l'aggiunta della colonna
+ * Utente in testa, cosi' le righe di utenti diversi restano distinguibili.
+ */
+function userdetails_export_all()
+{
+    checkPerm('view');
+    require_once _base_ . '/lib/lib.download.php';
+    require_once _lms_ . '/lib/lib.course.php';
+
+    $session = \FormaLms\lib\Session\SessionManager::getInstance()->getSession();
+    $idCourse = $session->get('idCourse');
+
+    $view_all_perm = checkPerm('view_all', true);
+
+    $lang = &DoceboLanguage::createInstance('statistic', 'lms');
+    $acl_man = Docebo::user()->getAclManager();
+    $course_man = new Man_Course();
+    $course_user = $course_man->getIdUserOfLevel($idCourse);
+
+    if (!$view_all_perm && Docebo::user()->getUserLevelId() == '/framework/level/admin') {
+        require_once _base_ . '/lib/lib.preference.php';
+        $ctrlManager = new ControllerPreference();
+        $ctrl_users = $ctrlManager->getUsers(Docebo::user()->getIdST());
+        $course_user = array_intersect($course_user, $ctrl_users);
+    }
+
+    $users_list = &$acl_man->getUsers($course_user);
+
+    $output = '<table border="1"><tr>'
+        . '<th>' . Lang::t('_USERNAME', 'standard') . '</th>'
+        . '<th>' . $lang->def('_SESSION_STARTED') . '</th>'
+        . '<th>' . $lang->def('_LAST_ACTION_AT') . '</th>'
+        . '<th>' . $lang->def('_HOW_MUCH_TIME') . '</th>'
+        . '<th>' . $lang->def('_NUMBER_OF_OP') . '</th>'
+        . '</tr>';
+
+    foreach ($users_list as $user_info) {
+        $idst_user = $user_info[ACL_INFO_IDST];
+        $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
+
+        $query_track = '
+		SELECT enterTime, lastTime, (UNIX_TIMESTAMP(lastTime) - UNIX_TIMESTAMP(enterTime)) AS howm, numOp
+		FROM %lms_tracksession
+		WHERE idCourse = "' . (int) $idCourse . '" AND idUser = "' . (int) $idst_user . '"
+		ORDER BY enterTime';
+        $re_tracks = sql_query($query_track);
+
+        while (list($session_start_at, $last_action_at, $how, $num_op) = sql_fetch_row($re_tracks)) {
+            $output .= '<tr>'
+                . '<td>' . htmlspecialchars($username) . '</td>'
+                . '<td>' . htmlspecialchars(Format::date($session_start_at)) . '</td>'
+                . '<td>' . htmlspecialchars(Format::date($last_action_at, false, true)) . '</td>'
+                . '<td>' . htmlspecialchars(formatSessionDuration($how)) . '</td>'
+                . '<td>' . (int) $num_op . '</td>'
+                . '</tr>';
+        }
+    }
+    $output .= '</table>';
+
+    sendStrAsFile($output, 'statistiche_tutti_utenti_' . date('Ymd') . '.xls');
+    exit();
 }
 
 function sessiondetails()
@@ -606,6 +719,12 @@ function statisticDispatch($op)
             break;
         case 'sessiondetails':
             sessiondetails();
+            break;
+        case 'userdetails_export':
+            userdetails_export();
+            break;
+        case 'userdetails_export_all':
+            userdetails_export_all();
             break;
     }
 }
