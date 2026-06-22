@@ -882,14 +882,17 @@
    ============================================================= */
 .ar-page .pui-card + form { margin-top: 16px; }
 
-.ar-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
+.ar-table-wrap {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
     overflow: hidden;
+}
+
+.ar-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
 }
 
 .ar-table th {
@@ -899,23 +902,32 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    padding: 12px 16px;
+    padding: 14px 20px;
     border-bottom: 1px solid #f0f2f8;
     background: #f8fafd;
 }
 
+.ar-table th.ar-col-check { width: 40px; }
+
 .ar-table td {
-    padding: 10px 16px;
+    padding: 13px 20px;
     border-bottom: 1px solid #f7f8fb;
     color: #2d3748;
 }
 
+.ar-table tbody tr:hover td { background: #f8fafd; }
 .ar-table tr:last-child td { border-bottom: none; }
+
+.ar-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
 
 .ar-link { color: #1a6ef7; cursor: pointer; font-weight: 600; }
 .ar-link:hover { text-decoration: underline; }
 
-.ar-actions { margin-top: 16px; }
+.ar-actions { margin-top: 18px; display: flex; gap: 12px; }
 
 .ar-empty,
 .ar-loading {

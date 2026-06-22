@@ -131,6 +131,37 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
+     * Export Word di TUTTI gli utenti iscritti al corso scelto (non solo i
+     * selezionati): una sezione per allievo, intestata col suo nome.
+     */
+    public function export_all_wordTask()
+    {
+        require_once _base_ . '/lib/lib.download.php';
+
+        $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+        $courseName = $this->model->getCourseName($idCourse);
+        $users = $this->model->getCourseUsers($idCourse);
+
+        $output = '<h2>' . htmlspecialchars($courseName) . '</h2>'
+            . '<p>' . Lang::t('_ATTENDANCE_REGISTER', 'standard') . ' - ' . date('d/m/Y') . '</p>'
+            . '<table border="1">';
+
+        if (empty($users)) {
+            $output .= '<tr><td>' . Lang::t('_NO_DATA', 'standard') . '</td></tr>';
+        }
+
+        foreach ($users as $u) {
+            $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst']);
+            $output .= '<tr><td colspan="4">&nbsp;</td></tr>';
+        }
+
+        $output .= '</table>';
+
+        sendStrAsFile($output, 'registro_presenze_' . preg_replace('/[^a-zA-Z0-9]/', '_', $courseName) . '_' . date('Ymd') . '.doc');
+        exit();
+    }
+
+    /**
      * Sezione (intestazione + righe sessioni + totali) per un singolo
      * utente, condivisa fra export singolo e multiplo.
      */

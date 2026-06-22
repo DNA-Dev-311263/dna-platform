@@ -133,6 +133,7 @@ function sendStrAsFile($string, $filename, $charset = false)
                 $string = $bom . $string;
                 break;
             case 'xls':
+            case 'doc':
                 $string = $meta . $string;
                 break;
             default: break;
