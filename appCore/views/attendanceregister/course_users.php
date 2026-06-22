@@ -18,9 +18,8 @@
         </table>
     </div>
     <div class="ar-actions">
-        <button type="submit" class="pui-btn pui-btn--primary"><?php echo Lang::t('_EXPORT_ALL_USERS_XLS', 'statistic'); ?></button>
-        <a class="pui-btn pui-btn--ghost" href="ajax.adm_server.php?r=adm/attendanceregister/export_all_word&idCourse=<?php echo (int) $idCourse; ?>&authentic_request=<?php echo urlencode(Util::getSignature()); ?>">
-            <?php echo Lang::t('_EXPORT_ALL_USERS_WORD', 'statistic'); ?>
-        </a>
+        <button type="submit" name="r" value="adm/attendanceregister/export_excel" class="pui-btn pui-btn--primary"><?php echo Lang::t('_EXPORT_ALL_USERS_XLS', 'statistic'); ?></button>
+        <button type="submit" name="r" value="adm/attendanceregister/export_word" class="pui-btn pui-btn--ghost"><?php echo Lang::t('_EXPORT_ALL_USERS_WORD', 'statistic'); ?></button>
     </div>
+    <div class="ar-actions__note"><?php echo Lang::t('_EXPORT_SELECTION_NOTE', 'statistic'); ?></div>
 <?php } ?>

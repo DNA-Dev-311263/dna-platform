@@ -927,7 +927,8 @@
 .ar-link { color: #1a6ef7; cursor: pointer; font-weight: 600; }
 .ar-link:hover { text-decoration: underline; }
 
-.ar-actions { margin-top: 18px; display: flex; gap: 12px; }
+.ar-actions { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; }
+.ar-actions__note { margin-top: 10px; font-size: 11.5px; color: #aebcd8; }
 
 .ar-empty {
     padding: 24px;
@@ -1031,4 +1032,30 @@
 
 @media (max-width: 900px) {
     .ar-split { grid-template-columns: 1fr; }
+}
+
+/* Stampa: solo il pannello dettaglio (niente tendina corso, niente lista
+   utenti/checkbox, niente pulsanti) e niente limiti di altezza/scroll, cosi'
+   escono tutte le righe — riepilogo o dettagliate secondo il pulsante usato
+   (vedi arPrint() in attendanceregister.js). */
+@media print {
+    .ar-page .pui-card,
+    .ar-page #ar_export_form,
+    .ar-detail__foot {
+        display: none !important;
+    }
+    .ar-split {
+        display: block !important;
+    }
+    .ar-detail {
+        max-height: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    .ar-detail__body {
+        overflow: visible !important;
+    }
+    .ar-detail__body th {
+        position: static !important;
+    }
 }

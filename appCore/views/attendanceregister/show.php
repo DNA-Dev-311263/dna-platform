@@ -15,7 +15,6 @@
 
     <div class="ar-split" id="ar_split" style="display:none;">
         <form id="ar_export_form" method="get" action="ajax.adm_server.php">
-            <input type="hidden" name="r" value="adm/attendanceregister/export_selected" />
             <input type="hidden" name="idCourse" id="ar_export_idcourse" value="" />
             <input type="hidden" name="authentic_request" value="<?php echo Util::getSignature(); ?>" />
             <div id="ar_users_container"></div>

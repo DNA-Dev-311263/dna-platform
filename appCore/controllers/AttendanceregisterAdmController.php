@@ -95,37 +95,26 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * Export Excel di piu' utenti selezionati: una sezione per allievo,
-     * intestata col suo nome.
+     * Export Excel di utenti: se ci sono checkbox selezionate esporta solo
+     * quelle persone, altrimenti tutti gli iscritti al corso. Una sezione
+     * per allievo, intestata col suo nome. Stessa regola di selezione di
+     * export_wordTask().
      */
-    public function export_selectedTask()
+    public function export_excelTask()
     {
         require_once _base_ . '/lib/lib.download.php';
 
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
         $selected = FormaLms\lib\Get::req('selected_users', DOTY_MIXED, []);
-        if (!is_array($selected)) {
-            $selected = [];
-        }
-        $selected = array_filter(array_map('intval', $selected));
 
-        $acl_man = Docebo::user()->getAclManager();
+        $users = $this->resolveExportUsers($idCourse, $selected);
         $output = '';
-
-        if (empty($selected)) {
-            $output = '<tr><td>' . Lang::t('_NO_DATA', 'standard') . '</td></tr>';
-        }
-
-        foreach ($selected as $idUser) {
-            $user_info = $acl_man->getUser($idUser, false);
-            if (!$user_info) {
-                continue;
-            }
-            $fullname = trim($user_info[ACL_INFO_LASTNAME] . ' ' . $user_info[ACL_INFO_FIRSTNAME]);
-            $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
-
-            $output .= $this->buildUserSection($fullname !== '' ? $fullname : $username, $username, $idCourse, $idUser);
+        foreach ($users as $u) {
+            $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst']);
             $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
+        }
+        if (empty($users)) {
+            $output = '<tr><td>' . Lang::t('_NO_DATA', 'standard') . '</td></tr>';
         }
 
         sendStrAsFile('<table border="1">' . $output . '</table>', 'registro_presenze_' . date('Ymd') . '.xls');
@@ -133,17 +122,19 @@ class AttendanceregisterAdmController extends AdmController
     }
 
     /**
-     * Export Word di TUTTI gli utenti iscritti al corso scelto (non solo i
-     * selezionati): una sezione per allievo, intestata col suo nome.
+     * Export Word di utenti: stessa regola di selezione dell'export Excel
+     * (selezionati, o tutti se nessuno selezionato). Una sezione per
+     * allievo, intestata col suo nome.
      */
-    public function export_all_wordTask()
+    public function export_wordTask()
     {
         require_once _base_ . '/lib/lib.download.php';
 
         $idCourse = FormaLms\lib\Get::req('idCourse', DOTY_INT, 0);
+        $selected = FormaLms\lib\Get::req('selected_users', DOTY_MIXED, []);
         $courseName = $this->model->getCourseName($idCourse);
-        $users = $this->model->getCourseUsers($idCourse);
 
+        $users = $this->resolveExportUsers($idCourse, $selected);
         $output = '<h2>' . htmlspecialchars($courseName) . '</h2>'
             . '<p>' . Lang::t('_ATTENDANCE_REGISTER', 'standard') . ' - ' . date('d/m/Y') . '</p>'
             . '<table border="1">';
@@ -151,16 +142,48 @@ class AttendanceregisterAdmController extends AdmController
         if (empty($users)) {
             $output .= '<tr><td>' . Lang::t('_NO_DATA', 'standard') . '</td></tr>';
         }
-
         foreach ($users as $u) {
             $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst']);
             $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
         }
-
         $output .= '</table>';
 
         sendStrAsFile($output, 'registro_presenze_' . preg_replace('/[^a-zA-Z0-9]/', '_', $courseName) . '_' . date('Ymd') . '.doc');
         exit();
+    }
+
+    /**
+     * Utenti da esportare: solo quelli con checkbox selezionata, oppure
+     * tutti gli iscritti al corso se non e' stato selezionato nessuno.
+     */
+    private function resolveExportUsers($idCourse, $selected)
+    {
+        if (!is_array($selected)) {
+            $selected = [];
+        }
+        $selected = array_filter(array_map('intval', $selected));
+
+        if (empty($selected)) {
+            return $this->model->getCourseUsers($idCourse);
+        }
+
+        $acl_man = Docebo::user()->getAclManager();
+        $users = [];
+        foreach ($selected as $idUser) {
+            $user_info = $acl_man->getUser($idUser, false);
+            if (!$user_info) {
+                continue;
+            }
+            $fullname = trim($user_info[ACL_INFO_LASTNAME] . ' ' . $user_info[ACL_INFO_FIRSTNAME]);
+            $username = $acl_man->relativeId($user_info[ACL_INFO_USERID]);
+            $users[] = [
+                'idst' => $idUser,
+                'userid' => $username,
+                'name' => $fullname !== '' ? $fullname : $username,
+            ];
+        }
+
+        return $users;
     }
 
     /**

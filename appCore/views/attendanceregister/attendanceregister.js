@@ -52,3 +52,33 @@ function arToggleDay(rowEl) {
 		caret.innerHTML = isOpen ? '&#9656;' : '&#9662;';
 	}
 }
+
+/**
+ * Stampa il pannello dettaglio: forza tutte le righe giorno
+ * espanse (true) o richiuse (false), stampa, poi ripristina lo stato
+ * com'era prima (cosi' la stampa non altera quello che l'utente vedeva).
+ */
+function arPrint(showDetail) {
+	var dayDetailRows = document.querySelectorAll('#ar_print_area tr.ar-day-detail');
+	var carets = document.querySelectorAll('#ar_print_area .ar-caret');
+	var previousDisplay = [];
+	var previousCaret = [];
+
+	dayDetailRows.forEach(function (row, i) {
+		previousDisplay[i] = row.style.display;
+		row.style.display = showDetail ? '' : 'none';
+	});
+	carets.forEach(function (caret, i) {
+		previousCaret[i] = caret.innerHTML;
+		caret.innerHTML = showDetail ? '&#9662;' : '&#9656;';
+	});
+
+	function restore() {
+		dayDetailRows.forEach(function (row, i) { row.style.display = previousDisplay[i]; });
+		carets.forEach(function (caret, i) { caret.innerHTML = previousCaret[i]; });
+		window.removeEventListener('afterprint', restore);
+	}
+	window.addEventListener('afterprint', restore);
+
+	window.print();
+}
