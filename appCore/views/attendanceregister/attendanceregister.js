@@ -33,3 +33,22 @@ document.addEventListener('DOMContentLoaded', function () {
 		xhr.send();
 	});
 });
+
+/**
+ * Espande/richiude la riga di dettaglio (sessioni singole) sotto una riga
+ * giorno, nel pannello dettaglio. Definita qui (non inline nel frammento
+ * AJAX) perche' i <script> iniettati via innerHTML non vengono eseguiti dal
+ * browser: serve una funzione globale gia' caricata sulla pagina.
+ */
+function arToggleDay(rowEl) {
+	var detailRow = rowEl.nextElementSibling;
+	var caret = rowEl.querySelector('.ar-caret');
+	if (!detailRow) {
+		return;
+	}
+	var isOpen = detailRow.style.display !== 'none';
+	detailRow.style.display = isOpen ? 'none' : '';
+	if (caret) {
+		caret.innerHTML = isOpen ? '&#9656;' : '&#9662;';
+	}
+}

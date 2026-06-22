@@ -82,28 +82,64 @@ class AttendanceregisterAdm extends Model
      */
     public function getUserSessionsByDay($idCourse, $idUser)
     {
-        $query = 'SELECT DATE(enterTime) AS theday, MIN(enterTime) AS first_entry, MAX(lastTime) AS last_exit, '
-            . ' SUM(UNIX_TIMESTAMP(lastTime) - UNIX_TIMESTAMP(enterTime)) AS total_seconds, '
-            . ' SUM(numOp) AS total_num_op, COUNT(*) AS session_count '
+        // Sessioni grezze (non aggregate in SQL): servono sia per calcolare i
+        // totali del giorno sia per poter mostrare il dettaglio delle singole
+        // sessioni quando si espande un giorno a video.
+        $query = 'SELECT enterTime, lastTime, (UNIX_TIMESTAMP(lastTime) - UNIX_TIMESTAMP(enterTime)) AS howm, numOp '
             . ' FROM %lms_tracksession '
             . ' WHERE idCourse = ' . (int) $idCourse . ' AND idUser = ' . (int) $idUser
-            . ' GROUP BY DATE(enterTime) '
-            . ' ORDER BY theday ASC';
+            . ' ORDER BY enterTime ASC';
         $res = $this->db->query($query);
 
-        $rows = [];
+        $days = [];
         $grand_total_seconds = 0;
         $grand_total_sessions = 0;
-        while (list($day, $first_entry, $last_exit, $day_seconds, $day_num_op, $day_sessions) = $this->db->fetch_row($res)) {
-            $grand_total_seconds += (int) $day_seconds;
-            $grand_total_sessions += (int) $day_sessions;
+        while (list($enter, $last, $how, $num_op) = $this->db->fetch_row($res)) {
+            $day_key = date('Y-m-d', strtotime($enter));
+            $enter_ts = strtotime($enter);
+            $exit_ts = strtotime($last);
+
+            if (!isset($days[$day_key])) {
+                $days[$day_key] = [
+                    'date' => date('d/m/Y', $enter_ts),
+                    'first_entry_ts' => $enter_ts,
+                    'last_exit_ts' => $exit_ts,
+                    'total_seconds' => 0,
+                    'num_op' => 0,
+                    'session_count' => 0,
+                    'sessions' => [],
+                ];
+            }
+            if ($enter_ts < $days[$day_key]['first_entry_ts']) {
+                $days[$day_key]['first_entry_ts'] = $enter_ts;
+            }
+            if ($exit_ts > $days[$day_key]['last_exit_ts']) {
+                $days[$day_key]['last_exit_ts'] = $exit_ts;
+            }
+            $days[$day_key]['total_seconds'] += (int) $how;
+            $days[$day_key]['num_op'] += (int) $num_op;
+            ++$days[$day_key]['session_count'];
+            $days[$day_key]['sessions'][] = [
+                'enter' => date('H:i', $enter_ts),
+                'exit' => date('H:i', $exit_ts),
+                'duration' => $this->formatDuration($how),
+                'num_op' => (int) $num_op,
+            ];
+
+            $grand_total_seconds += (int) $how;
+            ++$grand_total_sessions;
+        }
+
+        $rows = [];
+        foreach ($days as $day) {
             $rows[] = [
-                'date' => date('d/m/Y', strtotime($day)),
-                'first_entry' => date('H:i', strtotime($first_entry)),
-                'last_exit' => date('H:i', strtotime($last_exit)),
-                'duration' => $this->formatDuration($day_seconds),
-                'num_op' => (int) $day_num_op,
-                'session_count' => (int) $day_sessions,
+                'date' => $day['date'],
+                'first_entry' => date('H:i', $day['first_entry_ts']),
+                'last_exit' => date('H:i', $day['last_exit_ts']),
+                'duration' => $this->formatDuration($day['total_seconds']),
+                'num_op' => $day['num_op'],
+                'session_count' => $day['session_count'],
+                'sessions' => $day['sessions'],
             ];
         }
 

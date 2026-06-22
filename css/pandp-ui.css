@@ -999,7 +999,33 @@
     border-bottom: 1px solid #f0f2f8;
 }
 .ar-detail__body td { padding: 10px 24px; border-bottom: 1px solid #f7f8fb; color: #2d3748; }
-.ar-detail__body tr:hover td { background: #f8fafd; }
+.ar-detail__body tr.ar-day-row:hover td { background: #f8fafd; }
+.ar-detail__body tr.ar-day-row { cursor: pointer; }
+
+.ar-caret { display: inline-block; width: 10px; color: #aebcd8; font-size: 10px; }
+
+/* Riga di dettaglio (sessioni singole) espansa sotto una riga giorno. */
+.ar-day-detail td { padding: 0 24px 14px 48px; border-bottom: 1px solid #f7f8fb; }
+.ar-day-detail__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: #f8fafd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.ar-day-detail__table th {
+    text-align: left;
+    color: #8a9fc4;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: 7px 14px;
+    border-bottom: 1px solid #eef1f7;
+}
+.ar-day-detail__table td { padding: 7px 14px; color: #5a6a85; border-bottom: 1px solid #eef1f7; }
+.ar-day-detail__table tr:last-child td { border-bottom: none; }
 
 .ar-detail__foot { padding: 14px 24px; border-top: 1px solid #f0f2f8; flex-shrink: 0; }
 

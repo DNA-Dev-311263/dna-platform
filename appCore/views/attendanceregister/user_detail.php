@@ -19,12 +19,32 @@
             <th><?php echo Lang::t('_NUMBER_OF_OP', 'statistic'); ?></th>
         </tr>
         <?php foreach ($data['rows'] as $row) { ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['date']); ?></td>
+            <tr class="ar-day-row" onclick="arToggleDay(this)">
+                <td><span class="ar-caret">&#9656;</span> <?php echo htmlspecialchars($row['date']); ?></td>
                 <td><?php echo htmlspecialchars($row['first_entry']); ?></td>
                 <td><?php echo htmlspecialchars($row['last_exit']); ?></td>
                 <td><?php echo htmlspecialchars($row['duration']); ?></td>
                 <td><?php echo (int) $row['num_op']; ?></td>
+            </tr>
+            <tr class="ar-day-detail" style="display:none;">
+                <td colspan="5">
+                    <table class="ar-day-detail__table">
+                        <tr>
+                            <th><?php echo Lang::t('_ENTRY', 'statistic'); ?></th>
+                            <th><?php echo Lang::t('_EXIT', 'statistic'); ?></th>
+                            <th><?php echo Lang::t('_HOW_MUCH_TIME', 'statistic'); ?></th>
+                            <th><?php echo Lang::t('_NUMBER_OF_OP', 'statistic'); ?></th>
+                        </tr>
+                        <?php foreach ($row['sessions'] as $s) { ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($s['enter']); ?></td>
+                                <td><?php echo htmlspecialchars($s['exit']); ?></td>
+                                <td><?php echo htmlspecialchars($s['duration']); ?></td>
+                                <td><?php echo (int) $s['num_op']; ?></td>
+                            </tr>
+                        <?php } ?>
+                    </table>
+                </td>
             </tr>
         <?php } ?>
         <?php if (empty($data['rows'])) { ?>
