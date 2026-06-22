@@ -28,6 +28,21 @@ echo getTitleArea('Statistiche');
         </div>
     </div>
 
+    <div class="pui-stats-row">
+        <div class="pui-stat-box">
+            <div class="pui-stat-box__value"><?php echo (int) $stats->materials_total; ?></div>
+            <div class="pui-stat-box__label">Materiali</div>
+        </div>
+        <div class="pui-stat-box pui-stat-box--success">
+            <div class="pui-stat-box__value"><?php echo (int) $stats->materials_completed; ?></div>
+            <div class="pui-stat-box__label">Completati</div>
+        </div>
+        <div class="pui-stat-box <?php echo $stats->materials_remaining > 0 ? 'pui-stat-box--error' : 'pui-stat-box--success'; ?>">
+            <div class="pui-stat-box__value"><?php echo (int) $stats->materials_remaining; ?></div>
+            <div class="pui-stat-box__label">Da completare</div>
+        </div>
+    </div>
+
     <table class="table table-bordered" style="width:100%;">
         <thead>
             <tr>

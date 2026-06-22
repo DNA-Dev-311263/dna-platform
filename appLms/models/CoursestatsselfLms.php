@@ -322,6 +322,7 @@ class CoursestatsselfLms extends Model
      *  - total_time_seconds, total_time_formatted
      *  - medium_time_seconds, medium_time_formatted
      *  - gap_seconds, gap_formatted
+     *  - materials_total, materials_completed, materials_remaining
      */
     public function getCourseUserStatsList($id_course, $id_user)
     {
@@ -354,6 +355,15 @@ class CoursestatsselfLms extends Model
         }
 
         $output->total_time_formatted = $this->formatSeconds($output->total_time_seconds);
+
+        $output->materials_total = count($output->lo_list);
+        $output->materials_completed = 0;
+        foreach ($output->lo_list as $row) {
+            if ($row->status === 'passed' || $row->status === 'completed') {
+                ++$output->materials_completed;
+            }
+        }
+        $output->materials_remaining = $output->materials_total - $output->materials_completed;
 
         $course_info = $this->getUserCourseInfo($id_course, $id_user);
         $output->medium_time_seconds = $course_info->medium_time;
