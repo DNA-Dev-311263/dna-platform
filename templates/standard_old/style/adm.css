@@ -62,10 +62,10 @@ html, body {}
   padding: 13px 20px;
   /* make room for the toggle button (sub indicator) */
   padding-right: 58px;
-  color: #333333;
+  color: #1a2b4a;
   font-family: Arial, sans-serif;
   font-size: 14px;
-  font-weight: normal;
+  font-weight: 600;
   line-height: 17px;
   text-decoration: none;
 }
@@ -190,7 +190,8 @@ html, body {}
   }
   .sm-forma a, .sm-forma a:hover, .sm-forma a:focus, .sm-forma a:active, .sm-forma a.highlighted {
     padding: 15px 20px;
-    color: #333333;
+    color: #1a2b4a;
+    font-weight: 600;
     -webkit-border-radius: 4px 4px 0 0;
     -moz-border-radius: 4px 4px 0 0;
     -ms-border-radius: 4px 4px 0 0;
@@ -203,7 +204,7 @@ html, body {}
   }
   .sm-forma a.highlighted {
     background: #BFBFBF;
-    color: #333333;
+    color: #1a2b4a;
     -webkit-box-shadow: 0 4px 3px rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 0 4px 3px rgba(0, 0, 0, 0.25);
     box-shadow: 0 4px 3px rgba(0, 0, 0, 0.25);
@@ -272,7 +273,8 @@ html, body {}
   .sm-forma ul a, .sm-forma ul a:hover, .sm-forma ul a:focus, .sm-forma ul a:active, .sm-forma ul a.highlighted {
     border: 0 !important;
     padding: 10px 20px;
-    color: #333333;
+    color: #1a2b4a;
+    font-weight: 500;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     -ms-border-radius: 0;
