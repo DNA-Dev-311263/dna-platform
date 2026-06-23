@@ -135,7 +135,7 @@ class AttendanceregisterAdmController extends AdmController
         $idOrg = FormaLms\lib\Get::req('idOrg', DOTY_INT, 0);
         $selected = FormaLms\lib\Get::req('selected_users', DOTY_MIXED, []);
         $detailed = FormaLms\lib\Get::req('detailed', DOTY_INT, 0) == 1;
-        $courseName = $this->model->getCourseName($idCourse);
+        $courseName = $this->model->isCourseAllowed($idCourse) ? $this->model->getCourseName($idCourse) : '';
 
         $users = $this->resolveExportUsers($idCourse, $selected, $idOrg);
         $output = '<h2>' . htmlspecialchars($courseName) . '</h2>'
@@ -158,14 +158,21 @@ class AttendanceregisterAdmController extends AdmController
     /**
      * Utenti da esportare/stampare: solo quelli con checkbox selezionata
      * (anche uno solo), oppure tutti gli iscritti al corso (con l'eventuale
-     * filtro azienda) se non e' stato selezionato nessuno.
+     * filtro azienda) se non e' stato selezionato nessuno. Il filtro per
+     * perimetro amministrativo (AttendanceregisterAdm::filterAllowedUsers)
+     * si applica anche qui: un admin non puo' farsi esportare un utente
+     * fuori dal suo perimetro passando direttamente il suo idst.
      */
     private function resolveExportUsers($idCourse, $selected, $idOrg = 0)
     {
+        if (!$this->model->isCourseAllowed($idCourse)) {
+            return [];
+        }
+
         if (!is_array($selected)) {
             $selected = [];
         }
-        $selected = array_filter(array_map('intval', $selected));
+        $selected = $this->model->filterAllowedUsers(array_filter(array_map('intval', $selected)));
 
         if (empty($selected)) {
             return $this->model->getCourseUsers($idCourse, $idOrg);

@@ -22,17 +22,126 @@ class AttendanceregisterAdm extends Model
 {
     protected $db;
 
+    protected $user_level;
+    protected $users_filter;
+    protected $courses_filter;
+
+    /**
+     * Un amministratore non-godadmin vede solo i corsi e gli utenti che gli
+     * sono stati assegnati in gestione (stesso meccanismo/stessa logica della
+     * Dashboard: AdminPreference::getAdminUsers()/getAdminCourse()). false
+     * significa "nessun filtro" (tutto visibile), un array (anche vuoto)
+     * significa "solo questi id".
+     */
     public function __construct()
     {
         $this->db = DbConn::getInstance();
+
+        $this->users_filter = false;
+        $this->courses_filter = false;
+
+        $this->user_level = Docebo::user()->getUserLevelId();
+        if ($this->user_level != ADMIN_GROUP_GODADMIN) {
+            require_once _base_ . '/lib/lib.preference.php';
+
+            $adminManager = new AdminPreference();
+            $this->users_filter = $adminManager->getAdminUsers(Docebo::user()->getIdST());
+
+            $all_courses = false;
+            $array_courses = [];
+            $admin_courses = $adminManager->getAdminCourse(Docebo::user()->getIdST());
+            foreach ($admin_courses['course'] as $key => $id_course) {
+                if ($key > 0) {
+                    $array_courses[$key] = $id_course;
+                }
+            }
+            if (isset($admin_courses['course'][0])) {
+                $all_courses = true;
+            } elseif (isset($admin_courses['course'][-1])) {
+                require_once _lms_ . '/lib/lib.catalogue.php';
+                $cat_man = new Catalogue_Manager();
+                $user_catalogue = $cat_man->getUserAllCatalogueId(Docebo::user()->getIdSt());
+                if (count($user_catalogue) > 0) {
+                    $courses = [];
+                    foreach ($user_catalogue as $id_cat) {
+                        $catalogue_course = &$cat_man->getCatalogueCourse($id_cat, true);
+                        if (empty($courses)) {
+                            $courses = $catalogue_course;
+                        } else {
+                            $courses = array_merge($courses, $catalogue_course);
+                        }
+                    }
+                    foreach ($courses as $id_course) {
+                        if ($id_course != 0) {
+                            $array_courses[$id_course] = $id_course;
+                        }
+                    }
+                } elseif (FormaLms\lib\Get::sett('on_catalogue_empty', 'off') == 'on') {
+                    $all_courses = true;
+                }
+            } else {
+                if (!empty($admin_courses['coursepath'])) {
+                    require_once _lms_ . '/lib/lib.coursepath.php';
+                    $path_man = new CoursePath_Manager();
+                    $coursepath_course = &$path_man->getAllCourses($admin_courses['coursepath']);
+                    $array_courses = array_merge($array_courses, $coursepath_course);
+                }
+                if (!empty($admin_courses['catalogue'])) {
+                    require_once _lms_ . '/lib/lib.catalogue.php';
+                    $cat_man = new Catalogue_Manager();
+                    foreach ($admin_courses['catalogue'] as $id_cat) {
+                        $catalogue_course = &$cat_man->getCatalogueCourse($id_cat, true);
+                        $array_courses = array_merge($array_courses, $catalogue_course);
+                    }
+                }
+            }
+
+            if (!$all_courses) {
+                $this->courses_filter = array_values($array_courses);
+            }
+            // se "$all_courses" e' true, "$this->courses_filter" resta false (nessun filtro)
+        }
     }
 
     /**
-     * Tutti i corsi della piattaforma (esclusi solo quelli "In costruzione").
+     * Vero se l'amministratore corrente puo' vedere questo corso (sempre
+     * vero per il godadmin). Va richiamato su qualsiasi idCourse che arriva
+     * da una richiesta, non solo su quelli proposti dalla tendina: un admin
+     * non deve poter vedere un corso fuori dal suo perimetro semplicemente
+     * passando un idCourse diverso nella richiesta.
+     */
+    public function isCourseAllowed($idCourse)
+    {
+        return $this->courses_filter === false || in_array((int) $idCourse, $this->courses_filter);
+    }
+
+    /**
+     * Filtra una lista di idst utente, tenendo solo quelli che l'amministratore
+     * corrente puo' vedere (sempre tutti, per il godadmin). Usata per non
+     * fidarsi ciecamente di un elenco di "selected_users" arrivato dal client.
+     */
+    public function filterAllowedUsers($idUserList)
+    {
+        if ($this->users_filter === false) {
+            return $idUserList;
+        }
+
+        return array_values(array_intersect($idUserList, $this->users_filter));
+    }
+
+    /**
+     * Tutti i corsi della piattaforma (esclusi solo quelli "In costruzione"),
+     * limitati a quelli assegnati in gestione per un admin non-godadmin.
      */
     public function getAllCourses()
     {
-        $query = "SELECT idCourse, name FROM %lms_course WHERE status <> '0' ORDER BY name ASC";
+        $query = "SELECT idCourse, name FROM %lms_course WHERE status <> '0' ";
+        if ($this->courses_filter !== false) {
+            $query .= empty($this->courses_filter)
+                ? ' AND 0 '
+                : ' AND idCourse IN (' . implode(',', array_map('intval', $this->courses_filter)) . ') ';
+        }
+        $query .= ' ORDER BY name ASC';
         $res = $this->db->query($query);
 
         $rows = [];
@@ -60,6 +169,10 @@ class AttendanceregisterAdm extends Model
      */
     public function getCourseUsers($idCourse, $idOrg = 0)
     {
+        if (!$this->isCourseAllowed($idCourse)) {
+            return [];
+        }
+
         $query = 'SELECT DISTINCT u.idst, u.userid, u.firstname, u.lastname FROM %lms_courseuser cu '
             . ' JOIN %adm_user u ON u.idst = cu.idUser ';
 
@@ -77,6 +190,12 @@ class AttendanceregisterAdm extends Model
                 . ' AND d.iLeft >= ' . (int) $iLeft . ' AND d.iRight <= ' . (int) $iRight;
         } else {
             $query .= ' WHERE cu.idCourse = ' . (int) $idCourse;
+        }
+
+        if ($this->users_filter !== false) {
+            $query .= empty($this->users_filter)
+                ? ' AND 0 '
+                : ' AND u.idst IN (' . implode(',', array_map('intval', $this->users_filter)) . ') ';
         }
 
         $query .= ' ORDER BY u.lastname ASC, u.firstname ASC';
@@ -104,6 +223,10 @@ class AttendanceregisterAdm extends Model
      */
     public function getCompaniesForCourse($idCourse)
     {
+        if (!$this->isCourseAllowed($idCourse)) {
+            return [];
+        }
+
         $query = 'SELECT oct.idOrg, oct.idParent, oct.iLeft, oct.iRight, c.translation '
             . ' FROM core_org_chart_tree oct '
             . ' JOIN core_org_chart c ON c.id_dir = oct.idOrg AND c.lang_code = "' . getLanguage() . '" '
@@ -128,6 +251,11 @@ class AttendanceregisterAdm extends Model
                 . ' JOIN core_org_chart_tree d ON (d.idst_oc = gm.idst OR d.idst_ocd = gm.idst) '
                 . ' WHERE cu.idCourse = ' . (int) $idCourse
                 . ' AND d.iLeft >= ' . $node['iLeft'] . ' AND d.iRight <= ' . $node['iRight'];
+            if ($this->users_filter !== false) {
+                $count_query .= empty($this->users_filter)
+                    ? ' AND 0 '
+                    : ' AND u.idst IN (' . implode(',', array_map('intval', $this->users_filter)) . ') ';
+            }
             list($count) = $this->db->fetch_row($this->db->query($count_query));
 
             if ((int) $count > 0) {
@@ -163,6 +291,16 @@ class AttendanceregisterAdm extends Model
      */
     public function getUserSessionsByDay($idCourse, $idUser)
     {
+        if (!$this->isCourseAllowed($idCourse) || empty($this->filterAllowedUsers([$idUser]))) {
+            return [
+                'rows' => [],
+                'day_count' => 0,
+                'session_count' => 0,
+                'total_seconds' => 0,
+                'total_duration' => $this->formatDuration(0),
+            ];
+        }
+
         // Sessioni grezze (non aggregate in SQL): servono sia per calcolare i
         // totali del giorno sia per poter mostrare il dettaglio delle singole
         // sessioni quando si espande un giorno a video.
