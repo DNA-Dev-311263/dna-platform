@@ -151,15 +151,26 @@
         <div class="dash-col">
             <div class="dash-col__title"><span class="dot dot--courses"></span> Corsi</div>
 
-            <div class="dash-kpi-grid dash-kpi-grid--3">
+            <div class="dash-kpi-grid">
                 <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('active')">
-                    <div class="dash-kpi__value"><?php echo (int) $courses_active; ?></div>
+                    <div class="dash-kpi__value"><?php echo (int) $courses_status['active']; ?></div>
                     <div class="dash-kpi__label">Attivi</div>
                 </div>
-                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('certificates')">
-                    <div class="dash-kpi__value"><?php echo (int) $certificates_issued; ?></div>
-                    <div class="dash-kpi__label">Certificati</div>
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('preparation')">
+                    <div class="dash-kpi__value"><?php echo (int) $courses_status['preparation']; ?></div>
+                    <div class="dash-kpi__label">In costruzione</div>
                 </div>
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('concluded')">
+                    <div class="dash-kpi__value"><?php echo (int) $courses_status['concluded']; ?></div>
+                    <div class="dash-kpi__label">Conclusi</div>
+                </div>
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('cancelled')">
+                    <div class="dash-kpi__value"><?php echo (int) $courses_status['cancelled']; ?></div>
+                    <div class="dash-kpi__label">Cancellati</div>
+                </div>
+            </div>
+
+            <div class="dash-kpi-grid">
                 <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('activating')">
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['active_seven']; ?></div>
                     <div class="dash-kpi__label">In attivaz. 7gg</div>
@@ -168,36 +179,9 @@
                     <div class="dash-kpi__value"><?php echo (int) $course_stats['user_subscription']; ?></div>
                     <div class="dash-kpi__label">Iscrizioni</div>
                 </div>
-            </div>
-
-            <div class="dash-tw">
-                <div class="dash-tw__head"><div class="dash-tw__title">Iscrizioni vs Completamenti — ultimi 6 mesi</div></div>
-                <div class="dash-spark-dual">
-                    <?php
-                    $max_course = 1;
-                    foreach ($courses_trend as $pt) {
-                        $max_course = max($max_course, $pt['subscriptions'], $pt['completions']);
-                    }
-                    foreach ($courses_trend as $idx => $pt) {
-                        $h_sub = round(($pt['subscriptions'] / $max_course) * 100);
-                        $h_comp = round(($pt['completions'] / $max_course) * 100);
-                        $cls = ($idx === count($courses_trend) - 1) ? 'grp now' : 'grp';
-                        echo '<div class="' . $cls . '" title="' . htmlspecialchars($pt['label']) . '">'
-                            . '<div class="b b--sub" style="height:' . $h_sub . '%"></div>'
-                            . '<div class="b b--comp" style="height:' . $h_comp . '%"></div>'
-                            . '</div>';
-                    }
-                    ?>
-                </div>
-                <div class="dash-spark-dual-labels">
-                    <?php foreach ($courses_trend as $idx => $pt) {
-                        $cls = ($idx === count($courses_trend) - 1) ? 'now' : '';
-                        echo '<span class="' . $cls . '">' . htmlspecialchars($pt['label']) . '</span>';
-                    } ?>
-                </div>
-                <div class="dash-legend">
-                    <span><i style="background:#fde3b8"></i> Iscrizioni</span>
-                    <span><i style="background:#f0a93e"></i> Completamenti</span>
+                <div class="dash-kpi" onclick="dashOpenCoursesDrilldown('certificates')">
+                    <div class="dash-kpi__value"><?php echo (int) $certificates_issued; ?></div>
+                    <div class="dash-kpi__label">Certificati emessi</div>
                 </div>
             </div>
 

@@ -111,10 +111,9 @@ class DashboardAdmController extends AdmController
             'current_month_label' => Lang::t('_MONTH_' . date('m'), 'standard'),
 
             'course_stats' => $this->model->getCoursesStats(),
-            'courses_active' => $this->model->getActiveCoursesCount(),
+            'courses_status' => $this->model->getCoursesStatusBreakdown(),
             'course_months_stats' => $this->model->getCoursesMonthsStats(),
             'certificates_issued' => $this->model->getCertificatesIssuedCount(),
-            'courses_trend' => $this->model->getCoursesEnrollmentCompletionTrend(6),
             'top_courses' => $this->model->getTopViewedCourses(5),
             'courses_by_category' => $this->model->getCoursesByCategory(),
 

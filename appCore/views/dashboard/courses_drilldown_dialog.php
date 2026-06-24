@@ -13,6 +13,9 @@
 
 $titles = [
     'active' => 'Corsi attivi',
+    'preparation' => 'Corsi in costruzione',
+    'concluded' => 'Corsi conclusi',
+    'cancelled' => 'Corsi cancellati',
     'activating' => 'Corsi in attivazione (prossimi 7 giorni)',
     'completed' => 'Completamenti',
     'certificates' => 'Certificati rilasciati',
@@ -30,7 +33,7 @@ if ($kind === 'category') {
         $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . (int) $r['enrolled'] . '</td><td>' . (int) $r['waiting'] . '</td><td>' . $detail . '</td></tr>';
     }
     $colspan = 4;
-} elseif ($kind === 'active' || $kind === 'activating') {
+} elseif ($kind === 'active' || $kind === 'preparation' || $kind === 'concluded' || $kind === 'cancelled' || $kind === 'activating') {
     $html .= '<tr><th>Corso</th><th>' . ($kind === 'activating' ? 'Data inizio' : '') . '</th></tr>';
     foreach ($rows as $r) {
         $html .= '<tr><td>' . htmlspecialchars($r['name']) . '</td><td>' . htmlspecialchars($r['detail']) . '</td></tr>';
