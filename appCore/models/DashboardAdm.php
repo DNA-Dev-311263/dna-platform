@@ -295,7 +295,34 @@ class DashboardAdm extends Model
 
         $course_man = new AdminCourseManagment();
 
-        return $course_man->getCoursesStats($this->courses_filter);
+        $course_stats = $course_man->getCoursesStats($this->courses_filter);
+
+        // AdminCourseManagment::getCoursesStats() conta user_subscription/
+        // user_waiting filtrando solo per corso, non per utente: per un admin
+        // limitato risulterebbe il totale iscritti di tutta la piattaforma sui
+        // suoi corsi, non solo i suoi utenti. Li ricalcoliamo qui col filtro
+        // completo (stesso scopeFilterSql() usato in tutto il resto della
+        // Dashboard), senza toccare il metodo condiviso di libreria.
+        if ($this->user_level != ADMIN_GROUP_GODADMIN) {
+            $query = 'SELECT cu.waiting, COUNT(*) FROM %lms_courseuser cu '
+                . ' JOIN %adm_user u ON u.idst = cu.idUser '
+                . ' WHERE 1=1 '
+                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse')
+                . ' GROUP BY cu.waiting';
+            $res = $this->db->query($query);
+
+            $course_stats['user_subscription'] = 0;
+            $course_stats['user_waiting'] = 0;
+            while (list($wait_stat, $number) = $this->db->fetch_row($res)) {
+                if ($wait_stat == 0) {
+                    $course_stats['user_subscription'] = (int) $number;
+                } else {
+                    $course_stats['user_waiting'] = (int) $number;
+                }
+            }
+        }
+
+        return $course_stats;
     }
 
     /**
