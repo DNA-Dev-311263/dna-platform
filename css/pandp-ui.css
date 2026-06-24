@@ -879,13 +879,15 @@
 
 /* =============================================================
    Registro presenze — pagina unica (Statistiche > Registro presenze)
+   Stesso linguaggio visivo della Dashboard: .dash-canvas/.dash-col/
+   .dash-col__title, le card bianche con ombra arrivano da li'; qui sotto
+   solo gli stili che restano specifici di questa pagina (tabelle, anteprima).
    ============================================================= */
-.ar-page .pui-card + form { margin-top: 16px; }
+.dash-board--2col { grid-template-columns: 380px 1fr; margin-top: 18px; }
 
 .ar-table-wrap {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
+    border-radius: 10px;
+    border: 1px solid #f0f2f8;
     overflow: hidden;
 }
 
@@ -897,14 +899,14 @@
 
 .ar-table th {
     text-align: left;
-    color: #4a5a78;
+    color: #1a2b4a;
     font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    padding: 14px 20px;
+    padding: 12px 16px;
     border-bottom: 1px solid #f0f2f8;
-    background: #f8fafd;
+    background: #fff;
 }
 
 .ar-table th.ar-col-check { width: 40px; }
@@ -935,21 +937,11 @@
     text-align: center;
     color: #8a9fc4;
     font-size: 13px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
 }
 
-/* Layout a due colonne: lista utenti sempre visibile a sinistra, dettaglio
-   a destra che si aggiorna al click su un utente — niente popup. */
-.ar-split {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 20px;
-    align-items: start;
-    margin-top: 16px;
-}
-
+/* .ar-split resta solo un hook per il JS (mostra/nasconde il blocco) e per
+   le regole responsive/stampa sotto: il layout a due colonne vero e proprio
+   lo da' .dash-board--2col, gia' applicata insieme a questa classe in show.php. */
 .ar-table tbody tr.ar-row-active td { background: #eaf1ff; }
 
 .ar-filters { display: flex; gap: 24px; flex-wrap: wrap; }
@@ -957,18 +949,16 @@
 /* Pannello anteprima: niente popup, si aggiorna in automatico ogni volta che
    cambia la selezione o si passa da Riepilogo a Dettaglio (e viceversa).
    Le azioni (Stampa/Excel/Word) sono sempre visibili in fondo, agiscono su
-   quello che si sta guardando in quel momento. */
+   quello che si sta guardando in quel momento. Il bianco/ombra/radius arrivano
+   gia' da .dash-col: qui restano solo le proprieta' che servono in piu'. */
 .ar-preview {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, .07);
     display: flex;
     flex-direction: column;
     max-height: 640px;
     overflow: hidden;
 }
 
-.ar-preview__head { padding: 18px 24px; border-bottom: 1px solid #f0f2f8; flex-shrink: 0; }
+.ar-preview__head { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f0f2f8; flex-shrink: 0; }
 .ar-preview__toggle { display: inline-flex; background: #f0f2f8; border-radius: 8px; padding: 3px; gap: 2px; }
 .ar-preview__toggle-btn {
     border: none;
@@ -982,8 +972,8 @@
 }
 .ar-preview__toggle-btn--active { background: #fff; color: #1a2b4a; box-shadow: 0 1px 4px rgba(0, 0, 0, .08); }
 
-.ar-preview__body { overflow-y: auto; flex: 1 1 auto; padding: 20px 24px; }
-.ar-preview__foot { padding: 14px 24px; border-top: 1px solid #f0f2f8; flex-shrink: 0; display: flex; gap: 12px; }
+.ar-preview__body { overflow-y: auto; flex: 1 1 auto; }
+.ar-preview__foot { padding-top: 16px; margin-top: 16px; border-top: 1px solid #f0f2f8; flex-shrink: 0; display: flex; gap: 12px; }
 
 .ar-preview-section { margin-bottom: 28px; }
 .ar-preview-section:last-child { margin-bottom: 0; }
@@ -991,7 +981,7 @@
 .ar-preview-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ar-preview-table th {
     text-align: left;
-    color: #4a5a78;
+    color: #1a2b4a;
     font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
@@ -1004,7 +994,7 @@
 .ar-preview-table tr.ar-preview-total td { background: #f8fafd; }
 
 @media (max-width: 900px) {
-    .ar-split { grid-template-columns: 1fr; }
+    .dash-board--2col.ar-split { grid-template-columns: 1fr; }
 }
 
 /* Stampa: solo il contenuto dell'anteprima (niente tendine, niente lista
@@ -1012,17 +1002,19 @@
    cosi' escono tutte le righe. E' lo stesso contenuto visibile a video al
    momento in cui si clicca "Stampa" (vedi arDoPrint() in attendanceregister.js). */
 @media print {
-    .ar-page .pui-card,
+    .ar-page .ar-filters-row,
     .ar-page #ar_export_form,
     .ar-preview__head,
     .ar-preview__foot {
         display: none !important;
     }
-    .ar-split { display: block !important; }
+    .ar-page .dash-canvas { background: none; padding: 0; }
+    .dash-board--2col.ar-split { display: block !important; }
     .ar-preview {
         max-height: none !important;
         box-shadow: none !important;
         border-radius: 0 !important;
+        padding: 0 !important;
     }
     .ar-preview__body { overflow: visible !important; }
 }
