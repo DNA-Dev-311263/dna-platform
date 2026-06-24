@@ -326,14 +326,16 @@ class DashboardAdm extends Model
     }
 
     /**
-     * Corsi attivi/accessibili agli utenti. La libreria framework
-     * (AdminCourseManagment::getCoursesStats) conta solo status=1
-     * (CST_AVAILABLE/"Disponibile"), ma il controllo di accesso reale al corso
-     * (vedi lib.course.php, switch su $course['status']) blocca l'accesso solo
-     * per CST_PREPARATION(0)/CST_CONCLUDED(3)/CST_CANCELLED(4) — quindi anche
-     * CST_EFFECTIVE(2, "Confermato") e' un corso pienamente attivo.
+     * Numero di corsi per ciascun raggruppamento di stato. "Attivi" comprende
+     * sia CST_AVAILABLE(1, "Disponibile") che CST_EFFECTIVE(2, "Confermato"):
+     * il controllo di accesso reale al corso (vedi lib.course.php, switch su
+     * $course['status']) blocca l'accesso solo per CST_PREPARATION(0)/
+     * CST_CONCLUDED(3)/CST_CANCELLED(4) — quindi anche "Confermato" e' un
+     * corso pienamente attivo, non solo "Disponibile" (a differenza di quanto
+     * conta la libreria framework AdminCourseManagment::getCoursesStats, che
+     * considera attivo solo status=1).
      */
-    public function getActiveCoursesCount()
+    public function getCoursesStatusBreakdown()
     {
         $courses_filter_sql = '';
         if ($this->courses_filter !== false) {
@@ -342,10 +344,29 @@ class DashboardAdm extends Model
                 : ' AND idCourse IN (' . implode(',', $this->courses_filter) . ') ';
         }
 
-        $query = "SELECT COUNT(*) FROM %lms_course WHERE status IN ('1','2') " . $courses_filter_sql;
-        list($count) = $this->db->fetch_row($this->db->query($query));
+        $query = 'SELECT status, COUNT(*) FROM %lms_course WHERE 1=1 ' . $courses_filter_sql . ' GROUP BY status';
+        $res = $this->db->query($query);
 
-        return (int) $count;
+        $breakdown = ['active' => 0, 'preparation' => 0, 'concluded' => 0, 'cancelled' => 0];
+        while (list($status, $count) = $this->db->fetch_row($res)) {
+            switch ((int) $status) {
+                case 0:
+                    $breakdown['preparation'] += (int) $count;
+                    break;
+                case 1:
+                case 2:
+                    $breakdown['active'] += (int) $count;
+                    break;
+                case 3:
+                    $breakdown['concluded'] += (int) $count;
+                    break;
+                case 4:
+                    $breakdown['cancelled'] += (int) $count;
+                    break;
+            }
+        }
+
+        return $breakdown;
     }
 
     /**
@@ -1368,37 +1389,6 @@ class DashboardAdm extends Model
     }
 
     /**
-     * Andamento mensile (ultimi $how_many_months mesi) di Iscrizioni vs
-     * Completamenti, per il grafico a doppia serie della sezione Corsi.
-     */
-    public function getCoursesEnrollmentCompletionTrend($how_many_months = 6)
-    {
-        $output = [];
-        for ($i = $how_many_months - 1; $i >= 0; --$i) {
-            $month_start = date('Y-m-01 00:00:00', strtotime('-' . $i . ' months'));
-            $month_end = date('Y-m-t 23:59:59', strtotime('-' . $i . ' months'));
-
-            $sub_query = 'SELECT COUNT(*) FROM %lms_courseuser cu '
-                . ' JOIN %adm_user u ON u.idst = cu.idUser '
-                . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
-                . " WHERE cu.date_inscr BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
-                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse');
-            list($subs) = $this->db->fetch_row($this->db->query($sub_query));
-
-            $comp_query = 'SELECT COUNT(*) FROM %lms_courseuser cu '
-                . ' JOIN %adm_user u ON u.idst = cu.idUser '
-                . ' JOIN %lms_course c ON c.idCourse = cu.idCourse '
-                . " WHERE cu.status = 2 AND cu.date_complete BETWEEN '" . $month_start . "' AND '" . $month_end . "' "
-                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse');
-            list($comp) = $this->db->fetch_row($this->db->query($comp_query));
-
-            $output[] = ['label' => date('M', strtotime($month_start)), 'subscriptions' => (int) $subs, 'completions' => (int) $comp];
-        }
-
-        return $output;
-    }
-
-    /**
      * Top corsi per numero di iscritti. Le subquery validano anche l'utente
      * per lo stesso motivo delle altre metriche Corsi (vedi sopra).
      */
@@ -1506,6 +1496,17 @@ class DashboardAdm extends Model
 
         if ($kind === 'active') {
             $query = "SELECT idCourse, name FROM %lms_course WHERE status IN ('1','2') " . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
+            $res = $this->db->query($query);
+            while (list($idCourse, $name) = $this->db->fetch_row($res)) {
+                $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ''];
+            }
+
+            return $rows;
+        }
+
+        $single_status_kinds = ['preparation' => '0', 'concluded' => '3', 'cancelled' => '4'];
+        if (isset($single_status_kinds[$kind])) {
+            $query = "SELECT idCourse, name FROM %lms_course WHERE status = '" . $single_status_kinds[$kind] . "' " . $courses_filter_sql . ' ORDER BY name ASC LIMIT 200';
             $res = $this->db->query($query);
             while (list($idCourse, $name) = $this->db->fetch_row($res)) {
                 $rows[] = ['idCourse' => $idCourse, 'name' => $name, 'detail' => ''];
