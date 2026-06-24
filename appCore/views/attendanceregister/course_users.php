@@ -5,14 +5,14 @@
         <table class="ar-table">
             <tr>
                 <th class="ar-col-check"></th>
-                <th><?php echo Lang::t('_USERNAME', 'standard'); ?></th>
-                <th><?php echo Lang::t('_FULLNAME', 'standard'); ?></th>
+                <th class="ar-col-username"><?php echo Lang::t('_USERNAME', 'standard'); ?></th>
+                <th class="ar-col-fullname"><?php echo Lang::t('_FULLNAME', 'standard'); ?></th>
             </tr>
             <?php foreach ($users as $u) { ?>
                 <tr>
                     <td><input type="checkbox" name="selected_users[]" value="<?php echo (int) $u['idst']; ?>" /></td>
-                    <td class="ar-link" onclick="arSelectUser(this.parentNode)"><?php echo htmlspecialchars($u['userid']); ?></td>
-                    <td><?php echo htmlspecialchars($u['name']); ?></td>
+                    <td class="ar-link" title="<?php echo htmlspecialchars($u['userid']); ?>" onclick="arSelectUser(this.parentNode)"><?php echo htmlspecialchars($u['userid']); ?></td>
+                    <td title="<?php echo htmlspecialchars($u['name']); ?>"><?php echo htmlspecialchars($u['name']); ?></td>
                 </tr>
             <?php } ?>
         </table>

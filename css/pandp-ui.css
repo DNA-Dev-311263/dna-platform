@@ -883,7 +883,7 @@
    .dash-col__title, le card bianche con ombra arrivano da li'; qui sotto
    solo gli stili che restano specifici di questa pagina (tabelle, anteprima).
    ============================================================= */
-.dash-board--2col { grid-template-columns: 380px 1fr; margin-top: 18px; }
+.dash-board--2col { grid-template-columns: 420px 1fr; margin-top: 18px; }
 
 .ar-table-wrap {
     border-radius: 10px;
@@ -895,6 +895,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 13.5px;
+    table-layout: fixed;
 }
 
 .ar-table th {
@@ -907,14 +908,22 @@
     padding: 12px 16px;
     border-bottom: 1px solid #f0f2f8;
     background: #fff;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.ar-table th.ar-col-check { width: 40px; }
+.ar-table th.ar-col-check { width: 32px; padding-right: 0; }
+.ar-table th.ar-col-username { width: 42%; }
+.ar-table th.ar-col-fullname { width: 58%; }
 
 .ar-table td {
     padding: 13px 20px;
     border-bottom: 1px solid #f7f8fb;
     color: #2d3748;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .ar-table tbody tr:hover td { background: #f8fafd; }
