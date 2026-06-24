@@ -1377,8 +1377,13 @@ class DashboardAdm extends Model
      */
     public function getTopViewedCourses($limit = 5)
     {
+        // Il subquery che conta "enrolled" deve rispettare anche il filtro
+        // utenti, non solo quello sui corsi: altrimenti un admin limitato
+        // vede il numero di iscritti reale di tutta la piattaforma.
         $query = 'SELECT c.idCourse, c.name, '
-            . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse) AS enrolled, '
+            . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse'
+            . $this->scopeFilterSql('cu2.idUser', 'cu2.idCourse')
+            . ') AS enrolled, '
             . ' c.status '
             . ' FROM %lms_course c WHERE 1=1 ';
         if ($this->courses_filter !== false) {
@@ -1416,9 +1421,20 @@ class DashboardAdm extends Model
                 : ' AND c.idCourse IN (' . implode(',', $this->courses_filter) . ') ';
         }
 
+        // Il filtro utenti va dentro i CASE WHEN (non nella WHERE generale):
+        // nella WHERE escluderebbe anche i corsi senza nessun iscritto nel
+        // perimetro dell'admin, facendo sbagliare anche "num_courses" (che
+        // non deve dipendere dagli iscritti, solo total_enrolled/total_waiting).
+        $users_filter_sql = '';
+        if ($this->user_level != ADMIN_GROUP_GODADMIN && $this->users_filter !== false) {
+            $users_filter_sql = empty($this->users_filter)
+                ? ' AND 0 '
+                : ' AND u.idst IN (' . implode(',', $this->users_filter) . ') ';
+        }
+
         $query = 'SELECT cat.idCategory, cat.path, COUNT(DISTINCT c.idCourse) AS num_courses, '
-            . ' COUNT(CASE WHEN cu.waiting = 0 AND u.idst IS NOT NULL THEN 1 END) AS total_enrolled, '
-            . ' COUNT(CASE WHEN cu.waiting = 1 AND u.idst IS NOT NULL THEN 1 END) AS total_waiting '
+            . ' COUNT(CASE WHEN cu.waiting = 0 AND u.idst IS NOT NULL ' . $users_filter_sql . ' THEN 1 END) AS total_enrolled, '
+            . ' COUNT(CASE WHEN cu.waiting = 1 AND u.idst IS NOT NULL ' . $users_filter_sql . ' THEN 1 END) AS total_waiting '
             . ' FROM %lms_category cat '
             . ' JOIN %lms_course c ON c.idCategory = cat.idCategory '
             . ' LEFT JOIN %lms_courseuser cu ON cu.idCourse = c.idCourse '
@@ -1475,8 +1491,10 @@ class DashboardAdm extends Model
             // Stessa logica di Totale Iscritti/Totale in attesa di getCoursesByCategory(),
             // ma per singolo corso.
             $query = 'SELECT c.idCourse, c.name, c.status, '
-                . ' (SELECT COUNT(*) FROM %lms_courseuser cu JOIN %adm_user u ON u.idst = cu.idUser WHERE cu.idCourse = c.idCourse AND cu.waiting = 0) AS enrolled, '
-                . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse AND cu2.waiting = 1) AS waiting '
+                . ' (SELECT COUNT(*) FROM %lms_courseuser cu JOIN %adm_user u ON u.idst = cu.idUser WHERE cu.idCourse = c.idCourse AND cu.waiting = 0'
+                . $this->scopeFilterSql('cu.idUser', 'cu.idCourse') . ') AS enrolled, '
+                . ' (SELECT COUNT(*) FROM %lms_courseuser cu2 JOIN %adm_user u2 ON u2.idst = cu2.idUser WHERE cu2.idCourse = c.idCourse AND cu2.waiting = 1'
+                . $this->scopeFilterSql('cu2.idUser', 'cu2.idCourse') . ') AS waiting '
                 . ' FROM %lms_course c WHERE c.idCategory = ' . (int) $idCategory . ' '
                 . $courses_filter_sql . ' ORDER BY c.name ASC LIMIT 200';
             $res = $this->db->query($query);
@@ -1630,6 +1648,7 @@ class DashboardAdm extends Model
         $query = 'SELECT u.idst, u.userid, u.firstname, u.lastname, cu.status FROM %adm_user u '
             . ' JOIN %lms_courseuser cu ON cu.idUser = u.idst '
             . ' WHERE cu.idCourse = ' . (int) $idCourse
+            . $this->scopeFilterSql('cu.idUser', 'cu.idCourse')
             . ' ORDER BY u.lastname ASC';
         $res = $this->db->query($query);
 
