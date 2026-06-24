@@ -104,6 +104,17 @@ class AttendanceregisterAdm extends Model
     }
 
     /**
+     * Usata da AdminrulesAdm::createPerm() per generare la checkbox di
+     * permesso "Registro presenze" nella pagina di gestione profili
+     * amministratore (stesso pattern di QueueAdm::getPerm()/ExtractionAlms::
+     * getPerm(): qui solo "view", non essendoci azioni di modifica/cancellazione).
+     */
+    public function getPerm()
+    {
+        return ['view' => 'standard/view.png'];
+    }
+
+    /**
      * Vero se l'amministratore corrente puo' vedere questo corso (sempre
      * vero per il godadmin). Va richiamato su qualsiasi idCourse che arriva
      * da una richiesta, non solo su quelli proposti dalla tendina: un admin
