@@ -112,7 +112,7 @@ class AttendanceregisterAdmController extends AdmController
         $output = '';
         foreach ($users as $u) {
             $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst'], $detailed);
-            $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
+            $output .= '<tr><td colspan="4">&nbsp;</td></tr>';
         }
         if (empty($users)) {
             $output = '<tr><td>' . Lang::t('_NO_DATA', 'standard') . '</td></tr>';
@@ -147,7 +147,7 @@ class AttendanceregisterAdmController extends AdmController
         }
         foreach ($users as $u) {
             $output .= $this->buildUserSection($u['name'], $u['userid'], $idCourse, $u['idst'], $detailed);
-            $output .= '<tr><td colspan="5">&nbsp;</td></tr>';
+            $output .= '<tr><td colspan="4">&nbsp;</td></tr>';
         }
         $output .= '</table>';
 
@@ -206,13 +206,12 @@ class AttendanceregisterAdmController extends AdmController
     {
         $data = $this->model->getUserSessionsByDay($idCourse, $idUser);
 
-        $html = '<tr><th colspan="5">' . htmlspecialchars($displayName) . ' (' . htmlspecialchars($username) . ')</th></tr>'
+        $html = '<tr><th colspan="4">' . htmlspecialchars($displayName) . ' (' . htmlspecialchars($username) . ')</th></tr>'
             . '<tr>'
             . '<th>' . Lang::t('_DATE', 'standard') . '</th>'
             . '<th>' . Lang::t('_FIRST_ENTRY', 'statistic') . '</th>'
             . '<th>' . Lang::t('_LAST_EXIT', 'statistic') . '</th>'
             . '<th>' . Lang::t('_HOW_MUCH_TIME', 'statistic') . '</th>'
-            . '<th>' . Lang::t('_NUMBER_OF_OP', 'statistic') . '</th>'
             . '</tr>';
 
         foreach ($data['rows'] as $row) {
@@ -221,7 +220,6 @@ class AttendanceregisterAdmController extends AdmController
                 . '<td>' . htmlspecialchars($row['first_entry']) . '</td>'
                 . '<td>' . htmlspecialchars($row['last_exit']) . '</td>'
                 . '<td>' . htmlspecialchars($row['duration']) . '</td>'
-                . '<td>' . (int) $row['num_op'] . '</td>'
                 . '</tr>';
 
             if ($detailed) {
@@ -231,7 +229,6 @@ class AttendanceregisterAdmController extends AdmController
                         . '<td>' . htmlspecialchars($s['enter']) . '</td>'
                         . '<td>' . htmlspecialchars($s['exit']) . '</td>'
                         . '<td>' . htmlspecialchars($s['duration']) . '</td>'
-                        . '<td>' . (int) $s['num_op'] . '</td>'
                         . '</tr>';
                 }
             }
@@ -242,7 +239,6 @@ class AttendanceregisterAdmController extends AdmController
             . '<td><b>' . Lang::t('_NUMBER_OF_ACCESS', 'statistic') . ': ' . $data['session_count'] . '</b></td>'
             . '<td></td>'
             . '<td><b>' . $data['total_duration'] . '</b></td>'
-            . '<td></td>'
             . '</tr>';
 
         return $html;
